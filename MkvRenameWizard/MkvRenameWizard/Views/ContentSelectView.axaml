@@ -18,8 +18,8 @@
       </ListBox.ItemTemplate>
     </ListBox>
     <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Orientation="Vertical" HorizontalAlignment="Right" Margin="5">
-      <Button Content="Up" Command="{Binding MoveContentItemUpCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
-      <Button Content="Down" Command="{Binding MoveContentItemDownCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+      <Button Content="↑" Command="{Binding MoveContentItemUpCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+      <Button Content="↓"  Command="{Binding MoveContentItemDownCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
     </StackPanel>
     
     <TextBlock Grid.Row="0" Grid.Column="1" Text="Mkv Files List" FontWeight="Bold" Margin="5"/>
@@ -31,8 +31,8 @@
       </ListBox.ItemTemplate>
     </ListBox>
     <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Orientation="Vertical" HorizontalAlignment="Right" Margin="5">
-      <Button Content="Up" Command="{Binding MoveMkvFileItemUpCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
-      <Button Content="Down" Command="{Binding MoveMkvFileItemDownCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+      <Button Content="↑" Command="{Binding MoveMkvFileItemUpCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+      <Button Content="↓"  Command="{Binding MoveMkvFileItemDownCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
     </StackPanel>
   </Grid>
 
