@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MkvRenameWizard.Views.WizardView"
+             x:DataType="viewModels:WizardViewModel">
+    <Grid>
+        <Carousel ItemsSource="{Binding Pages}"
+                  SelectedIndex="{Binding CurrentPageIndex}">
+            <Carousel.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl Content="{Binding}" />
+                </DataTemplate>
+            </Carousel.ItemTemplate>
+        </Carousel>
+        <StackPanel Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Bottom">
+            <Button Content="Previous" 
+                    Command="{Binding PreviousCommand}"
+                    IsVisible="{Binding CanGoBack}"/>
+            <Button Content="Next" 
+                    Command="{Binding NextCommand}"
+                    IsVisible="{Binding CanGoForward}"/>
+            <Button Content="Finish" 
+                    Command="{Binding FinishCommand}"
+                    IsVisible="{Binding IsLastPage}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
+             xmlns:converters="clr-namespace:MkvRenameWizard.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MkvRenameWizard.Views.ContentSelectView"
+             x:DataType="viewModels:ContentSelectViewModel">
+    
+  <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,*">
+    <TextBlock Grid.Row="0" Grid.Column="0" Text="Content List" FontWeight="Bold" Margin="5"/>
+    <ListBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding ContentList}" SelectedIndex="{Binding #ContentListBox.SelectedIndex, Mode=TwoWay}" x:Name="ContentListBox">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <TextBlock Text="{Binding}"/>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+    <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Orientation="Vertical" HorizontalAlignment="Right" Margin="5">
+      <Button Content="Up" Command="{Binding MoveContentItemUpCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+      <Button Content="Down" Command="{Binding MoveContentItemDownCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+    </StackPanel>
+    
+    <TextBlock Grid.Row="0" Grid.Column="1" Text="Mkv Files List" FontWeight="Bold" Margin="5"/>
+    <ListBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding MkvFilesList}" SelectedIndex="{Binding #MkvFilesListBox.SelectedIndex, Mode=TwoWay}" x:Name="MkvFilesListBox">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <TextBlock Text="{Binding}"/>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+    <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Orientation="Vertical" HorizontalAlignment="Right" Margin="5">
+      <Button Content="Up" Command="{Binding MoveMkvFileItemUpCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+      <Button Content="Down" Command="{Binding MoveMkvFileItemDownCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
+    </StackPanel>
+  </Grid>
+
+    <!-- <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,*"> -->
+    <!--     <TextBlock Grid.ColumnSpan="2" Text="{Binding SelectedResult}" HorizontalAlignment="Center"/> -->
+    <!-- -->
+    <!--     <ListBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding ContentList}"> -->
+    <!--         <ListBox.ItemTemplate> -->
+    <!--             <DataTemplate> -->
+    <!--                 <Grid ColumnDefinitions="*,Auto,Auto"> -->
+    <!--                     <TextBlock Text="{Binding}"/> -->
+    <!--                     <Button Grid.Column="1" Content="↑" Command="{Binding MoveItemUpCommand}" CommandParameter="{Binding $parent[ListBoxItem].GetIndex()}"/> -->
+    <!--                     <Button Grid.Column="2" Content="↓" Command="{Binding MoveItemDownCommand}" CommandParameter="{Binding $parent[ListBox].ItemsSource}"/> -->
+    <!--                 </Grid> -->
+    <!--             </DataTemplate> -->
+    <!--         </ListBox.ItemTemplate> -->
+    <!--     </ListBox> -->
+    <!-- -->
+    <!--     <ListBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding MkvFilesList}"> -->
+    <!--         <ListBox.ItemTemplate> -->
+    <!--             <DataTemplate> -->
+    <!--                 <Grid ColumnDefinitions="*,Auto,Auto"> -->
+    <!--                     <TextBlock Text="{Binding}"/> -->
+    <!--                     <Button Grid.Column="1" Content="↑" Command="{Binding $parent[ListBox].DataContext.MoveItemUp}" CommandParameter="{Binding $parent[ListBox].ItemsSource}"/> -->
+    <!--                     <Button Grid.Column="2" Content="↓" Command="{Binding $parent[ListBox].DataContext.MoveItemDown}" CommandParameter="{Binding $parent[ListBox].ItemsSource}"/> -->
+    <!--                 </Grid> -->
+    <!--             </DataTemplate> -->
+    <!--         </ListBox.ItemTemplate> -->
+    <!--     </ListBox> -->
+    <!-- </Grid> -->
+</UserControl>
