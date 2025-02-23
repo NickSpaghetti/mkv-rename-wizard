@@ -78,7 +78,7 @@ public class TvMazeService : ITvMazeService
                         Id = seasonResultDto.Id,
                         Name = seasonResultDto.Name,
                         Number = seasonResultDto.Number,
-                        TotalEpisodeCount = seasonResultDto.EpisodeOrder
+                        TotalEpisodeCount = seasonResultDto.EpisodeOrder ?? 0
                     });
                 }
 

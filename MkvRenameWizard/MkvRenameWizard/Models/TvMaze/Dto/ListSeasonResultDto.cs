@@ -17,7 +17,7 @@ public class ListSeasonResultDto
     public string Name { get; set; } = string.Empty;
 
     [JsonPropertyName("episodeOrder")]
-    public int EpisodeOrder { get; set; }
+    public int? EpisodeOrder { get; set; }
 
     [JsonPropertyName("premiereDate")]
     public string PremiereDate { get; set; } = string.Empty;
