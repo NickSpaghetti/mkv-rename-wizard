@@ -2,7 +2,7 @@ using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
-public class CheckboxOption : ViewModelBase
+public class CheckboxOption<T> : ViewModelBase
 {
     private bool _isChecked;
     public bool IsChecked
@@ -17,9 +17,12 @@ public class CheckboxOption : ViewModelBase
         get => _label;
         set => this.RaiseAndSetIfChanged(ref _label, value);
     }
+    
+    public T Value { get; set; }
 
-    public CheckboxOption(string label)
+    public CheckboxOption(string label, T value)
     {
         Label = label;
+        Value = value;
     }
 }

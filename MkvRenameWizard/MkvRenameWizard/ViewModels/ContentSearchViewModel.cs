@@ -1,6 +1,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using DynamicData;
+using DynamicData.Binding;
+using MkvRenameWizard.DataAccess;
+using MkvRenameWizard.Models.TvMaze;
+using MkvRenameWizard.Services;
 using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
@@ -14,66 +22,62 @@ public class ContentSearchViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _searchText, value);
     }
     
-    private ObservableCollection<string> _searchResults;
-    public ObservableCollection<string> SearchResults
+    private ObservableCollection<Show> _searchResults;
+    public ObservableCollection<Show> SearchResults
     {
         get => _searchResults;
         set => this.RaiseAndSetIfChanged(ref _searchResults, value);
     }
     
-    private string _selectedResult;
-    public string SelectedResult
+    private Show _selectedShow;
+    public Show SelectedShow
     {
-        get => _selectedResult;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedResult, value);
-            UpdateCheckboxOptions();
-        }
+        get => _selectedShow;
+        set => this.RaiseAndSetIfChanged(ref _selectedShow, value);
     }
 
-    private ObservableCollection<CheckboxOption> _checkboxOptions;
-    public ObservableCollection<CheckboxOption> CheckboxOptions
+    private ObservableCollection<CheckboxOption<Season>> _seasonsCheckBoxs;
+    public ObservableCollection<CheckboxOption<Season>> SeasonsCheckBoxs
     {
-        get => _checkboxOptions;
-        set => this.RaiseAndSetIfChanged(ref _checkboxOptions, value);
+        get => _seasonsCheckBoxs;
+        set => this.RaiseAndSetIfChanged(ref _seasonsCheckBoxs, value);
     }
+    public ReactiveCommand<Unit, Unit> UpdateCheckboxOptionsCommand { get; }
 
-    public ReactiveCommand<Unit, Unit> SearchCommand { get; }
-    public ReactiveCommand<Unit, Unit> NextCommand { get; }
+    public ReactiveCommand<Show, Unit> SearchCommand { get; }
 
+    private readonly ITvMazeService _tvMazeService;
     public ContentSearchViewModel()
     {
-        SearchResults = new ObservableCollection<string>();
-        CheckboxOptions = new ObservableCollection<CheckboxOption>();
-        SearchCommand = ReactiveCommand.Create(ExecuteSearchCommand);
-        NextCommand = ReactiveCommand.Create(ExecuteNextCommand);
+        _tvMazeService = new TvMazeService(new TvMazeDataAccess());
+        
+        SearchResults = new ObservableCollection<Show>();
+        SeasonsCheckBoxs = new ObservableCollection<CheckboxOption<Season>>();
+        
+        SearchCommand = ReactiveCommand.CreateFromTask<Show>(ExecuteSearchCommand);
+        
+        UpdateCheckboxOptionsCommand = ReactiveCommand.CreateFromTask(UpdateCheckboxOptions);
+        this.WhenAnyValue(x => x.SelectedShow)
+            .Select(_ => Unit.Default)
+            .InvokeCommand(UpdateCheckboxOptionsCommand);
     }
 
-    public void ExecuteNextCommand()
-    {
-        // Implement next command logic
-    }
 
-    public void ExecuteSearchCommand()
+    public async Task ExecuteSearchCommand(Show show)
     {
-        var results = new List<string> { "Result 1", "Result 2", "Result 3" };
+        var showSearchResults = await _tvMazeService.FindShowIdByNameAsync(_searchText);
         SearchResults.Clear();
-        foreach (var result in results)
-        {
-            SearchResults.Add(result);
-        }
+        SearchResults.AddRange(showSearchResults);
     }
 
-    private void UpdateCheckboxOptions()
+    private async Task UpdateCheckboxOptions()
     {
-        CheckboxOptions.Clear();
-        if (SelectedResult != null)
+        SeasonsCheckBoxs.Clear();
+        if (SelectedShow != null)
         {
-            // Add dynamic checkbox options based on the selected result
-            CheckboxOptions.Add(new CheckboxOption($"Option 1 for {SelectedResult}"));
-            CheckboxOptions.Add(new CheckboxOption($"Option 2 for {SelectedResult}"));
-            CheckboxOptions.Add(new CheckboxOption($"Option 3 for {SelectedResult}"));
+            var seasons = await _tvMazeService.ListSeasonsAsync(SelectedShow.Id);
+            seasons.ForEach(season => SeasonsCheckBoxs.Add(new CheckboxOption<Season>($"Season: {season.Number}", season)));
         }
     }
+    
 }

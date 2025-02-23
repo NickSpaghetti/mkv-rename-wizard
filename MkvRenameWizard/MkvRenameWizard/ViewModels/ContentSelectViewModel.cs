@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using MkvRenameWizard.Models.TvMaze;
 using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
 public class ContentSelectViewModel : ViewModelBase
 {
-    public string SelectedResult { get; set; }
+    public Show SelectedResult { get; set; }
     public ObservableCollection<string> ContentList { get; } = new ObservableCollection<string>();
     public ObservableCollection<string> MkvFilesList { get; } = new ObservableCollection<string>();
     
@@ -16,15 +17,15 @@ public class ContentSelectViewModel : ViewModelBase
     public ReactiveCommand<int, Unit> MoveMkvFileItemUpCommand { get; }
     public ReactiveCommand<int, Unit> MoveMkvFileItemDownCommand { get; }
 
-    public ContentSelectViewModel(string selectedResult, IEnumerable<CheckboxOption> checkboxOptions)
+    public ContentSelectViewModel(Show selectedResult, ObservableCollection<CheckboxOption<Season>> checkboxOptions)
     {
         SelectedResult = selectedResult;
         foreach (var option in checkboxOptions)
         {
             if (option.IsChecked)
+            {
                 ContentList.Add(option.Label);
-            else
-                MkvFilesList.Add(option.Label);
+            }
         }
 
         MoveContentItemUpCommand = ReactiveCommand.Create<int>(index => MoveItemUp(ContentList, index));

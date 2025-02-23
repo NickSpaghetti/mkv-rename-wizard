@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
              xmlns:converters="clr-namespace:MkvRenameWizard.Converters"
+             xmlns:controls="clr-namespace:MkvRenameWizard.Controls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MkvRenameWizard.Views.ContentSearchView"
              x:DataType="viewModels:ContentSearchViewModel">
@@ -22,13 +23,21 @@
                 </StackPanel>
             </Button>
         </StackPanel>
-        <ListBox Grid.Row="1" Grid.Column="0" 
-                 ItemsSource="{Binding SearchResults}" 
-                 SelectedItem="{Binding SelectedResult}"
+        
+        <ListBox Grid.Row="1" Grid.Column="0"
+                 ItemsSource="{Binding SearchResults}"
+                 SelectedItem="{Binding SelectedShow}"
                  Width="{Binding SearchResults, Converter={StaticResource LongestStringWidthConverter}}"
-                 Margin="10"/>
+                 Margin="10">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
         <ItemsControl Grid.Row="1" Grid.Column="1" 
-                      ItemsSource="{Binding CheckboxOptions}" 
+                      ItemsSource="{Binding SeasonsCheckBoxs}" 
                       Margin="10">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
