@@ -397,4 +397,9 @@ FodyWeavers.xsd
 *.msp
 
 # JetBrains Rider
-*.sln.iml
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.idea_modules/

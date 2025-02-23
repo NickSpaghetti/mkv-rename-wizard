@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModel="clr-namespace:MkvRenameWizard.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MkvRenameWizard.Views.OutputFileConfigurationView"
+             x:DataType="viewModel:OutputFileConfigurationViewModel">
+   
+
+    <StackPanel>
+        
+        <StackPanel Orientation="Horizontal">  <Label Content="File Name Prefix:"
+                   VerticalAlignment="Center"
+                   Margin="5,0,5,0"/>  <TextBox Text="{Binding Prefix, Mode=TwoWay}"
+                     Watermark="Prefix:"
+                     TextAlignment="Left"
+                     VerticalAlignment="Center"
+                     Margin="0,5,5,5"  Padding="5"
+                     MinWidth="50"  HorizontalAlignment="Left">
+            </TextBox>
+        </StackPanel>
+        
+        <RadioButton Content="Default Name" IsChecked="{Binding UseDefaultName}" />
+        <RadioButton Content="Snake Case" IsChecked="{Binding UseSnakeCase}" />
+        <RadioButton Content="Pascal Case" IsChecked="{Binding UsePascalCase}" />
+
+        <Button Content="Update Preview" Command="{Binding UpdatePreviewCommand}" />
+
+        <ListBox ItemsSource="{Binding PreviewList}" />
+        
+        <Button Content="Rename Files" Command="{Binding UpdatePreviewCommand}" />
+    </StackPanel>
+    
+</UserControl>
