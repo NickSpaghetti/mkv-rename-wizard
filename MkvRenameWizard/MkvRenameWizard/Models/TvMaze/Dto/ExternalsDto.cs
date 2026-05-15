@@ -8,8 +8,8 @@ public class ExternalsDto
     public int? Tvrage { get; set; }
 
     [JsonPropertyName("thetvdb")]
-    public int Thetvdb { get; set; }
+    public int? Thetvdb { get; set; }
 
     [JsonPropertyName("imdb")]
-    public string Imdb { get; set; } = string.Empty;
+    public string? Imdb { get; set; } = string.Empty;
 }

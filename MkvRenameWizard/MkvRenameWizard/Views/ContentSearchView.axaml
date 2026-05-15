@@ -37,7 +37,7 @@
         </ListBox>
 
         <ItemsControl Grid.Row="1" Grid.Column="1" 
-                      ItemsSource="{Binding SeasonsCheckBoxs}" 
+                      ItemsSource="{Binding SeasonsCheckBoxes}" 
                       Margin="10">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>

@@ -27,10 +27,10 @@ public class ShowDto
         public string Status { get; set; } = string.Empty;
 
         [JsonPropertyName("runtime")]
-        public int Runtime { get; set; }
+        public int? Runtime { get; set; }
 
         [JsonPropertyName("averageRuntime")]
-        public int AverageRuntime { get; set; }
+        public int? AverageRuntime { get; set; }
 
         [JsonPropertyName("premiered")]
         public string Premiered { get; set; } = string.Empty;
@@ -51,10 +51,10 @@ public class ShowDto
         public int Weight { get; set; }
 
         [JsonPropertyName("network")]
-        public NetworkDto NetworkDto { get; set; } = new();
+        public NetworkDto? NetworkDto { get; set; }
 
         [JsonPropertyName("webChannel")]
-        public object? WebChannel { get; set; }
+        public WebChannelDto? WebChannel { get; set; }
 
         [JsonPropertyName("dvdCountry")]
         public object? DvdCountry { get; set; }
@@ -63,10 +63,10 @@ public class ShowDto
         public ExternalsDto ExternalsDto { get; set; } = new();
 
         [JsonPropertyName("image")]
-        public ImageDto ImageDto { get; set; } = new();
+        public ImageDto? ImageDto { get; set; }
 
         [JsonPropertyName("summary")]
-        public string Summary { get; set; } = string.Empty;
+        public string? Summary { get; set; } = string.Empty;
 
         [JsonPropertyName("updated")]
         public int Updated { get; set; }

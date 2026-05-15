@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using DynamicData;
-using DynamicData.Binding;
 using MkvRenameWizard.DataAccess;
 using MkvRenameWizard.Models.TvMaze;
 using MkvRenameWizard.Services;
@@ -15,44 +18,111 @@ namespace MkvRenameWizard.ViewModels;
 
 public class ContentSearchViewModel : ViewModelBase
 {
-    private string _searchText;
+    private readonly List<INotifyPropertyChanged> _seasonSelectionSubscriptions = [];
+    private CancellationTokenSource? _posterLoadCancellationTokenSource;
+
     public string SearchText
     {
-        get => _searchText;
-        set => this.RaiseAndSetIfChanged(ref _searchText, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Empty;
+
+    public ObservableCollection<Show> SearchResults { get; } = [];
     
-    private ObservableCollection<Show> _searchResults;
-    public ObservableCollection<Show> SearchResults
+    public Show? SelectedShow
     {
-        get => _searchResults;
-        set => this.RaiseAndSetIfChanged(ref _searchResults, value);
-    }
-    
-    private Show _selectedShow;
-    public Show SelectedShow
-    {
-        get => _selectedShow;
-        set => this.RaiseAndSetIfChanged(ref _selectedShow, value);
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            this.RaisePropertyChanged(nameof(HasSelectedShow));
+            this.RaisePropertyChanged(nameof(HasNoSelectedShow));
+        }
     }
 
-    private ObservableCollection<CheckboxOption<Season>> _seasonsCheckBoxs;
-    public ObservableCollection<CheckboxOption<Season>> SeasonsCheckBoxs
+    public ObservableCollection<CheckboxOption<Season>> SeasonsCheckBoxes { get; } = [];
+
+    public Bitmap? SelectedShowPoster
     {
-        get => _seasonsCheckBoxs;
-        set => this.RaiseAndSetIfChanged(ref _seasonsCheckBoxs, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
+
+    public bool IsPosterLoading
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public bool HasSearched
+    {
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            RaiseSearchStateProperties();
+        }
+    }
+
+    public bool IsSearching
+    {
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            RaiseSearchStateProperties();
+        }
+    }
+
+    public int SelectedSeasonCount
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public int SelectedEpisodeCount
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public int ResultCount => SearchResults.Count;
+    public int SeasonCount => SeasonsCheckBoxes.Count;
+    public bool HasSelectedShow => SelectedShow != null;
+    public bool HasNoSelectedShow => SelectedShow == null;
+    public bool ShowInitialPrompt => HasNoSelectedShow && (!HasSearched || IsSearching);
+    public bool ShowNoSearchResults => HasNoSelectedShow && HasSearched && !IsSearching && ResultCount  == 0;
+    public bool CanContinue => HasSelectedShow && SelectedSeasonCount > 0;
+    public string ResultCountLabel => ResultCount == 1 ? "1 RESULT" : $"{ResultCount} RESULT";
+
+    public string SelectionSummary => SelectedShow == null
+        ? "Search for a show to continue"
+        : $"{SelectedSeasonCount} of {SeasonCount} selected";
+
+    public string EpisodeSummary => SelectedEpisodeCount == 1 ? "1 episode" : $"{SelectedEpisodeCount} episodes";
+    public string SelectedShowMeta => BuildSelectedShowMeta();
+    
     public ReactiveCommand<Unit, Unit> UpdateCheckboxOptionsCommand { get; }
-
     public ReactiveCommand<Show, Unit> SearchCommand { get; }
+    public ReactiveCommand<Unit, Unit> SelectAllSeasonsCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearAllSeasonsCommand { get; }
+    
 
     private readonly ITvMazeService _tvMazeService;
+    private readonly IImageLoadingService _imageLoadingService;
     public ContentSearchViewModel()
     {
         _tvMazeService = new TvMazeService(new TvMazeDataAccess());
+        _imageLoadingService = new ImageLoadingService(new HttpClient());
         
-        SearchResults = new ObservableCollection<Show>();
-        SeasonsCheckBoxs = new ObservableCollection<CheckboxOption<Season>>();
+        
+        SearchResults.CollectionChanged += (_,_) =>
+        {
+          this.RaisePropertyChanged(nameof(ResultCountLabel));
+          RaiseSearchStateProperties();
+        };
+        
+        SeasonsCheckBoxes = new ObservableCollection<CheckboxOption<Season>>();
         
         SearchCommand = ReactiveCommand.CreateFromTask<Show>(ExecuteSearchCommand);
         
@@ -65,19 +135,186 @@ public class ContentSearchViewModel : ViewModelBase
 
     public async Task ExecuteSearchCommand(Show show)
     {
-        var showSearchResults = await _tvMazeService.FindShowIdByNameAsync(_searchText);
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            SearchResults.Clear();
+            SelectedShow = null;
+            HasSearched = false;
+            UpdateSelectionMetrics();
+            return;
+        }
+        
+        HasSearched = true;
+        IsSearching = true;
+        try
+        {
+            var showSearchResult = await _tvMazeService.FindShowIdByNameAsync(SearchText);
+            await Task.WhenAll(showSearchResult.Select(selectedShow => LoadResultThumbnailAsync(selectedShow)));
+            SearchResults.Clear();
+            SearchResults.AddRange(showSearchResult);
+
+        }
+        finally
+        {
+            IsSearching = false;
+        }
+        
+        var showSearchResults = await _tvMazeService.FindShowIdByNameAsync(SearchText);
         SearchResults.Clear();
         SearchResults.AddRange(showSearchResults);
     }
+    
 
     private async Task UpdateCheckboxOptions()
     {
-        SeasonsCheckBoxs.Clear();
+        foreach (var seasonSelectionSubscriptoin in _seasonSelectionSubscriptions)
+        {
+            seasonSelectionSubscriptoin.PropertyChanged -= OnSeasonSelectionChanged;
+        }
+        
+        _seasonSelectionSubscriptions.Clear();
+        SeasonsCheckBoxes.Clear();
         if (SelectedShow != null)
         {
             var seasons = await _tvMazeService.ListSeasonsAsync(SelectedShow.Id);
-            seasons.ForEach(season => SeasonsCheckBoxs.Add(new CheckboxOption<Season>($"Season: {season.Number}", season)));
+            seasons.ForEach(season =>
+            {
+                var option = new CheckboxOption<Season>($"Season: {season.Number}  .  {season.TotalEpisodeCount}", season);
+                option.PropertyChanged += OnSeasonSelectionChanged;
+                _seasonSelectionSubscriptions.Add(option);
+                SeasonsCheckBoxes.Add(option);
+            });
         }
+    }
+
+    private async Task LoadPosterAsync(Show? show)
+    {
+        _posterLoadCancellationTokenSource?.Cancel();
+        _posterLoadCancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = _posterLoadCancellationTokenSource.Token;
+
+        SelectedShowPoster = null;
+        this.RaisePropertyChanged(nameof(HasSelectedShow));
+        this.RaisePropertyChanged(nameof(SelectedShowMeta));
+
+        var imageUrl = show?.MediumImageUrl;
+        if (string.IsNullOrEmpty(imageUrl))
+        {
+            return;
+        }
+
+        try
+        {
+            IsPosterLoading = true;
+            SelectedShowPoster = await _imageLoadingService.LoadBitMapAsync(imageUrl, cancellationToken);
+        }
+        catch when (cancellationToken.IsCancellationRequested)
+        {
+
+        }
+        catch
+        {
+            SelectedShowPoster = null;
+        }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                IsPosterLoading = false;
+            }
+        }
+    }
+
+    private async Task LoadResultThumbnailAsync(Show show)
+    {
+        if (string.IsNullOrWhiteSpace(show.MediumImageUrl))
+        {
+            return;
+        }
+
+        try
+        {
+            show.Thumbnail = await _imageLoadingService.LoadBitMapAsync(show.MediumImageUrl, CancellationToken.None);
+        }
+        catch
+        {
+            show.Thumbnail = null;
+        }
+    }
+
+    private void SelectAllSeasons()
+    {
+        foreach (var option in SeasonsCheckBoxes)
+        {
+            option.IsChecked = true;
+        }
+        UpdateSelectionMetrics();
+    }
+
+    private void ClearAllSeasons()
+    {
+        foreach (var option in SeasonsCheckBoxes)
+        {
+            option.IsChecked = false;
+        }
+        UpdateSelectionMetrics();
+    }
+
+    private void OnSeasonSelectionChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(CheckboxOption<Season>.IsChecked))
+        {
+            UpdateSelectionMetrics();
+        }
+    }
+    
+    private void UpdateSelectionMetrics()
+    {
+        SelectedSeasonCount = SeasonsCheckBoxes.Count(option => option.IsChecked);
+        SelectedEpisodeCount = SeasonsCheckBoxes
+            .Where(option => option.IsChecked)
+            .Sum(option => option.Value.TotalEpisodeCount);
+        
+        this.RaisePropertyChanged(nameof(SelectionSummary));
+        this.RaisePropertyChanged(nameof(EpisodeSummary));
+        this.RaisePropertyChanged(nameof(SelectedShowMeta));
+        this.RaisePropertyChanged(nameof(CanContinue));
+        RaiseSearchStateProperties();
+    }
+
+    private void RaiseSearchStateProperties()
+    {
+        this.RaisePropertyChanged(nameof(ShowInitialPrompt));
+        this.RaisePropertyChanged(nameof(ShowNoSearchResults));
+        this.RaisePropertyChanged(nameof(HasNoSelectedShow));
+        this.RaisePropertyChanged(nameof(HasSelectedShow));
+        this.RaisePropertyChanged(nameof(IsSearching));
+    }
+
+    private string BuildSelectedShowMeta()
+    {
+        if (SelectedShow == null)
+        {
+            return string.Empty;
+        }
+
+        var pieces = new List<string>();
+        if (!string.IsNullOrWhiteSpace(SelectedShow.YearRange))
+        {
+            pieces.Add(SelectedShow.YearRange);
+        }
+
+        if (SelectedShow.RatingAverage is { } ratingAverage)
+        {
+            pieces.Add($"* {ratingAverage:0.0}");
+        }
+
+        if (SeasonCount > 0)
+        {
+            pieces.Add(SeasonCount == 1 ? "1 season" : $"{SeasonCount} seasons");
+        }
+        
+        return string.Join("  .  ", pieces);
     }
     
 }

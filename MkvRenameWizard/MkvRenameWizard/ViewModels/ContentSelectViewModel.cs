@@ -19,7 +19,7 @@ namespace MkvRenameWizard.ViewModels;
 
 public class ContentSelectViewModel : ViewModelBase
 {
-    public Show SelectedShow { get; set; }
+    public Show? SelectedShow { get; set; }
     public ObservableCollection<string> ContentList { get; } = new ObservableCollection<string>();
     public ObservableCollection<MkvFile> MkvFilesList { get; } = new ObservableCollection<MkvFile>();
     
@@ -31,7 +31,7 @@ public class ContentSelectViewModel : ViewModelBase
     
     private readonly IMkvFinderService _mkvFinderService;
 
-    public ContentSelectViewModel(Show selectedShow, ObservableCollection<CheckboxOption<Season>> checkboxOptions)
+    public ContentSelectViewModel(Show? selectedShow, ObservableCollection<CheckboxOption<Season>> checkboxOptions)
     {
         SelectedShow = selectedShow;
         foreach (var option in checkboxOptions)

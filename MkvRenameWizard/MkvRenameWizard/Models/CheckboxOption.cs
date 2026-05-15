@@ -8,14 +8,18 @@ public class CheckboxOption<T> : ViewModelBase
     public bool IsChecked
     {
         get => _isChecked;
-        set => this.RaiseAndSetIfChanged(ref _isChecked, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isChecked, value);
+            this.RaisePropertyChanged(nameof(IsNotChecked));
+        }
     }
+    public bool IsNotChecked => !IsChecked;
 
-    private string _label;
     public string Label
     {
-        get => _label;
-        set => this.RaiseAndSetIfChanged(ref _label, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
     
     public T Value { get; set; }

@@ -6,6 +6,21 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MkvRenameWizard.Views.WizardView"
              x:DataType="viewModels:WizardViewModel">
+    <UserControl.Styles>
+        <Style Selector="Button.primary-action">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}"></Setter>
+            <Setter Property="FontWeight" Value="SemiBold"></Setter>
+            <Setter Property="Padding" Value="18,9"></Setter>
+        </Style>
+        
+        <Style Selector="Button.secondary-action">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="Padding" Value="14,9"></Setter>
+        </Style>
+    </UserControl.Styles>
     <Grid>
         <Carousel ItemsSource="{Binding Pages}"
                   SelectedIndex="{Binding CurrentPageIndex}">
