@@ -1,6 +1,6 @@
 ﻿using Avalonia;
-using Avalonia.ReactiveUI;
 using System;
+using ReactiveUI.Avalonia;
 
 namespace MkvRenameWizard;
 
@@ -19,5 +19,6 @@ sealed class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
-            .UseReactiveUI();
+            .UseReactiveUI(builder => {})
+            .RegisterReactiveUIViewsFromEntryAssembly();
 }
