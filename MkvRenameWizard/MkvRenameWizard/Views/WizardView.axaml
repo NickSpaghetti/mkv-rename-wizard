@@ -21,27 +21,103 @@
             <Setter Property="Padding" Value="14,9"></Setter>
         </Style>
     </UserControl.Styles>
-    <Grid>
-        <Carousel ItemsSource="{Binding Pages}"
+    <Grid RowDefinitions="44,*,55" Background="{DynamicResource AppBackgroundBrush}">
+        <Border Background="{DynamicResource ChromeBackgroundBrush}"
+                BorderBrush="{DynamicResource DividerBush}"
+                BorderThickness="0,0,0,1"
+                Padding="14,0">
+                <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="12">
+                    <TextBlock Grid.Column="0"
+                        Text="MKV Rename Wizard"
+                        FontSize="13"
+                        FontWeight="SemiBold"
+                        VerticalAlignment="Center">
+                    </TextBlock>
+                    <TextBlock Grid.Column="1"
+                        Text="."
+                        Foreground="{DynamicResource TextMutedBrush}"
+                        VerticalAlignment="Center">
+                    </TextBlock>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding StepSubtitle}"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="12"
+                               VerticalAlignment="Center">
+                    </TextBlock>
+                </Grid>
+        </Border>
+        
+        <Carousel Grid.Row="1"
+                  ItemsSource="{Binding Pages}"
                   SelectedIndex="{Binding CurrentPageIndex}">
             <Carousel.ItemTemplate>
-                <DataTemplate>
-                    <ContentControl Content="{Binding}" />
+                <DataTemplate x:DataType="viewModels:ViewModelBase">
+                    <ContentControl Content="{Binding}"></ContentControl>
                 </DataTemplate>
             </Carousel.ItemTemplate>
         </Carousel>
-        <StackPanel Orientation="Horizontal" 
-                    HorizontalAlignment="Center" 
-                    VerticalAlignment="Bottom">
-            <Button Content="Previous" 
-                    Command="{Binding PreviousCommand}"
-                    IsVisible="{Binding CanGoBack}"/>
-            <Button Content="Next" 
-                    Command="{Binding NextCommand}"
-                    IsVisible="{Binding CanGoForward}"/>
-            <Button Content="Finish" 
-                    Command="{Binding FinishCommand}"
-                    IsVisible="{Binding IsLastPage}"/>
-        </StackPanel>
+        <Border Grid.Row="2"
+                Background="{DynamicResource FooterBackgroundBrush}"
+                BorderBrush="{DynamicResource DividerBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="18,8">
+            <Grid ColumnDefinitions="*,Auto,Auto"
+                  ColumnSpacing="10">
+                <StackPanel>
+                    <TextBlock Text="{Binding FooterStatusLine}"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               FontSize="11"
+                               FontWeight="SemiBold">
+                    </TextBlock>
+                    <TextBlock Text="{Binding FooterDetailLine}"
+                               Margin="0,3,0,0"
+                               FontSize="12"
+                               FontWeight="SemiBold">
+                    </TextBlock>
+                </StackPanel>
+                    <Button Grid.Column="1"
+                            Classes="secondary-action"
+                            Content="Previous"
+                            Command="{Binding PreviousCommand}"
+                            IsVisible="{Binding CanGoBack}">
+                    </Button>
+                    <Button Grid.Column="2"
+                            Classes="primary-action"
+                            Content="Previous">
+                    </Button>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="7">
+                    <TextBlock
+                        Text="{Binding PrimaryButtonText}">
+                    </TextBlock>
+                    <TextBlock
+                        Text=">">
+                        
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
+    <!-- <Grid> -->
+    <!--     <Carousel ItemsSource="{Binding Pages}" -->
+    <!--               SelectedIndex="{Binding CurrentPageIndex}"> -->
+    <!--         <Carousel.ItemTemplate> -->
+    <!--             <DataTemplate> -->
+    <!--                 <ContentControl Content="{Binding}" /> -->
+    <!--             </DataTemplate> -->
+    <!--         </Carousel.ItemTemplate> -->
+    <!--     </Carousel> -->
+    <!--     <StackPanel Orientation="Horizontal"  -->
+    <!--                 HorizontalAlignment="Center"  -->
+    <!--                 VerticalAlignment="Bottom"> -->
+    <!--         <Button Content="Previous"  -->
+    <!--                 Command="{Binding PreviousCommand}" -->
+    <!--                 IsVisible="{Binding CanGoBack}"/> -->
+    <!--         <Button Content="Next"  -->
+    <!--                 Command="{Binding NextCommand}" -->
+    <!--                 IsVisible="{Binding CanGoForward}"/> -->
+    <!--         <Button Content="Finish"  -->
+    <!--                 Command="{Binding FinishCommand}" -->
+    <!--                 IsVisible="{Binding IsLastPage}"/> -->
+    <!--     </StackPanel> -->
+    <!-- </Grid> -->
 </UserControl>
