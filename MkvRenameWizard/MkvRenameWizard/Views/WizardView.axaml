@@ -75,25 +75,26 @@
                                FontWeight="SemiBold">
                     </TextBlock>
                 </StackPanel>
+                
                     <Button Grid.Column="1"
                             Classes="secondary-action"
                             Content="Previous"
                             Command="{Binding PreviousCommand}"
                             IsVisible="{Binding CanGoBack}">
                     </Button>
+                
                     <Button Grid.Column="2"
                             Classes="primary-action"
-                            Content="Continue">
+                            Command="{Binding PrimaryCommand}">
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7">
+                                <TextBlock
+                                    Text="{Binding PrimaryButtonText}">
+                                </TextBlock>
+                                <TextBlock
+                                    Text=">">
+                                </TextBlock>
+                        </StackPanel>
                     </Button>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7">
-                    <TextBlock
-                        Text="{Binding PrimaryButtonText}">
-                    </TextBlock>
-                    <TextBlock
-                        Text=">">
-                        
-                    </TextBlock>
-                </StackPanel>
             </Grid>
         </Border>
     </Grid>
