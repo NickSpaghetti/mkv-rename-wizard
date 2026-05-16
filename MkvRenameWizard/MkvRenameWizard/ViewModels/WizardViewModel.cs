@@ -52,7 +52,7 @@ public class WizardViewModel : ViewModelBase
     public string FooterDetailLine => CurrentPageIndex switch
     {
         0 => _contentSearchViewModel.HasNoSelectedShow
-            ? "Search TVMaze, then chose at least oen season."
+            ? "Search TVMaze, then chose at least one season."
             : _contentSearchViewModel.EpisodeSummary,
         1 => "Match files to the selected episodes.",
         2 => "Review and finish the rename preview.",

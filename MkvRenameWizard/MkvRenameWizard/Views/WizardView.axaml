@@ -62,7 +62,7 @@
                 BorderThickness="0,1,0,0"
                 Padding="18,8">
             <Grid ColumnDefinitions="*,Auto,Auto"
-                  ColumnSpacing="10">
+                  ColumnSpacing="14">
                 <StackPanel>
                     <TextBlock Text="{Binding FooterStatusLine}"
                                Foreground="{DynamicResource TextMutedBrush}"
@@ -83,9 +83,9 @@
                     </Button>
                     <Button Grid.Column="2"
                             Classes="primary-action"
-                            Content="Previous">
+                            Content="Continue">
                     </Button>
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="7">
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7">
                     <TextBlock
                         Text="{Binding PrimaryButtonText}">
                     </TextBlock>
