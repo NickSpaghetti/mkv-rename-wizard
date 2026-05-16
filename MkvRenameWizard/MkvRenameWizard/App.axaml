@@ -6,19 +6,25 @@
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
     
              <Application.Resources>
-                 <SolidColorBrush x:Key="AppBackgroundBrush" Color="#191919"/>
-                 <SolidColorBrush x:Key="ChromeBackgroundBrush" Color="#202020"/>
-                 <SolidColorBrush x:Key="FooterBackgroundBrush" Color="#2C2C2C"/>
-                 <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#1E1E1E"/>
-                 <SolidColorBrush x:Key="CardBackgroundBrush" Color="#2A2A2A"/>
-                 <SolidColorBrush x:Key="DividerBrush" Color="#333333"/>
-                 <SolidColorBrush x:Key="TextPrimaryBush" Color="#F1F1F1"/>
-                 <SolidColorBrush x:Key="TextSecondaryBrush" Color="#D2D2D2"/>
-                 <SolidColorBrush x:Key="TextMutedBrush" Color="#A9A9A9"/>
-                 <SolidColorBrush x:Key="AccentBrush" Color="#48C8F6"/>
-                 <SolidColorBrush x:Key="AccentTextBrush" Color="#102028"/>
-                 <SolidColorBrush x:Key="ChipBackgroundBrush" Color="#3D3D3D"/>
-                 <SolidColorBrush x:Key="PosterFallbackBrush" Color="#2F2F2F"/>
+                 <ResourceDictionary>
+                     <ResourceDictionary.MergedDictionaries>
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/SearchIcon.axaml" />
+                     </ResourceDictionary.MergedDictionaries>
+                     
+                     <SolidColorBrush x:Key="AppBackgroundBrush" Color="#191919"/>
+                     <SolidColorBrush x:Key="ChromeBackgroundBrush" Color="#202020"/>
+                     <SolidColorBrush x:Key="FooterBackgroundBrush" Color="#2C2C2C"/>
+                     <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#1E1E1E"/>
+                     <SolidColorBrush x:Key="CardBackgroundBrush" Color="#2A2A2A"/>
+                     <SolidColorBrush x:Key="DividerBrush" Color="#333333"/>
+                     <SolidColorBrush x:Key="TextPrimaryBush" Color="#F1F1F1"/>
+                     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#D2D2D2"/>
+                     <SolidColorBrush x:Key="TextMutedBrush" Color="#A9A9A9"/>
+                     <SolidColorBrush x:Key="AccentBrush" Color="#48C8F6"/>
+                     <SolidColorBrush x:Key="AccentTextBrush" Color="#102028"/>
+                     <SolidColorBrush x:Key="ChipBackgroundBrush" Color="#3D3D3D"/>
+                     <SolidColorBrush x:Key="PosterFallbackBrush" Color="#2F2F2F"/>
+                 </ResourceDictionary>
              </Application.Resources>
 
     <Application.DataTemplates>
