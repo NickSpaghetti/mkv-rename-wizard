@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -25,16 +26,20 @@ public class ImageLoadingService : IImageLoadingService
         try
         {
             await using var imageStream = await _httpClient.GetStreamAsync(imageUrl, cancellationToken);
-            await using var memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
+            await imageStream.CopyToAsync(memoryStream, cancellationToken);
             memoryStream.Position = 0;
+        
             return new Bitmap(memoryStream);
         }
         catch when (cancellationToken.IsCancellationRequested)
         {
+            Console.WriteLine("Download canceled.");
             throw;
         }
-        catch
-        {
+        catch (Exception e)
+        {   
+            Console.WriteLine($"Failed to decode image from {imageUrl}: {e.Message}");
             return null;
         }
     }

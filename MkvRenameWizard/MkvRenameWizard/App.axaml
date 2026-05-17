@@ -15,7 +15,8 @@
                      <SolidColorBrush x:Key="ChromeBackgroundBrush" Color="#202020"/>
                      <SolidColorBrush x:Key="FooterBackgroundBrush" Color="#2C2C2C"/>
                      <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#1E1E1E"/>
-                     <SolidColorBrush x:Key="CardBackgroundBrush" Color="#2A2A2A"/>
+                     <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#2A2A2A"></SolidColorBrush>
+                     <SolidColorBrush x:Key="CardBackgroundBrush" Color="#353535"/>
                      <SolidColorBrush x:Key="DividerBrush" Color="#333333"/>
                      <SolidColorBrush x:Key="TextPrimaryBush" Color="#F1F1F1"/>
                      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#D2D2D2"/>

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Avalonia.Media.Imaging;
 using MkvRenameWizard.Models.TvMaze;
+using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
@@ -30,4 +32,6 @@ public class ShowSearchResultViewModel : ViewModelBase
     public string MediumImageUrl { get; }
     public string OriginalImageUrl { get; }
     public string PlanSummary { get; }
+    
+    public Bitmap? Thumbnail { get; set => this.RaiseAndSetIfChanged(ref field, value); }
 }

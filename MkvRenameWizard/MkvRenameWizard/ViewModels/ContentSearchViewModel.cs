@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -149,13 +150,15 @@ public class ContentSearchViewModel : ViewModelBase
         IsSearching = true;
         try
         {
-            var showSearchResult = await _tvMazeService.FindShowIdByNameAsync(SearchText);
-            var searchResultVm = showSearchResult.Select(result => new ShowSearchResultViewModel(result)).ToList();
-            await Task.WhenAll(searchResultVm.Select( searchResultVm => LoadResultThumbnailAsync(searchResultVm.MediumImageUrl)));
+            var showSearchResult = (await _tvMazeService.FindShowIdByNameAsync(SearchText))
+                .Select(show => new ShowSearchResultViewModel(show)).ToList();
+            await Task.WhenAll(showSearchResult.Select( async vm =>
+            {
+                vm.Thumbnail = await LoadResultThumbnailAsync(vm.MediumImageUrl);
+            }));
             SearchResults.Clear();
-            SearchResults.AddRange(searchResultVm);
+            SearchResults.AddRange(showSearchResult);
             SelectedShow = SearchResults.FirstOrDefault();
-
         }
         finally
         {
@@ -235,8 +238,9 @@ public class ContentSearchViewModel : ViewModelBase
         {
            return await _imageLoadingService.LoadBitMapAsync(imageUrl, CancellationToken.None);
         }
-        catch
+        catch(Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Image load failed for {imageUrl}: {ex.Message}");
             return null;
         }
     }
