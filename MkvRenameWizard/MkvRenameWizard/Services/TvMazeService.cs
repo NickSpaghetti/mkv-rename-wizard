@@ -22,7 +22,7 @@ public partial class TvMazeService : ITvMazeService
             _tvMazeDataAccess = tvMazeDataAccess;
         }
 
-        public async Task<List<Show>> FindShowIdByNameAsync(string showName)
+        public async Task<List<ShowSearchResult>> FindShowIdByNameAsync(string showName)
         {
             if (string.IsNullOrEmpty(showName))
             {
@@ -37,10 +37,10 @@ public partial class TvMazeService : ITvMazeService
                 var content = await response.Content.ReadAsStringAsync();
                 var tvShowResultsDtoList = JsonSerializer.Deserialize<List<ShowSearchResultDto>>(content) ?? new List<ShowSearchResultDto>();
 
-                var tvShowResults = new List<Show>();
+                var tvShowResults = new List<ShowSearchResult>();
                 foreach (var showResultDto in tvShowResultsDtoList)
                 {
-                    tvShowResults.Add(new Show
+                    var show = new Show
                     {
                         Id = showResultDto.ShowDto.Id,
                         Name = showResultDto.ShowDto.Name,
@@ -53,7 +53,8 @@ public partial class TvMazeService : ITvMazeService
                         MediumImageUrl = showResultDto.ShowDto.ImageDto?.Medium ?? string.Empty,
                         OriginalImageUrl = showResultDto.ShowDto.ImageDto?.Original ?? string.Empty,
                         PlainSummary = StripTvMazeHtml(showResultDto.ShowDto.Summary ?? "No Summary found"),
-                    });
+                    };
+                    tvShowResults.Add(new ShowSearchResult(showResultDto.Score,show));
                 }
 
                 return tvShowResults;

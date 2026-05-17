@@ -27,9 +27,9 @@ public class ContentSearchViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = string.Empty;
 
-    public ObservableCollection<Show> SearchResults { get; } = [];
+    public ObservableCollection<ShowSearchResultViewModel> SearchResults { get; } = [];
     
-    public Show? SelectedShow
+    public ShowSearchResultViewModel? SelectedShow
     {
         get;
         set
@@ -128,6 +128,7 @@ public class ContentSearchViewModel : ViewModelBase
         
         UpdateCheckboxOptionsCommand = ReactiveCommand.CreateFromTask(UpdateCheckboxOptions);
         this.WhenAnyValue(x => x.SelectedShow)
+            .Do(show => _ = LoadPosterAsync(show?.MediumImageUrl ?? string.Empty))
             .Select(_ => Unit.Default)
             .InvokeCommand(UpdateCheckboxOptionsCommand);
     }
@@ -149,9 +150,11 @@ public class ContentSearchViewModel : ViewModelBase
         try
         {
             var showSearchResult = await _tvMazeService.FindShowIdByNameAsync(SearchText);
-            await Task.WhenAll(showSearchResult.Select(selectedShow => LoadResultThumbnailAsync(selectedShow)));
+            var searchResultVm = showSearchResult.Select(result => new ShowSearchResultViewModel(result)).ToList();
+            await Task.WhenAll(searchResultVm.Select( searchResultVm => LoadResultThumbnailAsync(searchResultVm.MediumImageUrl)));
             SearchResults.Clear();
-            SearchResults.AddRange(showSearchResult);
+            SearchResults.AddRange(searchResultVm);
+            SelectedShow = SearchResults.FirstOrDefault();
 
         }
         finally
@@ -159,9 +162,6 @@ public class ContentSearchViewModel : ViewModelBase
             IsSearching = false;
         }
         
-        var showSearchResults = await _tvMazeService.FindShowIdByNameAsync(SearchText);
-        SearchResults.Clear();
-        SearchResults.AddRange(showSearchResults);
     }
     
 
@@ -187,7 +187,7 @@ public class ContentSearchViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadPosterAsync(Show? show)
+    private async Task LoadPosterAsync(string imageUrl)
     {
         _posterLoadCancellationTokenSource?.Cancel();
         _posterLoadCancellationTokenSource = new CancellationTokenSource();
@@ -196,8 +196,7 @@ public class ContentSearchViewModel : ViewModelBase
         SelectedShowPoster = null;
         this.RaisePropertyChanged(nameof(HasSelectedShow));
         this.RaisePropertyChanged(nameof(SelectedShowMeta));
-
-        var imageUrl = show?.MediumImageUrl;
+        
         if (string.IsNullOrEmpty(imageUrl))
         {
             return;
@@ -225,20 +224,20 @@ public class ContentSearchViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadResultThumbnailAsync(Show show)
+    private async Task<Bitmap?> LoadResultThumbnailAsync(string imageUrl)
     {
-        if (string.IsNullOrWhiteSpace(show.MediumImageUrl))
+        if (string.IsNullOrWhiteSpace(imageUrl))
         {
-            return;
+            return null;
         }
-
+        
         try
         {
-            show.Thumbnail = await _imageLoadingService.LoadBitMapAsync(show.MediumImageUrl, CancellationToken.None);
+           return await _imageLoadingService.LoadBitMapAsync(imageUrl, CancellationToken.None);
         }
         catch
         {
-            show.Thumbnail = null;
+            return null;
         }
     }
 
