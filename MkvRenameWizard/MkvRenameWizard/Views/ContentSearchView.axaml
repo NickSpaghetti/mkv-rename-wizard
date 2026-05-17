@@ -31,8 +31,7 @@
             
             <Style Selector="Grid.season-pill">
                 <Setter Property="Margin" Value="0,0,8,8"></Setter>
-                <Setter Property="Width" Value ="146"></Setter>
-                <Setter Property="Height" Value="34"></Setter>
+                <Setter Property="MinHeight" Value="36"></Setter> 
             </Style>
             
             <Style Selector="Border.season-pill-shell">
@@ -50,12 +49,12 @@
             </Style>
             
             <Style Selector="TextBlock.season-pill-text">
-                <Setter Property="Background" Value ="{DynamicResource TextMutedBrush}"></Setter>
+                <Setter Property="Foreground" Value ="{DynamicResource TextMutedBrush}"></Setter>
                 <Setter Property="FontWeight" Value="SemiBold"></Setter>
             </Style>
-            
+
             <Style Selector="TextBlock.season-pill-text.selected">
-                <Setter Property="Background" Value ="{DynamicResource AccentBrush}"></Setter>
+                <Setter Property="Foreground" Value ="{DynamicResource AccentTextBrush}"></Setter> 
             </Style>
             
             <Style Selector="Border.season-check-box">
@@ -81,18 +80,24 @@
                 <Setter Property="Padding" Value="0"></Setter>
             </Style>
             
-            <Style Selector="Button.link">
-                <Setter Property="Background" Value="Transparent"></Setter>
-                <Setter Property="BorderThickness" Value="0"></Setter>
-                <Setter Property="Padding" Value="0"></Setter>
-                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Style Selector="Button.link /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            </Style>
+            
+            <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="Opacity" Value="0.8" />
             </Style>
             
         </Style>
     </UserControl.Styles>
     
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <Grid ColumnDefinitions="200,*,300">
+        <Grid ColumnDefinitions="300,*,340">
             <Border Grid.Column="0" Classes="panel" Padding="12">
                 <Grid RowDefinitions="Auto,Auto,*">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -281,7 +286,7 @@
                         </TextBlock>
                     </StackPanel>
                     
-                    <ScrollViewer IsVisible="{Binding HasNoSelectedShow}"
+                    <ScrollViewer IsVisible="{Binding HasSelectedShow}"
                                   VerticalScrollBarVisibility="Auto">
                         <StackPanel MaxWidth="560" HorizontalAlignment="Center">
                             <Grid ColumnDefinitions="96,*" ColumnSpacing="18">
@@ -353,7 +358,7 @@
             
             <Border Grid.Column="2" Background="{DynamicResource SurfaceBackgroundBrush}" Padding="18,24">
                 <Grid RowDefinitions="Auto,Auto,Auto,*">
-                    <Grid ColumnDefinitions="*,Auto">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
                         <TextBlock Text="Seasons"
                                    FontSize="16"
                                    FontWeight="Bold">
@@ -363,6 +368,13 @@
                                 Command="{Binding SelectAllSeasonsCommand}"
                                 Classes="link"
                                 IsVisible="{Binding HasSelectedShow}">
+                        </Button>
+                        <Button Grid.Column="2"
+                                Content="Clear all"
+                                Command="{Binding ClearAllSeasonsCommand}"
+                                Classes="link"
+                                IsVisible="{Binding HasSelectedShow}"
+                                IsEnabled="{Binding CanClearAllSeasons}">
                         </Button>
                     </Grid>
                     
@@ -404,20 +416,24 @@
                                         </Grid>
                                     </Border>
                                     
-                                    <Border Classes="section-heading unselected"
+                                    <Border Classes="season-pill-shell unselected"
                                             IsVisible="{Binding IsNotChecked}">
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                                             <Border Classes="season-check-box unselected"></Border>
-                                                <TextBlock Grid.Column="1"
-                                                           Classes="season-pill-text"
-                                                           Text="{Binding Value.Name, StringFormat='Season {0}'}">
-                                                </TextBlock>
-                                                <TextBlock Grid.Column="2"
-                                                           Classes="season-pill-text"
-                                                           Text="{Binding Value.TotalEpisodeCount}"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                                           HorizontalAlignment="Right">
-                                                </TextBlock>
+        
+                                            <TextBlock Grid.Column="1"
+                                                       Classes="season-pill-text"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Value.Number, StringFormat='Season {0}'}">
+                                            </TextBlock>
+        
+                                            <TextBlock Grid.Column="2"
+                                                       Classes="season-pill-text"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Value.TotalEpisodeCount}"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       HorizontalAlignment="Right">
+                                            </TextBlock>
                                         </Grid>
                                     </Border>
                                     
@@ -432,7 +448,7 @@
                     </ItemsControl>
                     
                     <TextBlock Grid.Row="1"
-                               IsVisible="{Binding HasSelectedShow}"
+                               IsVisible="{Binding HasNoSelectedShow}"
                                Text="Select a show to load seasons."
                                Foreground="{DynamicResource TextMutedBrush}"
                                Margin="0,18,0,8">

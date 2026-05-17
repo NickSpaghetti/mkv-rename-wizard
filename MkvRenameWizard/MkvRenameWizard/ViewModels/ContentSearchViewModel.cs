@@ -94,6 +94,7 @@ public class ContentSearchViewModel : ViewModelBase
     public bool ShowInitialPrompt => HasNoSelectedShow && (!HasSearched || IsSearching);
     public bool ShowNoSearchResults => HasNoSelectedShow && HasSearched && !IsSearching && ResultCount  == 0;
     public bool CanContinue => HasSelectedShow && SelectedSeasonCount > 0;
+    public bool CanClearAllSeasons => HasSelectedShow && SeasonCount > 0;
     public string ResultCountLabel => ResultCount == 1 ? "1 RESULT" : $"{ResultCount} RESULT";
 
     public string SelectionSummary => SelectedShow == null
@@ -132,6 +133,10 @@ public class ContentSearchViewModel : ViewModelBase
             .Do(show => _ = LoadPosterAsync(show?.MediumImageUrl ?? string.Empty))
             .Select(_ => Unit.Default)
             .InvokeCommand(UpdateCheckboxOptionsCommand);
+
+        SelectAllSeasonsCommand = ReactiveCommand.Create(SelectAllSeasons);
+        var canClearAllSeasons = this.WhenAnyValue(x => x.SelectedSeasonCount, x => x.SelectedShow).Select(_ => CanClearAllSeasons);
+        ClearAllSeasonsCommand = ReactiveCommand.Create(ClearAllSeasons, canClearAllSeasons);
     }
 
 
@@ -282,6 +287,7 @@ public class ContentSearchViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(EpisodeSummary));
         this.RaisePropertyChanged(nameof(SelectedShowMeta));
         this.RaisePropertyChanged(nameof(CanContinue));
+        this.RaisePropertyChanged(nameof(CanClearAllSeasons));
         RaiseSearchStateProperties();
     }
 
