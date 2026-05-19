@@ -17,11 +17,14 @@ namespace MkvRenameWizard.ViewModels;
 
 public class WizardViewModel : ViewModelBase
 {
-    private int _currentPageIndex;
     public int CurrentPageIndex
     {
-        get => _currentPageIndex;
-        set => this.RaiseAndSetIfChanged(ref _currentPageIndex, value);
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            RaiseWizardChromeProperties();
+        }
     }
 
     public ObservableCollection<ViewModelBase> Pages { get; }
@@ -30,9 +33,38 @@ public class WizardViewModel : ViewModelBase
     public bool CanGoForward => CurrentPageIndex < Pages.Count - 1;
     public bool IsLastPage => CurrentPageIndex == Pages.Count - 1;
 
+    public string StepSubtitle => CurrentPageIndex switch
+    {
+        0 => "Step 1 of 3 - Find your show",
+        1 => "Step 2 of 3 - Select your files",
+        2 => "Step 3 of 3 - Configure output",
+        _ => string.Empty
+    };
+    
+    public string FooterStatusLine => CurrentPageIndex switch
+    {
+        0 => _contentSearchViewModel.SelectionSummary,
+        1 => $"{_contentSelectViewModel.MkvFilesList.Count} MKV files selected",
+        2 => $"{_outputFileConfigurationViewModel.PreviewList.Count} Rename preview files",
+        _ => string.Empty
+    };
+
+    public string FooterDetailLine => CurrentPageIndex switch
+    {
+        0 => _contentSearchViewModel.HasNoSelectedShow
+            ? "Search TVMaze, then chose at least one season."
+            : _contentSearchViewModel.EpisodeSummary,
+        1 => "Match files to the selected episodes.",
+        2 => "Review and finish the rename preview.",
+        _ => string.Empty
+    };
+
+    public string PrimaryButtonText => IsLastPage ? "Finish" : "Continue";
+
     public ReactiveCommand<Unit, Unit> PreviousCommand { get; }
     public ReactiveCommand<Unit, Unit> NextCommand { get; }
     public ReactiveCommand<Unit, Unit> FinishCommand { get; }
+    public ReactiveCommand<Unit, Unit> PrimaryCommand { get; }
 
     private readonly ContentSearchViewModel _contentSearchViewModel;
     private readonly ContentSelectViewModel _contentSelectViewModel;
@@ -49,10 +81,10 @@ public class WizardViewModel : ViewModelBase
         _tvMazeService = new TvMazeService(new TvMazeDataAccess());
         
         _contentSearchViewModel
-            .WhenAnyValue(x => x.SeasonsCheckBoxs)
+            .WhenAnyValue(x => x.SelectedSeasonCount, x => x.SelectedEpisodeCount, x => x.SelectedShow, x => x.CanContinue)
             .Subscribe(checkboxOptions =>
             {
-                UpdateContentSelectViewModel();
+                RaiseWizardChromeProperties();
             });
         
         _contentSearchViewModel
@@ -69,8 +101,19 @@ public class WizardViewModel : ViewModelBase
             _outputFileConfigurationViewModel,
         };
 
-        PreviousCommand = ReactiveCommand.Create(Previous, this.WhenAnyValue(x => x.CanGoBack));
-
+        var canGoBack = this.WhenAnyValue(x => x.CurrentPageIndex).Select(_ => CanGoBack);
+        var canGoForward = this.WhenAnyValue(x => x.CurrentPageIndex).Select(_ => CanGoForward);
+        var canFinish = this.WhenAnyValue(x => x.CurrentPageIndex).Select(_ => IsLastPage);
+        var canUsePrimary = this.WhenAnyValue(x => x.CurrentPageIndex)
+            .CombineLatest(
+            _contentSearchViewModel.WhenAnyValue(x => x.CanContinue),
+            (pageIndex, canContinueSearch) => pageIndex switch
+            {
+                0 => canContinueSearch,
+                _ => CanGoBack || IsLastPage
+            }
+        );
+        PreviousCommand = ReactiveCommand.Create(Previous, canGoBack);
         
         NextCommand = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -78,9 +121,10 @@ public class WizardViewModel : ViewModelBase
                 await UpdateContentSelectViewModel();
                 UpdateFileOutputConfigurationViewModel();
             },
-            this.WhenAnyValue(x => x.CanGoForward));
+            canGoForward);
 
-        FinishCommand = ReactiveCommand.Create(Finish, this.WhenAnyValue(x => x.IsLastPage));
+        FinishCommand = ReactiveCommand.Create(Finish, canFinish);
+        PrimaryCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryCommand, canUsePrimary);
     }
 
     private void Previous() => CurrentPageIndex--;
@@ -88,17 +132,28 @@ public class WizardViewModel : ViewModelBase
 
     private void Finish() { /* Implement finish logic */ }
 
+    private async Task ExecutePrimaryCommand()
+    {
+        if (IsLastPage)
+        {
+            Finish();
+            return;
+        }
+        Next();
+        await UpdateContentSelectViewModel();
+        UpdateFileOutputConfigurationViewModel();
+    }
+
     private async Task UpdateContentSelectViewModel()
     {
         _contentSelectViewModel.SelectedShow = _contentSearchViewModel.SelectedShow;
+        _contentSelectViewModel.ContentList.Clear();
         if (_contentSelectViewModel.SelectedShow == null)
         {
             return;
         }
-
-        //_contentSelectViewModel.ContentList.Clear();
-        //_contentSelectViewModel.MkvFilesList.Clear();
-        foreach (var option in _contentSearchViewModel.SeasonsCheckBoxs)
+        
+        foreach (var option in _contentSearchViewModel.SeasonsCheckBoxes)
         {
             if (option.IsChecked)
             {
@@ -127,5 +182,16 @@ public class WizardViewModel : ViewModelBase
             var mkvFile = _contentSelectViewModel.MkvFilesList[i];
             _outputFileConfigurationViewModel.FileContentMap.Add(content, mkvFile);
         }
+    }
+
+    private void RaiseWizardChromeProperties()
+    {
+        this.RaisePropertyChanged(nameof(CanGoBack));
+        this.RaisePropertyChanged(nameof(CanGoForward));
+        this.RaisePropertyChanged(nameof(IsLastPage));
+        this.RaisePropertyChanged(nameof(StepSubtitle));
+        this.RaisePropertyChanged(nameof(FooterStatusLine));
+        this.RaisePropertyChanged(nameof(FooterDetailLine));
+        this.RaisePropertyChanged(nameof(PrimaryButtonText));
     }
 }

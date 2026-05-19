@@ -8,7 +8,12 @@
         x:Class="MkvRenameWizard.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="MkvRenameWizard">
+        Title="MkvRenameWizard"
+        Width="1024"
+        Height="640"
+        MinWidth="900"
+        MinHeight="560"
+        Background="{DynamicResource AppBackgroundBrush}">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,

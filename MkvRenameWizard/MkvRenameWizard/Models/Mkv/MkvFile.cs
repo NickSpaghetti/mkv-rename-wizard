@@ -1,5 +1,3 @@
-using Avalonia.Controls.Shapes;
-
 namespace MkvRenameWizard.Models.Mkv;
 
 public class MkvFile(string root, string fullPath, bool isIncluded)

@@ -1,6 +1,3 @@
-
-using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,7 +6,6 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using MkvRenameWizard.DataAccess;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.Models.TvMaze;
 using MkvRenameWizard.Services;
@@ -19,7 +15,7 @@ namespace MkvRenameWizard.ViewModels;
 
 public class ContentSelectViewModel : ViewModelBase
 {
-    public Show SelectedShow { get; set; }
+    public ShowSearchResultViewModel? SelectedShow { get; set; }
     public ObservableCollection<string> ContentList { get; } = new ObservableCollection<string>();
     public ObservableCollection<MkvFile> MkvFilesList { get; } = new ObservableCollection<MkvFile>();
     
@@ -31,7 +27,7 @@ public class ContentSelectViewModel : ViewModelBase
     
     private readonly IMkvFinderService _mkvFinderService;
 
-    public ContentSelectViewModel(Show selectedShow, ObservableCollection<CheckboxOption<Season>> checkboxOptions)
+    public ContentSelectViewModel(ShowSearchResultViewModel? selectedShow, ObservableCollection<CheckboxOption<Season>> checkboxOptions)
     {
         SelectedShow = selectedShow;
         foreach (var option in checkboxOptions)

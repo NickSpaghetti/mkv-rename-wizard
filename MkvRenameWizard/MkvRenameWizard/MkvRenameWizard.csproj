@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResources Include="Resources\**"/>
     </ItemGroup>
 
     <ItemGroup>

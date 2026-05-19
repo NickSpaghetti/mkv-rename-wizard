@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MkvRenameWizard.DataAccess;
 using MkvRenameWizard.Models.TvMaze;
@@ -8,16 +10,19 @@ using MkvRenameWizard.Models.TvMaze.Dto;
 
 namespace MkvRenameWizard.Services;
 
-public class TvMazeService : ITvMazeService
+public partial class TvMazeService : ITvMazeService
     {
         private readonly ITvMazeDataAccess _tvMazeDataAccess;
+        
+        [GeneratedRegex("<.*?>")]
+        private static partial Regex HtmlTagRegex();
 
         public TvMazeService(ITvMazeDataAccess tvMazeDataAccess)
         {
             _tvMazeDataAccess = tvMazeDataAccess;
         }
 
-        public async Task<List<Show>> FindShowIdByNameAsync(string showName)
+        public async Task<List<ShowSearchResult>> FindShowIdByNameAsync(string showName)
         {
             if (string.IsNullOrEmpty(showName))
             {
@@ -30,18 +35,26 @@ public class TvMazeService : ITvMazeService
                 var response = await _tvMazeDataAccess.FindShowIdByNameAsync(showName);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
-                var tvShowResultsDtoList = JsonSerializer.Deserialize<List<ShowSearchResultDto>>(content);
+                var tvShowResultsDtoList = JsonSerializer.Deserialize<List<ShowSearchResultDto>>(content) ?? new List<ShowSearchResultDto>();
 
-                var tvShowResults = new List<Show>();
+                var tvShowResults = new List<ShowSearchResult>();
                 foreach (var showResultDto in tvShowResultsDtoList)
                 {
-                    tvShowResults.Add(new Show
+                    var show = new Show
                     {
                         Id = showResultDto.ShowDto.Id,
                         Name = showResultDto.ShowDto.Name,
                         Language = showResultDto.ShowDto.Language,
-                        Genres = showResultDto.ShowDto.Genres
-                    });
+                        Genres = showResultDto.ShowDto.Genres,
+                        Premiered = showResultDto.ShowDto.Premiered,
+                        Ended = showResultDto.ShowDto.Ended,
+                        RatingAverage = showResultDto.ShowDto.RatingDto.Average,
+                        AirNetworkLabel = showResultDto.ShowDto.NetworkDto?.Name ?? showResultDto.ShowDto.WebChannel?.Name ?? string.Empty,
+                        MediumImageUrl = showResultDto.ShowDto.ImageDto?.Medium ?? string.Empty,
+                        OriginalImageUrl = showResultDto.ShowDto.ImageDto?.Original ?? string.Empty,
+                        PlainSummary = StripTvMazeHtml(showResultDto.ShowDto.Summary ?? "No Summary found"),
+                    };
+                    tvShowResults.Add(new ShowSearchResult(showResultDto.Score,show));
                 }
 
                 return tvShowResults;
@@ -53,6 +66,17 @@ public class TvMazeService : ITvMazeService
                 Environment.Exit(-1);
             }
             return null;
+        }
+
+        public static string StripTvMazeHtml(string summaryHtml)
+        {
+            if (string.IsNullOrEmpty(summaryHtml))
+            {
+                return string.Empty;
+            }
+            
+            var strippedHtmlTags = HtmlTagRegex().Replace(summaryHtml, string.Empty);
+            return WebUtility.HtmlDecode(strippedHtmlTags);
         }
 
         public async Task<List<Season>> ListSeasonsAsync(long showId)
@@ -68,17 +92,23 @@ public class TvMazeService : ITvMazeService
                 var response = await _tvMazeDataAccess.ListSeasonsAsync(showId);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
-                var tvShowResultsDtoList = JsonSerializer.Deserialize<List<ListSeasonResultDto>>(content);
+                var tvShowResultsDtoList = JsonSerializer.Deserialize<List<ListSeasonResultDto>>(content) ?? new List<ListSeasonResultDto>();
 
                 var seasons = new List<Season>();
                 foreach (var seasonResultDto in tvShowResultsDtoList)
                 {
+                    var totalEpisodecount =  seasonResultDto.EpisodeOrder;
+                    if (totalEpisodecount == null)
+                    {
+                        var episodes = await ListEpisodesBySeasonAsync(seasonResultDto.Id);
+                        totalEpisodecount = episodes.Count;
+                    }
                     seasons.Add(new Season
                     {
                         Id = seasonResultDto.Id,
                         Name = seasonResultDto.Name,
                         Number = seasonResultDto.Number,
-                        TotalEpisodeCount = seasonResultDto.EpisodeOrder ?? 0
+                        TotalEpisodeCount = totalEpisodecount.Value
                     });
                 }
 
@@ -106,7 +136,7 @@ public class TvMazeService : ITvMazeService
                 var response = await _tvMazeDataAccess.ListEpisodesBySeasonIdAsync(seasonId);
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
-                var episodesDto = JsonSerializer.Deserialize<List<EpisodeDto>>(content);
+                var episodesDto = JsonSerializer.Deserialize<List<EpisodeDto>>(content) ?? new List<EpisodeDto>();
 
                 var episodes = new List<Episode>();
                 foreach (var episodeDto in episodesDto)
@@ -132,4 +162,4 @@ public class TvMazeService : ITvMazeService
 
             return null;
         }
-    }
+}

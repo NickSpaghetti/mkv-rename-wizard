@@ -3,48 +3,475 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
-             xmlns:converters="clr-namespace:MkvRenameWizard.Converters"
-             xmlns:controls="clr-namespace:MkvRenameWizard.Controls"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
              x:Class="MkvRenameWizard.Views.ContentSearchView"
+             x:Name="SearchRoot"
              x:DataType="viewModels:ContentSearchViewModel">
     
-    <UserControl.Resources>
-        <converters:LongestStringWidthConverter x:Key="LongestStringWidthConverter"/>
-    </UserControl.Resources>
-    
-    <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto,*">
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="10">
-            <TextBox Width="200" Margin="0,0,10,0" Text="{Binding SearchText}"/>
-            <Button Command="{Binding SearchCommand}" HotKey="Enter">
-                <StackPanel Orientation="Horizontal">
-                    <PathIcon Data="{StaticResource search_regular}"/>
-                    <TextBlock  Text="Search" VerticalAlignment="Center" Margin="0,0,16,0"/>
-                </StackPanel>
-            </Button>
-        </StackPanel>
-        
-        <ListBox Grid.Row="1" Grid.Column="0"
-                 ItemsSource="{Binding SearchResults}"
-                 SelectedItem="{Binding SelectedShow}"
-                 Width="{Binding SearchResults, Converter={StaticResource LongestStringWidthConverter}}"
-                 Margin="10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Name}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+    <UserControl.Styles>
+        <Style>
+            <Style Selector="TextBlock.section-heading">
+                <Setter Property="FontSize" Value ="12"></Setter>
+                <Setter Property="FontWeight" Value="SemiBold"></Setter>
+                <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            </Style>
+            
+            <Style Selector="Border.panel">
+                <Setter Property="Background" Value ="{DynamicResource PanelBackgroundBrush}"></Setter>
+                <Setter Property="BorderBrush" Value ="{DynamicResource DividerBrush}"></Setter>
+                <Setter Property="BorderThickness" Value="0,0,1,0"></Setter>
+            </Style>
+            
+            <Style Selector="Border.chip">
+                <Setter Property="Background" Value ="{DynamicResource ChipBackgroundBrush}"></Setter>
+                <Setter Property="CornerRadius" Value ="7"></Setter>
+                <Setter Property="Padding" Value="8,3"></Setter>
+                <Setter Property="BorderThickness" Value="0,0,6,6"></Setter>
+            </Style>
+            
+            <Style Selector="Grid.season-pill">
+                <Setter Property="Margin" Value="0,0,8,8"></Setter>
+                <Setter Property="MinHeight" Value="36"></Setter> 
+            </Style>
+            
+            <Style Selector="Border.season-pill-shell">
+                <Setter Property="CornerRadius" Value ="17"></Setter>
+                <Setter Property="Padding" Value="10,7"></Setter>
+            </Style>
+            
+            <Style Selector="Border.season-pill-shell.selected">
+                <Setter Property="Background" Value ="{DynamicResource AccentBrush}"></Setter>
+            </Style>
+            
+            <Style Selector="Border.season-pill-shell.unselected">
+                <Setter Property="Background" Value ="{DynamicResource ChipBackgroundBrush}"></Setter>
+                <Setter Property="Opacity" Value="0.82"></Setter>
+            </Style>
+            
+            <Style Selector="TextBlock.season-pill-text">
+                <Setter Property="Foreground" Value ="{DynamicResource TextMutedBrush}"></Setter>
+                <Setter Property="FontWeight" Value="SemiBold"></Setter>
+            </Style>
 
-        <ItemsControl Grid.Row="1" Grid.Column="1" 
-                      ItemsSource="{Binding SeasonsCheckBoxs}" 
-                      Margin="10">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <CheckBox Content="{Binding Label}" 
-                              IsChecked="{Binding IsChecked}"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            <Style Selector="TextBlock.season-pill-text.selected">
+                <Setter Property="Foreground" Value ="{DynamicResource AccentTextBrush}"></Setter> 
+            </Style>
+            
+            <Style Selector="Border.season-check-box">
+                <Setter Property="Width" Value ="16"></Setter>
+                <Setter Property="Height" Value ="16"></Setter>
+                <Setter Property="CornerRadius" Value="4"></Setter>
+                <Setter Property="BorderThickness" Value="1"></Setter>
+            </Style>
+            
+            <Style Selector="Border.season-check-box.selected">
+                <Setter Property="Background" Value ="#38A8d2"></Setter>
+                <Setter Property="BorderBrush" Value ="#167D9F"></Setter>
+            </Style>
+            
+            <Style Selector="Border.season-check-box.unselected">
+                <Setter Property="Background" Value ="#343434"></Setter>
+                <Setter Property="BorderBrush" Value ="#666666"></Setter>
+            </Style>
+            
+            <Style Selector="ListBox.results-list">
+                <Setter Property="Background" Value ="Transparent"></Setter>
+                <Setter Property="BorderThickness" Value ="0"></Setter>
+                <Setter Property="Padding" Value="0"></Setter>
+            </Style>
+            
+            <Style Selector="Button.link /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            </Style>
+            
+            <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="Opacity" Value="0.8" />
+            </Style>
+            
+        </Style>
+    </UserControl.Styles>
+    
+    <Grid Background="{DynamicResource AppBackgroundBrush}">
+        <Grid ColumnDefinitions="300,*,340">
+            <Border Grid.Column="0" Classes="panel" Padding="12">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                       <TextBox Text="{Binding SearchText}"
+                                PlaceholderText="Search shows"
+                                Height="36"
+                                VerticalAlignment="Center">
+                       </TextBox>
+                        <Button Grid.Column="1"
+                                Command="{Binding SearchCommand}"
+                                HotKey="Enter"
+                                MinWidth="44"
+                                MinHeight="36"
+                                Padding="10,0">
+                            <PathIcon Data="{StaticResource SearchRegular}" Width="15" Height="15"></PathIcon>
+                        </Button>
+                    </Grid>
+                    
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,14,0,8">
+                        <TextBlock Grid.Column="0"
+                                   Classes="section-heading"
+                                   Text="{Binding ResultCountLabel}"
+                                   VerticalAlignment="Center">
+                        </TextBlock>
+                        <TextBlock Grid.Column="1"
+                                   Classes="section-heading"
+                                   Text="Search"
+                                   VerticalAlignment="Center">
+                        </TextBlock>
+                    </Grid>
+                    
+                    <ListBox Grid.Row="2"
+                             Classes="results-list"
+                             ItemsSource="{Binding SearchResults}"
+                             SelectedItem="{Binding SelectedShow}"
+                             SelectionMode="Single">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:ShowSearchResultViewModel">
+                                <Border
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    BorderBrush="{DynamicResource DividerBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8">
+                                    <Grid ColumnDefinitions="36,*" ColumnSpacing="8">
+                                        <Border Background="{DynamicResource PosterFallbackBrush}"
+                                                CornerRadius="3"
+                                                Height="50"
+                                                Width="36"
+                                                ClipToBounds="True">
+                                            <Grid>
+                                                <TextBlock Text="No&#10;Image"
+                                                           Foreground="{DynamicResource PosterFallbackBrush}"
+                                                           FontSize="7"
+                                                           FontWeight="SemiBold"
+                                                           TextAlignment="Center"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center">
+                                                </TextBlock>
+                                                <Image Source="{Binding Thumbnail}"
+                                                       Stretch="UniformToFill"></Image>
+                                            </Grid>
+                                        </Border>
+                                        <Grid Grid.Column="1" RowDefinitions="Auto,Auto" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis">
+                                            </TextBlock>
+                                            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,3,0,0">
+                                                <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                                           FontSize="11"
+                                                           TextTrimming="CharacterEllipsis">
+                                                    <Run Text="{Binding YearRange}"></Run>
+                                                    <Run Text="  .  "></Run>
+                                                    <Run Text="{Binding AirNetworkLabel}"></Run>
+                                                </TextBlock>
+                                                <TextBlock Grid.Column="1"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Text="{Binding RatingAverage, StringFormat='* {0:0.0}'}">
+                                                </TextBlock>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+            <Border Grid.Column="1" Classes="panel" Padding="20,24">
+                <Grid>
+                    <StackPanel IsVisible="{Binding ShowInitialPrompt}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                MaxWidth="300"
+                                Spacing="14">
+                        <Grid Width="138" Height="118" HorizontalAlignment="Center">
+                            <Border Background="{DynamicResource ChipBackgroundBrush}"
+                                    CornerRadius="10"
+                                    Width="56"
+                                    Height="78"
+                                    Opacity="0.65"
+                                    RenderTransformOrigin="0.5,0.5"
+                                    HorizontalAlignment="Left"
+                                    Margin="20,10,0,0">
+                                <Border.RenderTransform>
+                                    <RotateTransform Angle="-10"></RotateTransform>
+                                </Border.RenderTransform>
+                            </Border>
+                            <Border Background="{DynamicResource SurfaceBackgroundBrush}"
+                                    CornerRadius="10"
+                                    Width="56"
+                                    Height="78"
+                                    Opacity="0.8"
+                                    RenderTransformOrigin=".5,0.5"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,10,20,0">
+                                <Border.RenderTransform>
+                                    <RotateTransform Angle="10"></RotateTransform>
+                                </Border.RenderTransform>
+                            </Border>
+                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                    BorderBrush="{DynamicResource DividerBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Width="62"
+                                    Height="86"
+                                    HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource SearchRegular}"
+                                          Width="24"
+                                          Height="24"
+                                          Foreground="{DynamicResource AccentBrush}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center">
+                                </PathIcon>
+                            </Border>
+                        </Grid>
+                        
+                        <TextBlock Text="Find your Tv show"
+                            FontSize="26"
+                            FontWeight="Bold"
+                            TextAlignment="Center"
+                            HorizontalAlignment="Center">
+                        </TextBlock>
+                        <TextBlock Text="Search for the show, then chose the seasons you want to rename."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   LineHeight="20">
+                        </TextBlock>
+                        <TextBlock Text="We'll match your title_00.mkv files in the next step"
+                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center">
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <StackPanel IsVisible="{Binding ShowNoSearchResults}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                MaxWidth="390"
+                                Spacing="12">
+                        <PathIcon Data="{StaticResource SearchRegular}"
+                                  Width="40"
+                                  Height="40"
+                                  Foreground="{DynamicResource TextMutedBrush}"
+                                  HorizontalAlignment="Center">
+                        </PathIcon>
+                        <TextBlock Text="No shows matching the search."
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   TextAlignment="Center"
+                                   HorizontalAlignment="Center">
+                        </TextBlock>
+                        <TextBlock Text="Try a different title, spelling, or search phrase."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   LineHeight="20">
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <ScrollViewer IsVisible="{Binding HasSelectedShow}"
+                                  VerticalScrollBarVisibility="Auto">
+                        <StackPanel MaxWidth="560" HorizontalAlignment="Center">
+                            <Grid ColumnDefinitions="96,*" ColumnSpacing="18">
+                                <Border Background="{DynamicResource PosterFallbackBrush}"
+                                        CornerRadius="6"
+                                        Width="96"
+                                        Height="140">
+                                    <Grid>
+                                        <TextBlock Text="No Image&#10;Found"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   TextAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center">
+                                        </TextBlock>
+                                        <Image Source="{Binding SelectedShowPoster}" Stretch="UniformToFill"></Image>
+                                    </Grid>
+                                </Border>
+                                
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SelectedShow?.AirNetworkLabel}"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold">
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding SelectedShow?.Name}"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               FontSize="24"
+                                               FontWeight="Bold"
+                                               TextWrapping="Wrap"
+                                               Margin="0,2,0,8">
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding SelectedShowMeta}"
+                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               FontSize="12"
+                                               Margin="0,2,0,8">
+                                    </TextBlock>
+                                    <ItemsControl ItemsSource="{Binding SelectedShow?.Genres}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel></WrapPanel>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Classes="chip">
+                                                    <TextBlock Text="{Binding}"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource TextPrimaryBush}">
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <TextBlock Text="{Binding SelectedShow?.PlanSummary}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap"
+                                       LineHeight="20"
+                                       Margin="0,22,0,0">
+                            </TextBlock>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+            
+            <Border Grid.Column="2" Background="{DynamicResource SurfaceBackgroundBrush}" Padding="18,24">
+                <Grid RowDefinitions="Auto,Auto,Auto,*">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                        <TextBlock Text="Seasons"
+                                   FontSize="16"
+                                   FontWeight="Bold">
+                        </TextBlock>
+                        <Button Grid.Column="1"
+                                Content="Select all"
+                                Command="{Binding SelectAllSeasonsCommand}"
+                                Classes="link"
+                                IsVisible="{Binding HasSelectedShow}">
+                        </Button>
+                        <Button Grid.Column="2"
+                                Content="Clear all"
+                                Command="{Binding ClearAllSeasonsCommand}"
+                                Classes="link"
+                                IsVisible="{Binding HasSelectedShow}"
+                                IsEnabled="{Binding CanClearAllSeasons}">
+                        </Button>
+                    </Grid>
+                    
+                    <ItemsControl Grid.Row="1"
+                                  ItemsSource="{Binding SeasonsCheckBoxes}"
+                                  Margin="0,18,0,8"
+                                  IsVisible="{Binding HasSelectedShow}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="2"></UniformGrid>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Classes="season-pill">
+                                    <Border Classes="season-pill-shell selected"
+                                            IsVisible="{Binding IsChecked}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                            <Border Classes="season-check-box selected">
+                                                <!-- check mark -->
+                                                <TextBlock Text="&#x2713;" 
+                                                           Foreground="{DynamicResource AccentTextBrush}"
+                                                           FontSize="10"
+                                                           FontWeight="Bold"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center">
+                                                    
+                                                </TextBlock> 
+                                            </Border>
+                                            <TextBlock Grid.Column="1"
+                                                       Classes="season-pill-text selected"
+                                                       Text="{Binding Value.Number, StringFormat='Season {0}'}">
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="2"
+                                                       Classes="season-pill-text selected"
+                                                       Text="{Binding Value.TotalEpisodeCount}"
+                                                       HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <Border Classes="season-pill-shell unselected"
+                                            IsVisible="{Binding IsNotChecked}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                            <Border Classes="season-check-box unselected"></Border>
+        
+                                            <TextBlock Grid.Column="1"
+                                                       Classes="season-pill-text"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Value.Number, StringFormat='Season {0}'}">
+                                            </TextBlock>
+        
+                                            <TextBlock Grid.Column="2"
+                                                       Classes="season-pill-text"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Value.TotalEpisodeCount}"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <CheckBox IsChecked="{Binding IsChecked}"
+                                              Opacity="0"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Stretch">
+                                    </CheckBox>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <TextBlock Grid.Row="1"
+                               IsVisible="{Binding HasNoSelectedShow}"
+                               Text="Select a show to load seasons."
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               Margin="0,18,0,8">
+                    </TextBlock>
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            Padding="12,8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding SelectionSummary}"
+                                       IsVisible="{Binding HasSelectedShow}"
+                                       Foreground="{DynamicResource TextMutedBrush}">
+                            </TextBlock>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding EpisodeSummary}"
+                                       HorizontalAlignment="Right"
+                                       FontWeight="SemiBold"></TextBlock>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
