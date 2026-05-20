@@ -33,7 +33,7 @@ public class EpisodeDto
     public DateTime Airstamp { get; set; }
 
     [JsonPropertyName("runtime")]
-    public int Runtime { get; set; }
+    public long Runtime { get; set; }
 
     [JsonPropertyName("rating")]
     public RatingDto Rating { get; set; }
