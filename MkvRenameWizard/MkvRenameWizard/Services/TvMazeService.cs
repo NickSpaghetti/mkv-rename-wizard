@@ -147,7 +147,8 @@ public partial class TvMazeService : ITvMazeService
                         Name = episodeDto.Name,
                         EpisodeNumber = episodeDto.Number,
                         Season = episodeDto.Season,
-                        Type = episodeDto.Type
+                        Type = episodeDto.Type,
+                        RunTime = episodeDto.Runtime
                     });
                 }
 
