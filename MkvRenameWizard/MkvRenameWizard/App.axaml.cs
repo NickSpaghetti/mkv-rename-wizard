@@ -1,6 +1,16 @@
+using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using FileTypeChecker;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using MkvRenameWizard.Models.Mkv;
+using MkvRenameWizard.DataAccess;
+using MkvRenameWizard.FileTypes;
+using MkvRenameWizard.Services;
 using MkvRenameWizard.ViewModels;
 using MkvRenameWizard.Views;
 
@@ -8,6 +18,7 @@ namespace MkvRenameWizard;
 
 public partial class App : Application
 {
+    private ServiceProvider _serviceProvider;
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -17,12 +28,56 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            _serviceProvider = RegisterServices();
+            desktop.Exit += (_, _) => _serviceProvider?.Dispose();
+            
+            try
             {
-                DataContext = new MainWindowViewModel(),
-            };
+                desktop.MainWindow = new MainWindow
+                {
+                    DataContext = _serviceProvider.GetRequiredService<MainWindowViewModel>(),
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static ServiceProvider RegisterServices()
+    {
+        var services = new ServiceCollection();
+        
+        services.AddLogging(configure =>
+        {
+            configure.SetMinimumLevel(LogLevel.Debug);
+        });
+        
+        services.AddHttpClient<ITvMazeDataAccess, TvMazeDataAccess>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.tvmaze.com/");
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.DefaultRequestHeaders.Add("User-Agent", "https://github.com/NickSpaghetti/mkv-rename-wizard");
+        });
+
+        services.AddHttpClient<IImageLoadingService, ImageLoadingService>();
+        
+        services.TryAddSingleton<ITvMazeService, TvMazeService>();
+        services.TryAddSingleton<IMkvFinderService, MkvFinderService>();
+        
+        services.TryAddSingleton<ContentSearchViewModel>();
+        services.TryAddSingleton<ShowSearchResultViewModel>();
+        services.TryAddSingleton<ContentSelectViewModel>();
+        services.TryAddSingleton<OutputFileConfigurationViewModel>(_ => new OutputFileConfigurationViewModel(new Dictionary<string, MkvFile>()));
+        services.TryAddSingleton<WizardViewModel>();
+        services.TryAddSingleton<MainWindowViewModel>();
+
+        FileTypeValidator.RegisterCustomTypes(typeof(MatroskaVideo).Assembly);
+
+        return services.BuildServiceProvider();
     }
 }
