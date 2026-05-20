@@ -112,10 +112,10 @@ public class ContentSearchViewModel : ViewModelBase
 
     private readonly ITvMazeService _tvMazeService;
     private readonly IImageLoadingService _imageLoadingService;
-    public ContentSearchViewModel()
+    public ContentSearchViewModel(ITvMazeService tvMazeService, IImageLoadingService imageLoadingService)
     {
-        _tvMazeService = new TvMazeService(new TvMazeDataAccess());
-        _imageLoadingService = new ImageLoadingService(new HttpClient());
+        _tvMazeService = tvMazeService;
+        _imageLoadingService = imageLoadingService;
         
         
         SearchResults.CollectionChanged += (_,_) =>

@@ -27,7 +27,7 @@ public class ContentSelectViewModel : ViewModelBase
     
     private readonly IMkvFinderService _mkvFinderService;
 
-    public ContentSelectViewModel(ShowSearchResultViewModel? selectedShow, ObservableCollection<CheckboxOption<Season>> checkboxOptions)
+    public ContentSelectViewModel(ShowSearchResultViewModel? selectedShow, IMkvFinderService mkvFinderService, ObservableCollection<CheckboxOption<Season>> checkboxOptions)
     {
         SelectedShow = selectedShow;
         foreach (var option in checkboxOptions)
@@ -44,7 +44,7 @@ public class ContentSelectViewModel : ViewModelBase
         MoveMkvFileItemDownCommand = ReactiveCommand.Create<int>(index => MoveItemDown(MkvFilesList, index));
         OpenFilesCommand = ReactiveCommand.CreateFromTask<List<string>>(files => ExecuteOpenFilesCommand(MkvFilesList));
 
-        _mkvFinderService = new MkvFinderService();
+        _mkvFinderService = mkvFinderService;
     }
 
     private void MoveItemUp<T>(ObservableCollection<T> list, int index)
@@ -88,9 +88,9 @@ public class ContentSelectViewModel : ViewModelBase
         }
         
         mkvFileList.Clear();
-        foreach (var mkvFiles in files)
+        foreach (var mkvFiles in files.ImportedFiles)
         {
-            foreach (var mkvFile in mkvFiles.Value.OrderBy(f => f.FullPath))
+            foreach (var mkvFile in mkvFiles.OrderBy(f => f.FullPath))
             {
                 mkvFileList.Add(mkvFile);
             }

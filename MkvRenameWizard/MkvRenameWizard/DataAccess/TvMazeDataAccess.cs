@@ -9,26 +9,26 @@ public class TvMazeDataAccess : ITvMazeDataAccess
 {
     private readonly HttpClient _httpClient;
 
-    public TvMazeDataAccess()
+    public TvMazeDataAccess(HttpClient httpClient)
     {
-        _httpClient = new HttpClient();
+        _httpClient = httpClient;
     }
 
     public async Task<HttpResponseMessage> FindShowIdByNameAsync(string showName)
     {
-        var uri = $"https://api.tvmaze.com/search/shows?q={showName}";
+        var uri = $"search/shows?q={Uri.EscapeDataString(showName)}";
         return await _httpClient.GetAsync(uri);
     }
 
     public async Task<HttpResponseMessage> ListSeasonsAsync(long showId)
     {
-        var uri = $"https://api.tvmaze.com/shows/{showId}/seasons";
+        var uri = $"shows/{showId}/seasons";
         return await _httpClient.GetAsync(uri);
     }
 
     public async Task<HttpResponseMessage> ListEpisodesBySeasonIdAsync(long seasonId)
     {
-        var uri = $"https://api.tvmaze.com/seasons/{seasonId}/episodes";
+        var uri = $"seasons/{seasonId}/episodes";
         return await _httpClient.GetAsync(uri);
     }
 }

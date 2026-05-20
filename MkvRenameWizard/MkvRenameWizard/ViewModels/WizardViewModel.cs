@@ -72,13 +72,13 @@ public class WizardViewModel : ViewModelBase
     
     private readonly ITvMazeService _tvMazeService;
 
-    public WizardViewModel()
+    public WizardViewModel(ContentSearchViewModel contentSearchViewModel, ContentSelectViewModel contentSelectViewModel, OutputFileConfigurationViewModel outputFileConfigurationViewModel, ITvMazeService tvMazeService)
     {
-        _contentSearchViewModel = new ContentSearchViewModel();
-        _contentSelectViewModel = new ContentSelectViewModel(null, new ObservableCollection<CheckboxOption<Season>>());
-        _outputFileConfigurationViewModel = new OutputFileConfigurationViewModel(new Dictionary<string, MkvFile>());
+        _contentSearchViewModel = contentSearchViewModel;
+        _contentSelectViewModel = contentSelectViewModel;
+        _outputFileConfigurationViewModel = outputFileConfigurationViewModel;
 
-        _tvMazeService = new TvMazeService(new TvMazeDataAccess());
+        _tvMazeService = tvMazeService;
         
         _contentSearchViewModel
             .WhenAnyValue(x => x.SelectedSeasonCount, x => x.SelectedEpisodeCount, x => x.SelectedShow, x => x.CanContinue)
