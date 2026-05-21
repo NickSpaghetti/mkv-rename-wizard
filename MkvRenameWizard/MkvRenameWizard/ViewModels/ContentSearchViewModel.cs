@@ -325,5 +325,33 @@ public class ContentSearchViewModel : ViewModelBase
         
         return string.Join("  .  ", pieces);
     }
+
+    public void Reset()
+    {
+        _posterLoadCancellationTokenSource?.Cancel();
+        _posterLoadCancellationTokenSource = null;
+
+        foreach (var seasonSelectSubscription in _seasonSelectionSubscriptions)
+        {
+            seasonSelectSubscription.PropertyChanged -= OnSeasonSelectionChanged;
+        }
+        
+        _seasonSelectionSubscriptions.Clear();
+        SearchText = string.Empty;
+        SearchResults.Clear();
+        SelectedShow = null;
+        SelectedShowPoster = null;
+        IsPosterLoading = false;
+        HasSearched = false;
+        IsSearching = false;
+        SelectedSeasonCount = 0;
+        SelectedEpisodeCount = 0;
+        
+        this.RaisePropertyChanged(nameof(SearchResults));
+        this.RaisePropertyChanged(nameof(SeasonCount));
+        UpdateSelectionMetrics();
+    }
+    
+    
     
 }

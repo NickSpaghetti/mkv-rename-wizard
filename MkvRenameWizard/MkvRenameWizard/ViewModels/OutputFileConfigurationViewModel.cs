@@ -97,4 +97,14 @@ public class OutputFileConfigurationViewModel : ViewModelBase
             PreviewList.Add($"{Path.GetFileName(entry.Value.FullPath)} -> {newName}");
         }
     }
+
+    public void Reset()
+    {
+        FileContentMap.Clear();
+        PreviewList.Clear();
+        Prefix = "e";
+        UseDefaultName = true;
+        UseSnakeCase = false;
+        UsePascalCase = false;
+    }
 }

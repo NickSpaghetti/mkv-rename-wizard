@@ -1,15 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DynamicData;
-using MkvRenameWizard.DataAccess;
-using MkvRenameWizard.Models.Mkv;
-using MkvRenameWizard.Models.TvMaze;
 using MkvRenameWizard.Services;
 using ReactiveUI;
 
@@ -44,7 +39,7 @@ public class WizardViewModel : ViewModelBase
     public string FooterStatusLine => CurrentPageIndex switch
     {
         0 => _contentSearchViewModel.SelectionSummary,
-        1 => $"{_contentSelectViewModel.MkvFilesList.Count} MKV files selected",
+        1 => $"{_contentSelectViewModel.MkvFiles.Count} MKV files selected",
         2 => $"{_outputFileConfigurationViewModel.PreviewList.Count} Rename preview files",
         _ => string.Empty
     };
@@ -130,7 +125,18 @@ public class WizardViewModel : ViewModelBase
     private void Previous() => CurrentPageIndex--;
     private void Next() => CurrentPageIndex++;
 
-    private void Finish() { /* Implement finish logic */ }
+    private void Finish()
+    {
+        ResetWizard();
+        CurrentPageIndex = 0;
+    }
+
+    private void ResetWizard()
+    {
+        _contentSearchViewModel.Reset();
+        _contentSelectViewModel.Reset();
+        _outputFileConfigurationViewModel.Reset();
+    }
 
     private async Task ExecutePrimaryCommand()
     {
@@ -146,22 +152,21 @@ public class WizardViewModel : ViewModelBase
 
     private async Task UpdateContentSelectViewModel()
     {
-        _contentSelectViewModel.SelectedShow = _contentSearchViewModel.SelectedShow;
-        _contentSelectViewModel.ContentList.Clear();
-        if (_contentSelectViewModel.SelectedShow == null)
+        _contentSelectViewModel.Episodes.Clear();
+        if (_contentSearchViewModel.SelectedShow == null)
         {
+            _contentSelectViewModel.ShowName =string.Empty;
             return;
         }
-        
-        foreach (var option in _contentSearchViewModel.SeasonsCheckBoxes)
+        _contentSelectViewModel.ShowName = _contentSearchViewModel.SelectedShow.Name;
+        foreach (var seasonsCheckBox in _contentSearchViewModel.SeasonsCheckBoxes)
         {
-            if (option.IsChecked)
+            if (!seasonsCheckBox.IsChecked)
             {
-                var episodes = await _tvMazeService.ListEpisodesBySeasonAsync(option.Value.Id);
-                //TODO: change to send Episodes instead of just the name
-                _contentSelectViewModel.ContentList.AddRange(episodes.Select(e => e.Name));
+                continue;
             }
-                
+            var episodes = await _tvMazeService.ListEpisodesBySeasonAsync(seasonsCheckBox.Value.Id);
+            _contentSelectViewModel.Episodes.AddRange(episodes);
         }
     }
     
@@ -170,17 +175,17 @@ public class WizardViewModel : ViewModelBase
         _outputFileConfigurationViewModel.PreviewList.Clear();
         _outputFileConfigurationViewModel.FileContentMap.Clear();
         
-        var maxCount = _contentSelectViewModel.MkvFilesList.Count;
-        if (_contentSelectViewModel.ContentList.Count < _contentSelectViewModel.MkvFilesList.Count)
+        var maxCount = _contentSelectViewModel.ImportedFileCount;
+        if (_contentSelectViewModel.EpisodeCount < _contentSelectViewModel.ImportedFileCount)
         {
-            maxCount = _contentSelectViewModel.ContentList.Count;
+            maxCount = _contentSelectViewModel.EpisodeCount;
         }
 
         for (var i = 0; i < maxCount; i++)
         {
-            var content = _contentSelectViewModel.ContentList[i];
-            var mkvFile = _contentSelectViewModel.MkvFilesList[i];
-            _outputFileConfigurationViewModel.FileContentMap.Add(content, mkvFile);
+            var episode = _contentSelectViewModel.Episodes[i];
+            var mkvFile = _contentSelectViewModel.MkvFiles[i];
+            _outputFileConfigurationViewModel.FileContentMap.Add(episode.Name, mkvFile);
         }
     }
 

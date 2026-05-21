@@ -9,7 +9,6 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using FileTypeChecker;
 using FileTypeChecker.Extensions;
-using FileTypeChecker.Types;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.FileTypes;
 using MkvRenameWizard.Models.FileImport;
@@ -25,7 +24,7 @@ public class MkvFinderService : IMkvFinderService
         _logger = logger;
     }
     
-    public async Task<FileImportResult> OpenMkvFiles(TopLevel topLevel)
+    public async Task<FileImportResult> OpenMkvFoldersAsync(TopLevel topLevel)
     {
         var importedFiles = new List<MkvFile>();
         var issues = new List<FileImportIssue>();
@@ -93,6 +92,150 @@ public class MkvFinderService : IMkvFinderService
         return new FileImportResult(sortedImportFiles, issues.ToList(),selectedFolders.ToList());
     }
 
+    public async Task<FileImportResult> OpenMkvFilesAsync(TopLevel topLevel)
+    {
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
+        {
+            Title = "Select MKV files",
+            AllowMultiple = true,
+            FileTypeFilter = [new FilePickerFileType("mkv") {Patterns = ["*.mkv"]}]
+        });
+
+        if (files.Count == 0)
+        {
+            return new FileImportResult(ImportedFiles:[], FileImportIssues:[], SelectedFolders:[]);
+        }
+
+        var importedFiles = new List<MkvFile>();
+        var issues = new List<FileImportIssue>();
+
+        foreach (var file in files)
+        {
+            var localFilePath = file.Path.LocalPath;
+            var parentFolder = Path.GetFileName(Path.GetDirectoryName(localFilePath) ?? string.Empty);
+
+            if (!string.Equals(Path.GetExtension(localFilePath), ".mkv", StringComparison.InvariantCultureIgnoreCase))
+            {
+                issues.Add(new FileImportIssue(file.Name, "Not a .mkv file", FileImportIssueType.UnsupportedFileType));
+                continue;
+            }
+
+            var issue = await ValidateMkvFileAsync(file);
+            if (issue != null)
+            {
+                issues.Add(issue);
+                continue;
+            }
+            
+            importedFiles.Add(CreateImportedFile(parentFolder,localFilePath));
+        }
+        
+        var sortedImportFiles = importedFiles
+            .OrderBy(file => file.FullPath, StringComparer.InvariantCultureIgnoreCase)
+            .ToArray();
+        return new FileImportResult(sortedImportFiles, issues.ToList(), SelectedFolders: []);
+    }
+
+    public async Task<FileImportResult> ImportFromPathsAsync(IReadOnlyList<string> paths)
+    {
+        var importedFiles = new List<MkvFile>();
+        var issues = new List<FileImportIssue>();
+        var isImportedFileFound = false;
+        foreach (var path in paths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    var directoryName = Path.GetFileName(path);
+                    foreach (var filePath in Directory.EnumerateFiles(path, "*.mkv", SearchOption.AllDirectories))
+                    {
+                        var issue = await ValidateMkvFileAsync(path);
+                        if (issue != null)
+                        {
+                            issues.Add(issue);
+                            continue;
+                        }
+
+                        isImportedFileFound = true;
+                        importedFiles.Add(CreateImportedFile(directoryName,filePath));
+                    }
+
+                    if (!isImportedFileFound)
+                    {
+                        issues.Add(new FileImportIssue(path, "No *.mkv files found", FileImportIssueType.FileNotFound));
+                    }
+                }
+                else if (File.Exists(path))
+                {
+                    var issue = await ValidateMkvFileAsync(path);
+                    if (issue != null)
+                    {
+                        issues.Add(issue);
+                        continue;
+                    }
+                    
+                    importedFiles.Add(CreateImportedFile(path, path));
+                }
+                else
+                {
+                    issues.Add(new FileImportIssue(path, "file not found", FileImportIssueType.FileNotFound));
+                }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex,
+                    $"A ${nameof(UnauthorizedAccessException)} exception occurred while importing {path}");
+                issues.Add(new FileImportIssue(path, $"{ex.Message}", FileImportIssueType.PermissionDenied));
+            }
+            catch (IOException ex)
+            {
+                _logger.LogError(ex, $"An {nameof(IOException)} exception occurred while importing {path}");
+                issues.Add(new FileImportIssue(path, $"{ex.Message}", FileImportIssueType.Unknown));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred while importing {path}");
+                issues.Add(new FileImportIssue(path, $"{ex.Message}", FileImportIssueType.Unknown));
+            }
+        }
+        
+        var sortedImportFiles = importedFiles
+            .OrderBy(file => file.FullPath, StringComparer.InvariantCultureIgnoreCase)
+            .ToArray();
+        return new FileImportResult(sortedImportFiles, issues.ToList(), SelectedFolders: []);
+    }
+
+
+    private async Task<FileImportIssue?> ValidateMkvFileAsync(string filePath)
+    {
+        FileImportIssue? issue = null;
+        try
+        {
+            await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+            if (!await FileTypeValidator.IsTypeRecognizableAsync(fileStream) ||
+                !await fileStream.IsAsync<MatroskaVideo>())
+            {
+                _logger.LogDebug("Unsupported  file type: {FileType}", filePath);
+                return new FileImportIssue(filePath, "Unsupported Video File",
+                    FileImportIssueType.UnsupportedFileType);
+            }
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogError(ex, "An exception occurred while validating the file");
+            issue = new FileImportIssue(filePath, $"{ex.Message}", FileImportIssueType.PermissionDenied);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred while validating the file"); 
+            issue = new FileImportIssue(filePath, "Not a mkv container", FileImportIssueType.InvalidContainer);
+        }
+
+        return issue;
+    }
+    
     private async Task<FileImportIssue?> ValidateMkvFileAsync(IStorageFile storageFile)
     {
         
@@ -111,7 +254,8 @@ public class MkvFinderService : IMkvFinderService
         }
         catch (UnauthorizedAccessException ex)
         {
-            issue = new FileImportIssue(storageFile.Name, "", FileImportIssueType.PermissionDenied);
+            _logger.LogError(ex, "An exception occurred while validating the file");
+            issue = new FileImportIssue(storageFile.Name, $"{ex.Message}", FileImportIssueType.PermissionDenied);
         }
         catch (Exception ex)
         {

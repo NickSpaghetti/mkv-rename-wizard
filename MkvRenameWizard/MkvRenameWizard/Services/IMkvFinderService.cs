@@ -9,5 +9,7 @@ namespace MkvRenameWizard.Services;
 
 public interface IMkvFinderService
 {
-    Task<FileImportResult> OpenMkvFiles(TopLevel topLevel);
+    Task<FileImportResult> OpenMkvFilesAsync(TopLevel topLevel);
+    Task<FileImportResult> OpenMkvFoldersAsync(TopLevel topLevel);
+    Task<FileImportResult> ImportFromPathsAsync(IReadOnlyList<string> paths);
 }

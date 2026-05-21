@@ -61,11 +61,12 @@ public partial class App : Application
         {
             client.BaseAddress = new Uri("https://api.tvmaze.com/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("User-Agent", "https://github.com/NickSpaghetti/mkv-rename-wizard");
+            client.DefaultRequestHeaders.Add("User-Agent", "MkvRenameWizard/1.0 (+https://github.com/NickSpaghetti/mkv-rename-wizard)");
         });
 
-        services.AddHttpClient<IImageLoadingService, ImageLoadingService>();
+        services.AddHttpClient();
         
+        services.TryAddTransient<IImageLoadingService, ImageLoadingService>();
         services.TryAddSingleton<ITvMazeService, TvMazeService>();
         services.TryAddSingleton<IMkvFinderService, MkvFinderService>();
         

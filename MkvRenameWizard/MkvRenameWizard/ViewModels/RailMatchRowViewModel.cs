@@ -1,0 +1,43 @@
+using MkvRenameWizard.Helpers;
+using MkvRenameWizard.Models.Mkv;
+using MkvRenameWizard.Models.Rail;
+using MkvRenameWizard.Models.TvMaze;
+
+namespace MkvRenameWizard.ViewModels;
+
+public class RailMatchRowViewModel
+{
+    public RailMatchRowViewModel(int index, Episode? episode, MkvFile? mkvFile, RailSettleType railSettleType = RailSettleType.None, int settleDirection = 0)
+    {
+        Index = index;
+        Episode = episode;
+        MkvFile = mkvFile;
+        SettleKind = SettleKind;
+        SettleDirection = settleDirection;
+    }
+    public int Index { get; }
+    public Episode? Episode { get; }
+    public MkvFile? MkvFile { get; }
+    public RailSettleType SettleKind { get; }
+    public int SettleDirection { get; }
+    public bool ShouldSettleIndependent => SettleKind == RailSettleType.Independent;
+    public bool ShouldSettleLinked => SettleKind == RailSettleType.Linked;
+    public bool ShouldAnimateLink => SettleKind == RailSettleType.Linked && IsPaired;
+    public bool HasEpisode => Episode != null;
+    public bool HasMkv => MkvFile != null;
+    public bool IsPaired => HasEpisode && HasMkv;
+    public bool IsMissingFile => HasEpisode && !HasMkv;
+    public bool IsExtraFile => !HasEpisode && HasMkv;
+    public int ZeroBasedIndex => Index - 1;
+    public string IndexLabel => Index.ToString("00");
+
+    public string EpisodeCode  => Episode?.EpisodeNumber is { } num ? $"{Episode.Season:D2}E{num:D2}" : string.Empty;
+    public string EpisodeTitle => Episode?.Name ?? string.Empty;
+
+    public string EpisodeDisplayName =>
+        Episode != null ? $"{EpisodeCode}  {EpisodeTitle}" : "File will not be mapped to an episode";
+
+    public bool HasEpisodeRunTime => Episode is { RunTime : > 0 };
+    public string EpisodeRuneTimeLabel => HasEpisodeRunTime ? $"{Episode?.RunTime}"  : string.Empty;
+    public string FileDisplayName => HasMkv ? "File will not be mapped for this episode" : PathDisplay.GetSafeFileName(MkvFile?.FullPath);
+}
