@@ -6,7 +6,7 @@ namespace MkvRenameWizard.Views;
 
 internal static class RailReorderDragFormats
 {
-    private const string Prefix = Constants.RailReorderDragPrefix;
+    private const string Prefix = Constants.TransformsMetadata.RailReorderDragPrefix;
 
     public static bool TryGet(IDataTransfer transfer, out RailReorderDragData outdragData)
     {

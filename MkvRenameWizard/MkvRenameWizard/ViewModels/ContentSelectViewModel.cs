@@ -631,7 +631,7 @@ public class ContentSelectViewModel : ViewModelBase
         ApplyImportResult(result, merge:true);
     }
 
-    private async Task ImportFromPathsAsync(IReadOnlyList<string> paths)
+    internal async Task ImportFromPathsAsync(IReadOnlyList<string> paths)
     {
         var result = await _mkvFinderService.ImportFromPathsAsync(paths);
         ApplyImportResult(result, merge: true);
@@ -741,9 +741,9 @@ public class ContentSelectViewModel : ViewModelBase
         {
             Os.Windows =>
                 "Windows blocked access to the folder you picked.  Check the folder permissions, Controlled folder access, or copy the files to a location your user account can read.",
-            Os.MacOs => $"macOS bocked access to the folder you picked.  Grant full disk Access to {Constants.AppName}, or move the files somewhere readable.",
+            Os.MacOs => $"macOS bocked access to the folder you picked.  Grant full disk Access to {Constants.Metadata.AppName}, or move the files somewhere readable.",
             Os.Linux => "Linux blocked access to the folder you picked.  Check the file ownership and permissions, or if you have installed via sandbox container grant access to that folder and try again.",
-            _ or Os.Unkown=> $"{Constants.AppName} could not read the folder you picked.  Move the file somewhere readable or fox permissions on your user account."
+            _ or Os.Unkown=> $"{Constants.Metadata.AppName} could not read the folder you picked.  Move the file somewhere readable or fox permissions on your user account."
         };
     }
 
