@@ -80,17 +80,22 @@
                 <Setter Property="Padding" Value="0"></Setter>
             </Style>
             
-            <Style Selector="Button.link /template/ ContentPresenter#PART_ContentPresenter">
+            <Style Selector="Button.link">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
             </Style>
             
-            <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Style Selector="Button.link:pointerover">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                 <Setter Property="Opacity" Value="0.8" />
+            </Style>
+            
+            <Style Selector="Button.link:disabled">
+                <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+                <Setter Property="Opacity" Value="0.55" />
             </Style>
             
         </Style>

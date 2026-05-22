@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
@@ -135,8 +136,16 @@ public class ContentSearchViewModel : ViewModelBase
             .InvokeCommand(UpdateCheckboxOptionsCommand);
 
         SelectAllSeasonsCommand = ReactiveCommand.Create(SelectAllSeasons);
-        var canClearAllSeasons = this.WhenAnyValue(x => x.SelectedSeasonCount, x => x.SelectedShow).Select(_ => CanClearAllSeasons);
-        ClearAllSeasonsCommand = ReactiveCommand.Create(ClearAllSeasons, canClearAllSeasons);
+        var anySeasonChecked = Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => SeasonsCheckBoxes.CollectionChanged += h,
+                h => SeasonsCheckBoxes.CollectionChanged -= h)
+            .Select(_ => Unit.Default)
+            .StartWith(Unit.Default)
+            .Merge(this.WhenAnyValue(x => x.SelectedSeasonCount).Select(_ => Unit.Default)) 
+            .Select(_ => SelectedShow != null && SeasonsCheckBoxes.Any(x => x.IsChecked))
+            .DistinctUntilChanged();
+        
+        ClearAllSeasonsCommand = ReactiveCommand.Create(ClearAllSeasons, anySeasonChecked);
     }
 
 

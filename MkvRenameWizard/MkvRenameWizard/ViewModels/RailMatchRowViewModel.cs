@@ -12,17 +12,17 @@ public class RailMatchRowViewModel
         Index = index;
         Episode = episode;
         MkvFile = mkvFile;
-        SettleKind = SettleKind;
+        SettleType = SettleType;
         SettleDirection = settleDirection;
     }
     public int Index { get; }
     public Episode? Episode { get; }
     public MkvFile? MkvFile { get; }
-    public RailSettleType SettleKind { get; }
+    public RailSettleType SettleType { get; }
     public int SettleDirection { get; }
-    public bool ShouldSettleIndependent => SettleKind == RailSettleType.Independent;
-    public bool ShouldSettleLinked => SettleKind == RailSettleType.Linked;
-    public bool ShouldAnimateLink => SettleKind == RailSettleType.Linked && IsPaired;
+    public bool ShouldSettleIndependent => SettleType == RailSettleType.Independent;
+    public bool ShouldSettleLinked => SettleType == RailSettleType.Linked;
+    public bool ShouldAnimateLink => SettleType == RailSettleType.Linked && IsPaired;
     public bool HasEpisode => Episode != null;
     public bool HasMkv => MkvFile != null;
     public bool IsPaired => HasEpisode && HasMkv;
