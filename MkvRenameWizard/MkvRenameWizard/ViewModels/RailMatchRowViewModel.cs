@@ -27,6 +27,9 @@ public class RailMatchRowViewModel(
     public bool IsExtraFile => !HasEpisode && HasMkv;
     public int ZeroBasedIndex => Index - 1;
     public string IndexLabel => Index.ToString("00");
+    public string FileSizeLabel => MkvFile?.FormattedSize ?? string.Empty;
+    public bool HasFileSizeLabel => !string.IsNullOrEmpty(FileSizeLabel);
+    public string FileSizeRootLabel => MkvFile?.Root ?? string.Empty;
 
     public string EpisodeCode  => Episode?.EpisodeNumber is { } num ? $"{Episode.Season:D2}E{num:D2}" : string.Empty;
     public string EpisodeTitle => Episode?.Name ?? string.Empty;

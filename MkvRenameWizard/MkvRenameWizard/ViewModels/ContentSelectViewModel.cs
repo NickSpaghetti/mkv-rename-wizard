@@ -11,6 +11,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
+using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.FileImport;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.Models.Rail;
@@ -143,6 +144,7 @@ public class ContentSelectViewModel : ViewModelBase
 
     public string FooterStatusText => HasImportedFiles ? $"{ImportedFileCount} file(s) imported" :
         ShowErrorPanel ? "Fix the issue(s) above to continue" : $"{ImportedFileCount} file(s) imported";
+    
     
     public string ErrorEyebrowText => HasPermissionDenied ? "Permission denied" : HasInvalidMkvIssues ? $"{IssueCount} of {ImportedFileCount + IssueCount} files couldn't be parsed" : string.Empty;
 

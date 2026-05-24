@@ -19,4 +19,17 @@ public static class Constants
         public const string BorderRailPaneCell = "railPaneCell";
     }
 
+    public static class BorderNames
+    {
+        public const string SettleRail = nameof(SettleRail);
+        public const string LinkLifeLeft = nameof(LinkLifeLeft);
+        public const string LinkLifeRight = nameof(LinkLifeRight);
+    }
+    
+    public static class EllipseNames
+    {
+        public const string LinkDot = nameof(LinkDot);
+        public const string LinkHalo = nameof(LinkHalo);
+    }
+
 }
