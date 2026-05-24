@@ -59,11 +59,13 @@ internal static class RailSettleAnimator
             row.RenderTransform = new TranslateTransform(0, y);
             
             var tintAlpha = (1 - eased) * 0.12;
+            //Same colors as AccentBrush from App.axmal.
             row.Background = new SolidColorBrush(Color.FromArgb((byte)(tintAlpha * 255), 0x48, 0xC8, 0xF6));
 
             if (settleRail != null)
             {
                 var railAlpha = 1 - eased;
+                //Same colors as AccentBrush from App.axmal.
                 settleRail.Background = new SolidColorBrush(Color.FromArgb((byte)(railAlpha * 255), 0x48, 0xC8, 0xF6));
             }
             

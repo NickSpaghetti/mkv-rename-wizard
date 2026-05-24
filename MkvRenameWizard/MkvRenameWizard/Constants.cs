@@ -25,6 +25,11 @@ public static class Constants
         public const string LinkLifeLeft = nameof(LinkLifeLeft);
         public const string LinkLifeRight = nameof(LinkLifeRight);
     }
+
+    public static class GridNames
+    {
+        public const string LinkConnector = nameof(LinkConnector);
+    }
     
     public static class EllipseNames
     {
