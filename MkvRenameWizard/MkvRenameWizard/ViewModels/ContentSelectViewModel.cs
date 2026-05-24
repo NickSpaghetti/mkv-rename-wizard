@@ -40,7 +40,7 @@ public class ContentSelectViewModel : ViewModelBase
         OpenSystemSettingsCommand = ReactiveCommand.Create(TryOpenPermissionsSetting);
         PrimaryErrorCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryErrorCommand);
         SecondaryErrorCommand = ReactiveCommand.CreateFromTask(ExecuteSecondaryErrorCommand);
-        TogglePartialFailureDetailscommand = ReactiveCommand.Create(() => {ShowPartialFailureDetails = !ShowPartialFailureDetails;});
+        TogglePartialFailureDetailsCommand = ReactiveCommand.Create(() => {ShowPartialFailureDetails = !ShowPartialFailureDetails;});
         SetLinkedReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = true; });
         SetIndependentReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = false; });
     }
@@ -62,7 +62,7 @@ public class ContentSelectViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> OpenSystemSettingsCommand { get;  }
     public ReactiveCommand<Unit, Unit> PrimaryErrorCommand { get;  }
     public ReactiveCommand<Unit, Unit> SecondaryErrorCommand { get; }
-    public ReactiveCommand<Unit, Unit> TogglePartialFailureDetailscommand { get;  }
+    public ReactiveCommand<Unit, Unit> TogglePartialFailureDetailsCommand { get;  }
     public ReactiveCommand<Unit, Unit> SetLinkedReorderCommand { get; }
     public ReactiveCommand<Unit, Unit> SetIndependentReorderCommand { get;  }
 

@@ -341,7 +341,7 @@
                                                 <Border Classes="chip">
                                                     <TextBlock Text="{Binding}"
                                                                FontSize="11"
-                                                               Foreground="{DynamicResource TextPrimaryBush}">
+                                                               Foreground="{DynamicResource TextPrimaryBrush}">
                                                     </TextBlock>
                                                 </Border>
                                             </DataTemplate>

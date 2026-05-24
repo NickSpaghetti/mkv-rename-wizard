@@ -14,7 +14,6 @@ public static class Constants
 
     public static class AxamlClasses
     {
-        public const string EpisodeGripClass = "episodeGrip";
         public const string DraggingClass = "dragging";
         public const string BorderMatchRow = "matchRow";
         public const string BorderRailPaneCell = "railPaneCell";

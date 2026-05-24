@@ -24,14 +24,12 @@ public partial class ContentSelectView : UserControl
     private Border? _dragSourceRow;
     private RailReorderSide? _dragSide;
     private int _lastInsertIndex = -1;
-    private DispatcherTimer _autoScrollTimer;
+    private DispatcherTimer? _autoScrollTimer;
     private double _autoScrollDirection;
     private Point? _lastDragPointInScroll;
-        
 
-    public ContentSelectView(Point? lastDragPointInScroll)
+    public ContentSelectView()
     {
-        _lastDragPointInScroll = lastDragPointInScroll;
         InitializeComponent();
         
         AddHandler(DragDrop.DragOverEvent, OnRootDragOver, RoutingStrategies.Bubble);
@@ -133,7 +131,7 @@ public partial class ContentSelectView : UserControl
             return;
         }
 
-        var side = grip.Classes.Contains(Constants.AxamlClasses.EpisodeGripClass) ? RailReorderSide.Episode : RailReorderSide.File;
+        var side = RailGrip.GetSide(grip);
         var isMoveLinked = vm.LinkRailReorder || (e.KeyModifiers & KeyModifiers.Shift) != 0;
         var dragData = new RailReorderDragData(side, rowVm.ZeroBasedIndex, isMoveLinked);
         var startPoint = e.GetPosition(grip);
@@ -568,7 +566,7 @@ public partial class ContentSelectView : UserControl
 
     private void StopAutoScroll()
     {
-        _autoScrollTimer.Stop();
+        _autoScrollTimer?.Stop();
         _autoScrollTimer = null;
         _autoScrollDirection = 0;
     }
@@ -624,25 +622,21 @@ public partial class ContentSelectView : UserControl
                 return;
             }
 
-            if (c is Border { Classes.Count: > 0 } border &&
-                border.Classes.Contains(Constants.AxamlClasses.BorderRailPaneCell))
+            if (c is not Border { Classes.Count: > 0 } border ||
+                !border.Classes.Contains(Constants.AxamlClasses.BorderRailPaneCell))
             {
-                var grid = border.Child as Grid;
-                if (grid == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var isEpisode = grid.Children.OfType<Border>()
-                    .Any(g => g.Classes.Contains(Constants.AxamlClasses.EpisodeGripClass));
-                if (railReorderSide == RailReorderSide.Episode && isEpisode)
-                {
-                    found = border;
-                }
-                else if (railReorderSide == RailReorderSide.File && !isEpisode)
-                {
-                    found = border;
-                }
+            if (border.Child is not Grid grid)
+            {
+                return;
+            }
+
+            var grip = grid.Children.OfType<Border>().FirstOrDefault(g => g.IsSet(RailGrip.SideProperty));
+            if (grip != null && RailGrip.GetSide(grip) == railReorderSide)
+            {
+                found = border;
             }
         });
         return found;
