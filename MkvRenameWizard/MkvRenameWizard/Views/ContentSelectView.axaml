@@ -4,9 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
              xmlns:converters="clr-namespace:MkvRenameWizard.Converters"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
              x:Class="MkvRenameWizard.Views.ContentSelectView"
-             x:DataType="viewModels:ContentSelectViewModel">
+             x:Name="SelectRoot"
+             x:DataType="viewModels:ContentSelectViewModel"
+             DragDrop.AllowDrop="True">
     
 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,*">
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Content List" FontWeight="Bold" Margin="5"/>
