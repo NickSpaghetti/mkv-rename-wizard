@@ -421,13 +421,13 @@
                                                                 VerticalAlignment="Center"
                                                                 Spacing="0">
                                                         <Button Classes="railIcon railReorder"
-                                                                Command="{Binding #SelectRoot.DataContext.MoveEpisodeUpCommand, x:DataType={x:Type viewModels:ContentSelectViewModel}}"
+                                                                Command="{Binding #SelectRoot.DataContext.MoveEpisodeUpCommand"
                                                                 CommandParameter="{Binding ZeroBasedIndex}">
                                                             <PathIcon Data="{StaticResource ChevronUp}" Width="12" Height="12"></PathIcon>
                                                         </Button>
 
                                                         <Button Classes="railIcon railReorder"
-                                                                Command="{Binding #SelectRoot.DataContext.MoveEpisodeDownCommand, x:DataType={x:Type viewModels:ContentSelectViewModel}}"
+                                                                Command="{Binding #SelectRoot.DataContext.MoveEpisodeDownCommand}"
                                                                 CommandParameter="{Binding ZeroBasedIndex}">
                                                             <PathIcon Data="{StaticResource ChevronDown}" Width="12" Height="12"></PathIcon>
                                                         </Button>
@@ -435,6 +435,31 @@
                                                 </Grid>
                                             </Border>
                                             
+                                            <Border Classes="placeHolderCell"
+                                                    IsVisible="{Binding IsExtraFile}">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                    <Border Classes="indexBadge warning">
+                                                        <TextBlock Text="!"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   FontStyle="Italic"
+                                                                   Foreground="{DynamicResource TextMutedBrush}"></TextBlock>
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding EpisodeDisplayName}"
+                                                               VerticalAlignment="Center"
+                                                               FontStyle="Italic"
+                                                               Foreground="{DynamicResource TextMutedBrush}">
+                                                    </TextBlock>
+                                                </Grid>
+                                            </Border>
+                                            <!-- Center is Link Node -->
+                                            <Grid x:Name="LinkedConnector"
+                                                  ColumnDefinitions="*,Auto,*"
+                                                  VerticalAlignment="Center"
+                                                  Background="{DynamicResource AccentBrush}"
+                                                  Opacity="0.75">
+                                            </Grid>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

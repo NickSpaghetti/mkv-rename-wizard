@@ -5,21 +5,18 @@ using MkvRenameWizard.Models.TvMaze;
 
 namespace MkvRenameWizard.ViewModels;
 
-public class RailMatchRowViewModel
+public class RailMatchRowViewModel(
+    int index,
+    Episode? episode,
+    MkvFile? mkvFile,
+    RailSettleType railSettleType = RailSettleType.None,
+    int settleDirection = 0)
 {
-    public RailMatchRowViewModel(int index, Episode? episode, MkvFile? mkvFile, RailSettleType railSettleType = RailSettleType.None, int settleDirection = 0)
-    {
-        Index = index;
-        Episode = episode;
-        MkvFile = mkvFile;
-        SettleType = SettleType;
-        SettleDirection = settleDirection;
-    }
-    public int Index { get; }
-    public Episode? Episode { get; }
-    public MkvFile? MkvFile { get; }
-    public RailSettleType SettleType { get; }
-    public int SettleDirection { get; }
+    public int Index { get; } = index;
+    public Episode? Episode { get; } = episode;
+    public MkvFile? MkvFile { get; } = mkvFile;
+    public RailSettleType SettleType { get; } = railSettleType;
+    public int SettleDirection { get; } = settleDirection;
     public bool ShouldSettleIndependent => SettleType == RailSettleType.Independent;
     public bool ShouldSettleLinked => SettleType == RailSettleType.Linked;
     public bool ShouldAnimateLink => SettleType == RailSettleType.Linked && IsPaired;
