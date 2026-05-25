@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
@@ -112,10 +113,10 @@ public class ContentSearchViewModel : ViewModelBase
 
     private readonly ITvMazeService _tvMazeService;
     private readonly IImageLoadingService _imageLoadingService;
-    public ContentSearchViewModel()
+    public ContentSearchViewModel(ITvMazeService tvMazeService, IImageLoadingService imageLoadingService)
     {
-        _tvMazeService = new TvMazeService(new TvMazeDataAccess());
-        _imageLoadingService = new ImageLoadingService(new HttpClient());
+        _tvMazeService = tvMazeService;
+        _imageLoadingService = imageLoadingService;
         
         
         SearchResults.CollectionChanged += (_,_) =>
@@ -135,8 +136,16 @@ public class ContentSearchViewModel : ViewModelBase
             .InvokeCommand(UpdateCheckboxOptionsCommand);
 
         SelectAllSeasonsCommand = ReactiveCommand.Create(SelectAllSeasons);
-        var canClearAllSeasons = this.WhenAnyValue(x => x.SelectedSeasonCount, x => x.SelectedShow).Select(_ => CanClearAllSeasons);
-        ClearAllSeasonsCommand = ReactiveCommand.Create(ClearAllSeasons, canClearAllSeasons);
+        var anySeasonChecked = Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => SeasonsCheckBoxes.CollectionChanged += h,
+                h => SeasonsCheckBoxes.CollectionChanged -= h)
+            .Select(_ => Unit.Default)
+            .StartWith(Unit.Default)
+            .Merge(this.WhenAnyValue(x => x.SelectedSeasonCount).Select(_ => Unit.Default)) 
+            .Select(_ => SelectedShow != null && SeasonsCheckBoxes.Any(x => x.IsChecked))
+            .DistinctUntilChanged();
+        
+        ClearAllSeasonsCommand = ReactiveCommand.Create(ClearAllSeasons, anySeasonChecked);
     }
 
 
@@ -325,5 +334,33 @@ public class ContentSearchViewModel : ViewModelBase
         
         return string.Join("  .  ", pieces);
     }
+
+    public void Reset()
+    {
+        _posterLoadCancellationTokenSource?.Cancel();
+        _posterLoadCancellationTokenSource = null;
+
+        foreach (var seasonSelectSubscription in _seasonSelectionSubscriptions)
+        {
+            seasonSelectSubscription.PropertyChanged -= OnSeasonSelectionChanged;
+        }
+        
+        _seasonSelectionSubscriptions.Clear();
+        SearchText = string.Empty;
+        SearchResults.Clear();
+        SelectedShow = null;
+        SelectedShowPoster = null;
+        IsPosterLoading = false;
+        HasSearched = false;
+        IsSearching = false;
+        SelectedSeasonCount = 0;
+        SelectedEpisodeCount = 0;
+        
+        this.RaisePropertyChanged(nameof(SearchResults));
+        this.RaisePropertyChanged(nameof(SeasonCount));
+        UpdateSelectionMetrics();
+    }
+    
+    
     
 }

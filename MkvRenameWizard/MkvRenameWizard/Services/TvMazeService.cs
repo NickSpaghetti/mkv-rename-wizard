@@ -4,6 +4,7 @@ using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MkvRenameWizard.DataAccess;
 using MkvRenameWizard.Models.TvMaze;
 using MkvRenameWizard.Models.TvMaze.Dto;
@@ -13,21 +14,22 @@ namespace MkvRenameWizard.Services;
 public partial class TvMazeService : ITvMazeService
     {
         private readonly ITvMazeDataAccess _tvMazeDataAccess;
+        private readonly ILogger<TvMazeService> _logger;
         
         [GeneratedRegex("<.*?>")]
         private static partial Regex HtmlTagRegex();
 
-        public TvMazeService(ITvMazeDataAccess tvMazeDataAccess)
+        public TvMazeService(ITvMazeDataAccess tvMazeDataAccess, ILogger<TvMazeService> logger)
         {
             _tvMazeDataAccess = tvMazeDataAccess;
+            _logger =  logger;
         }
 
         public async Task<List<ShowSearchResult>> FindShowIdByNameAsync(string showName)
         {
             if (string.IsNullOrEmpty(showName))
             {
-                Console.WriteLine("Cannot search for an empty show");
-                Environment.Exit(-1);
+                return new List<ShowSearchResult>();
             }
 
             try
@@ -61,11 +63,9 @@ public partial class TvMazeService : ITvMazeService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to get list of TV shows with the name {showName}.");
-                Console.WriteLine(ex.Message);
-                Environment.Exit(-1);
+                _logger.LogError(ex, $"Failed to get list of tv shows with the name {showName}");
             }
-            return null;
+            return new List<ShowSearchResult>();
         }
 
         public static string StripTvMazeHtml(string summaryHtml)
@@ -83,8 +83,8 @@ public partial class TvMazeService : ITvMazeService
         {
             if (showId <= 0)
             {
-                Console.WriteLine($"Invalid show id {showId}");
-                Environment.Exit(-1);
+                _logger.LogWarning($"Invalid show id {showId}");
+                return new List<Season>();
             }
 
             try
@@ -116,19 +116,17 @@ public partial class TvMazeService : ITvMazeService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to get list of seasons with the id {showId}.");
-                Console.WriteLine(ex.Message);
-                Environment.Exit(-1);
+                _logger.LogError(ex, $"Failed to get list of seasons with the show id {showId}.");
             }
-            return null;
+            return new List<Season>();
         }
 
         public async Task<List<Episode>> ListEpisodesBySeasonAsync(long seasonId)
         {
             if (seasonId <= 0)
             {
-                Console.WriteLine($"Invalid season id {seasonId}");
-                Environment.Exit(-1);
+                _logger.LogWarning($"Invalid season id {seasonId}");
+                return new List<Episode>();
             }
 
             try
@@ -147,7 +145,8 @@ public partial class TvMazeService : ITvMazeService
                         Name = episodeDto.Name,
                         EpisodeNumber = episodeDto.Number,
                         Season = episodeDto.Season,
-                        Type = episodeDto.Type
+                        Type = episodeDto.Type,
+                        RunTime = episodeDto.Runtime
                     });
                 }
 
@@ -155,11 +154,9 @@ public partial class TvMazeService : ITvMazeService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to get list of episodes with the season id {seasonId}.");
-                Console.WriteLine(ex.Message);
-                Environment.Exit(-1);
+                _logger.LogError(ex, $"Failed to get list of episodes with the season id {seasonId}.");
             }
 
-            return null;
+            return new List<Episode>();
         }
 }

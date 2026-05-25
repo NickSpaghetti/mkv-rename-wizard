@@ -4,8 +4,8 @@ public class MainWindowViewModel : ViewModelBase
 {
     public WizardViewModel WizardViewModel { get; }
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(WizardViewModel wizardViewModel)
     {
-        WizardViewModel = new WizardViewModel();
+        WizardViewModel = wizardViewModel;
     }
 }

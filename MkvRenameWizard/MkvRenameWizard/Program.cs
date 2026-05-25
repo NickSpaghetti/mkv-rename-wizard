@@ -19,6 +19,6 @@ sealed class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
-            .UseReactiveUI(builder => {})
+            .UseReactiveUI(static _ => {})
             .RegisterReactiveUIViewsFromEntryAssembly();
 }

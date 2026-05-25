@@ -9,6 +9,13 @@
                  <ResourceDictionary>
                      <ResourceDictionary.MergedDictionaries>
                          <ResourceInclude Source="avares://MkvRenameWizard/Resources/SearchIcon.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/ChevronUp.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/ChevronDown.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/PlayRegular.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/DocumentRegular.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/LinkRegular.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/LinkDismissRegular.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/ReOrderDotsVerticalRegular.axaml" />
                      </ResourceDictionary.MergedDictionaries>
                      
                      <SolidColorBrush x:Key="AppBackgroundBrush" Color="#191919"/>
@@ -18,7 +25,7 @@
                      <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#2A2A2A"></SolidColorBrush>
                      <SolidColorBrush x:Key="CardBackgroundBrush" Color="#353535"/>
                      <SolidColorBrush x:Key="DividerBrush" Color="#333333"/>
-                     <SolidColorBrush x:Key="TextPrimaryBush" Color="#F1F1F1"/>
+                     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F1F1F1"/>
                      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#D2D2D2"/>
                      <SolidColorBrush x:Key="TextMutedBrush" Color="#A9A9A9"/>
                      <SolidColorBrush x:Key="AccentBrush" Color="#48C8F6"/>

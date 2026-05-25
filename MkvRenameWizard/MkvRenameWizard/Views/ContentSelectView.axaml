@@ -3,60 +3,868 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
-             xmlns:converters="clr-namespace:MkvRenameWizard.Converters"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:views="clr-namespace:MkvRenameWizard.Views"
+             xmlns:models="clr-namespace:MkvRenameWizard.Models.Rail"
+             xmlns:app="using:MkvRenameWizard"
+             mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
              x:Class="MkvRenameWizard.Views.ContentSelectView"
-             x:DataType="viewModels:ContentSelectViewModel">
-    
-<Grid ColumnDefinitions="*,*" RowDefinitions="Auto,*">
-    <TextBlock Grid.Row="0" Grid.Column="0" Text="Content List" FontWeight="Bold" Margin="5"/>
-    <ListBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding ContentList}" SelectedIndex="{Binding #ContentListBox.SelectedIndex, Mode=TwoWay}" x:Name="ContentListBox">
-        <ListBox.ItemTemplate>
-            <DataTemplate>
-                <TextBlock Text="{Binding}"/>
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
-    <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Orientation="Vertical" HorizontalAlignment="Right" Margin="5">
-        <Button Content="↑" Command="{Binding MoveContentItemUpCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
-        <Button Content="↓"  Command="{Binding MoveContentItemDownCommand}" CommandParameter="{Binding ElementName=ContentListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=ContentListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
-    </StackPanel>
+             x:Name="SelectRoot"
+             x:DataType="viewModels:ContentSelectViewModel"
+             DragDrop.AllowDrop="True">
 
-    <TextBlock Grid.Row="0" Grid.Column="1" Text="Mkv Files List" FontWeight="Bold" Margin="5" VerticalAlignment="Center"/>  
-    <Button Grid.Row="0" Grid.Column="1"
-            Content="Import MKV Files"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"
-            Command="{Binding OpenFilesCommand}"
-            />
-    <!-- <Button Grid.Row="0" Grid.Column="1"  -->
-    <!--         Content="Import MKV Files"  -->
-    <!--         VerticalAlignment="Center"  -->
-    <!--         HorizontalAlignment="Center" -->
-    <!--         Command="{Binding OpenFilesCommand}" -->
-    <!--         CommandParameter="{Binding #FilePicker}"> -->
-    <!--     <Button.Flyout> -->
-    <!--         <Flyout> -->
-    <!--             <StackPanel> -->
-    <!--                 <TextBox x:Name="FilePicker" IsVisible="False"/> -->
-    <!--                 <Button Content="Open Files" -->
-    <!--                         Command="{Binding OpenFilesCommand}" -->
-    <!--                         CommandParameter="{Binding #FilePicker}"/> -->
-    <!--             </StackPanel> -->
-    <!--         </Flyout> -->
-    <!--     </Button.Flyout> -->
-    <!-- </Button> -->
-    <ListBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding MkvFilesList}" SelectedIndex="{Binding #MkvFilesListBox.SelectedIndex, Mode=TwoWay}" x:Name="MkvFilesListBox">
-        <ListBox.ItemTemplate>
-            <DataTemplate>
-                <TextBlock Text="{Binding FullPath}"/>
-            </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
-    <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Orientation="Vertical" HorizontalAlignment="Right" Margin="5">
-        <Button Content="↑" Command="{Binding MoveMkvFileItemUpCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
-        <Button Content="↓"  Command="{Binding MoveMkvFileItemDownCommand}" CommandParameter="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex}" IsEnabled="{Binding ElementName=MkvFilesListBox, Path=SelectedIndex, Converter={x:Static converters:IntToBoolConverter.Instance}}"/>
-    </StackPanel>
-</Grid>
-    
+    <UserControl.Styles>
+        <Style Selector="TextBlock.eyebrow">
+            <Setter Property="FontSize" Value="10"></Setter>
+            <Setter Property="FontWeight" Value="Bold"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Border.statusChip">
+            <Setter Property="CornerRadius" Value="11"></Setter>
+            <Setter Property="Padding" Value="10,4"></Setter>
+            <Setter Property="Background" Value="#293D45"></Setter>
+            <Setter Property="BorderBrush" Value="#315F70"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+        </Style>
+
+        <Style Selector="Border.warnChip">
+            <Setter Property="CornerRadius" Value="11"></Setter>
+            <Setter Property="Padding" Value="10,4"></Setter>
+            <Setter Property="Background" Value="#473B2A"></Setter>
+            <Setter Property="BorderBrush" Value="#73562D"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+        </Style>
+
+        <Style Selector="Border.indexBadge">
+            <Setter Property="Width" Value="26"></Setter>
+            <Setter Property="Height" Value="26"></Setter>
+            <Setter Property="CornerRadius" Value="6"></Setter>
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+        </Style>
+
+        <Style Selector="Border.indexBadge > TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Border.indexBadge.active">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Background" Value="#182C33"></Setter>
+            <Setter Property="BoxShadow" Value="0 0 10 2 #3348C8F6"></Setter>
+        </Style>
+
+        <Style Selector="Border.indexBadge.active > TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Border.indexBadge.warning">
+            <Setter Property="Background" Value="#463721"></Setter>
+            <Setter Property="BorderBrush" Value="#9A6720"></Setter>
+        </Style>
+
+        <Style Selector="Border.railPanelHeader">
+            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"></Setter>
+            <Setter Property="Padding" Value="14,10"></Setter>
+        </Style>
+
+        <Style Selector="Border.railPanelCell">
+            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"></Setter>
+            <Setter Property="Padding" Value="14,8"></Setter>
+            <Setter Property="BorderBrush" Value="#252A2E"></Setter>
+            <Setter Property="BorderThickness" Value="0,0,0,1"></Setter>
+        </Style>
+
+        <Style Selector="Border.railPanelCell:pointerover">
+            <Setter Property="Background" Value="#252A2E"></Setter>
+        </Style>
+
+        <Style Selector="Border.matchRow">
+            <Setter Property="MinHeight" Value="54"></Setter>
+            <Setter Property="ClipToBounds" Value="False"></Setter>
+        </Style>
+
+        <Style Selector="Border.dragging">
+            <Setter Property="Opacity" Value="0.35"></Setter>
+        </Style>
+
+        <Style Selector="Border.settleRail">
+            <Setter Property="Width" Value="3"></Setter>
+            <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+            <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="IsHitTestVisible" Value="True"></Setter>
+        </Style>
+
+        <Style Selector="Border.dragGhost">
+            <Setter Property="MaxWidth" Value="320"></Setter>
+            <Setter Property="Opacity" Value="0.88"></Setter>
+            <Setter Property="Padding" Value="12,8"></Setter>
+            <Setter Property="CornerRadius" Value="6"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="Background" Value="#252A2E"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Border.dragInsertLine">
+            <Setter Property="Height" Value="2"></Setter>
+            <Setter Property="Opacity" Value="0.92"></Setter>
+            <Setter Property="CornerRadius" Value="1"></Setter>
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Border.placeHolderCell">
+            <Setter Property="MinHeight" Value="54"></Setter>
+            <Setter Property="Padding" Value="14,8"></Setter>
+            <Setter Property="BorderBrush" Value="#3E3424"></Setter>
+            <Setter Property="Background" Value="#211F1A"></Setter>
+            <Setter Property="BorderThickness" Value="0,0,0,1"></Setter>
+        </Style>
+
+        <Style Selector="Ellipse.linkHalo">
+            <Setter Property="Width" Value="16"></Setter>
+            <Setter Property="Height" Value="16"></Setter>
+            <Setter Property="Fill" Value="Transparent"></Setter>
+            <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="StrokeThickness" Value="1"></Setter>
+            <Setter Property="Opacity" Value="0"></Setter>
+            <Setter Property="IsHitTestVisible" Value="False"></Setter>
+        </Style>
+
+        <Style Selector="Ellipse.linkNode">
+            <Setter Property="Width" Value="8"></Setter>
+            <Setter Property="Height" Value="8"></Setter>
+            <Setter Property="Fill" Value="{DynamicResource DividerBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Ellipse.linkNode.paired">
+            <Setter Property="Fill" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Button.toolbar">
+            <Setter Property="Padding" Value="14,8"></Setter>
+            <Setter Property="FontWeight" Value="SemiBold"></Setter>
+        </Style>
+
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="BorderThickness" Value="0"></Setter>
+            <Setter Property="Padding" Value="0"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Button.disabled">
+            <Setter Property="Opacity" Value="0.55"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Button.railIcon">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="BorderThickness" Value="0"></Setter>
+            <Setter Property="Width" Value="28"></Setter>
+            <Setter Property="Height" Value="28"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Button.railIcon:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Button.railReorder">
+            <Setter Property="Opacity" Value="0"></Setter>
+        </Style>
+
+        <Style Selector="Button.segment">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderThickness" Value="0"></Setter>
+            <Setter Property="Padding" Value="12,8"></Setter>
+            <Setter Property="HorizontalContentAlignment" Value="Left"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Button.segment.selected">
+            <Setter Property="Background" Value="#182C33"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+
+        <Style Selector="Border.railPanelCell:pointerover Button.railReorder">
+            <Setter Property="Opacity" Value="1"></Setter>
+        </Style>
+
+        <Style Selector="Border.gripHandel">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="Padding" Value="2"></Setter>
+            <Setter Property="Cursor" Value="SizeAll"></Setter>
+        </Style>
+
+        <Style Selector="Border.gripHandel:pointerover PathIcon">
+            <Setter Property="Opacity" Value="1"></Setter>
+        </Style>
+
+        <Style Selector="PathIcon.gripIcon">
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Width" Value="12"></Setter>
+            <Setter Property="Height" Value="16"></Setter>
+            <Setter Property="Opacity" Value="0.5"></Setter>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*"
+          Background="{DynamicResource AppBackgroundBrush}">
+        <!-- Row 0 is ToolBar -->
+        <Grid Grid.Row="0"
+              Margin="16,12,16,10"
+              ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Classes="statusChip" IsVisible="{Binding HasImportedFiles}" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="6"
+                                    VerticalAlignment="Center">
+                            <Ellipse Classes="linkNode paired"
+                                     VerticalAlignment="Center">
+                            </Ellipse>
+                            <TextBlock Text="{Binding PairedChipText}"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentBrush}">
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="warnChip" IsVisible="{Binding HasIssues}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SkippedChipText}"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="#FFB115">
+                        </TextBlock>
+                    </Border>
+
+                    <Border
+                        CornerRadius="20"
+                        BorderBrush="{DynamicResource DividerBrush}"
+                        BorderThickness="1"
+                        Background="Transparent"
+                        ClipToBounds="True"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding HasImportedFiles}">
+
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="0">
+                            <Button Classes="segment"
+                                    Classes.selected="{Binding IsIndependentModeSelected}"
+                                    Command="{Binding SetIndependentReorderCommand}"
+                                    CornerRadius="20, 0, 0, 20">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{StaticResource LinkDismissRegular}" Width="16" Height="16"></PathIcon>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Independent" FontWeight="SemiBold"></TextBlock>
+                                        <TextBlock Text="Move sides separately" FontSize="11"
+                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Button>
+                            <Border Width="1"
+                                    Background="{DynamicResource DividerBrush}"
+                                    VerticalAlignment="Stretch">
+
+                            </Border>
+                            <Button Classes="segment"
+                                    Classes.selected="{Binding SetLinkedReorderCommand}"
+                                    Command="{Binding SetLinkedReorderCommand}"
+                                    CornerRadius="0,20,20,0">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Linked" FontWeight="SemiBold"></TextBlock>
+                                        <TextBlock Text="Move pairs together" FontSize="11"
+                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <TextBlock Text="Hold Shift to move pairs together" FontSize="11"
+                           Foreground="{DynamicResource TextMutedBrush}"
+                           IsVisible="{Binding IsShiftLinkHintVisible}">
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="10"
+                        VerticalAlignment="Top">
+                <Button Classes="toolbar"
+                        Content="{Binding ImportButtonText}"
+                        Command="{Binding OpenFilesCommand}">
+                </Button>
+                <Button Classes="link"
+                        Content="Clear"
+                        Command="{Binding ClearFilesCommand}"
+                        IsVisible="{Binding HasImportedFiles}">
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Row 1 is Partial Failure Banner -->
+        <Border Grid.Row="1"
+                Classes="warnChip"
+                Margin="16,0,16,8"
+                Padding="14,10"
+                IsVisible="{Binding ShowPartialFailureBanner}">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                <Border Classes="indexBadge warning">
+                    <TextBlock Text="!"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="#FFB115"
+                               FontWeight="Bold">
+                    </TextBlock>
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding PartialFailureTitle}"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}">
+                    </TextBlock>
+                    <TextBlock Text="{Binding PartialFailureSummary}"
+                               FontSize="12"
+                               TextTrimming="CharacterEllipsis">
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Column="2"
+                        Classes="link"
+                        Content="{Binding PartialFailureDetailsToggleText}"
+                        Command="{Binding TogglePartialFailureDetailsCommand}">
+                </Button>
+                <Button Grid.Column="3"
+                        Classes="link"
+                        Content="Open different file(s)"
+                        Command="{Binding OpenFilesCommand}">
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Row 2 is Expandable Issue Details -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource DividerBrush}"
+                BorderThickness="1"
+                CornerRadius="5"
+                Margin="16,0,16,8"
+                Padding="0"
+                IsVisible="{Binding ShowPartialFailureDetails}"
+                MaxHeight="200">
+            <Grid RowDefinitions="Auto,*">
+                <Grid ColumnDefinitions="*,Auto" Margin="12,8">
+                    <TextBlock Classes="eyebrow" Text="ISSUE DETAILS"></TextBlock>
+                    <TextBlock Grid.Column="1" Classes="eyebrow"
+                               Text="{Binding IssueCount, StringFormat='{}{0} FILES'}">
+                    </TextBlock>
+                </Grid>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding ImportIssues}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{DynamicResource DividerBrush}"
+                                        BorderThickness="0,1,0,0"
+                                        Padding="12,8">
+                                    <TextBlock Text="{Binding Detail}"
+                                               FontFamily="Consolas"
+                                               FontSize="12"
+                                               TextTrimming="CharacterEllipsis">
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- Row 3 is Main Content Area -->
+        <Grid Grid.Row="3" RowDefinitions="Auto,*">
+            <!-- Column Headers -->
+            <Grid ColumnDefinitions="*,48,*" Margin="16,0,16,0">
+                <Border Classes="railPanelHeader">
+                    <StackPanel>
+                        <TextBlock Classes="eyebrow" Text="EPISODES"></TextBlock>
+                        <TextBlock Text="{Binding EpisodeColumnSubtitle}" FontSize="12"
+                                   Foreground="{DynamicResource TextSecondaryBrush}">
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                <PathIcon Grid.Column="1"
+                          Data="{StaticResource LinkRegular}"
+                          Width="14"
+                          Height="14"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource TextMutedBrush}">
+                </PathIcon>
+                <Border Grid.Column="2" Classes="railPanelHeader">
+                    <StackPanel>
+                        <TextBlock Classes="eyebrow" Text="MKV FILES"></TextBlock>
+                        <TextBlock Text="{Binding FileColumnSubtitle}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="12">
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <!-- Match Rails and Import Panel -->
+            <Grid Grid.Row="1" Margin="0,8,0,0">
+                <!-- Active match rails (files imported) -->
+                <ScrollViewer x:Name="MatchRailsScroll"
+                              VerticalScrollBarVisibility="Auto"
+                              IsVisible="{Binding ShowMatchRails}">
+                    <Grid>
+                        <Border Width="1"
+                                Background="#2A2A2A"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Stretch">
+                        </Border>
+
+                        <ItemsControl ItemsSource="{Binding MatchRows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:RailMatchRowViewModel">
+                                    <Border Classes="matchRow" DragDrop.AllowDrop="True" Loaded="OnMatchRowLoaded">
+                                        <Grid>
+                                            <Border Classes="settleRail"
+                                                    x:Name="{x:Static app:Constants+BorderNames.SettleRail}"
+                                                    ZIndex="10">
+                                            </Border>
+                                            <Grid ColumnDefinitions="*,48,*">
+                                                <!-- Left is Episode cell -->
+                                                <Border Classes="railPanelCell" IsVisible="{Binding HasEpisode}">
+                                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                                                        <Border Classes="gripHandel"
+                                                                views:RailGrip.Side="{x:Static models:RailReorderSide.Episode}"
+                                                                PointerPressed="OnGripPointerPressed">
+                                                            <PathIcon Classes="gripIcon"
+                                                                      Data="{StaticResource ReOrderDotsVerticalRegular}"
+                                                                      VerticalAlignment="Center">
+                                                            </PathIcon>
+                                                        </Border>
+                                                        <Border Grid.Column="1" Classes="indexBadge"
+                                                                Classes.active="{Binding IsPaired}">
+                                                            <TextBlock Text="{Binding IndexLabel}"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       FontWeight="Bold">
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                <TextBlock Text="{Binding EpisodeCode}"
+                                                                           Foreground="{DynamicResource AccentBrush}"
+                                                                           FontWeight="SemiBold"
+                                                                           FontSize="12">
+                                                                </TextBlock>
+                                                                <TextBlock Text="{Binding EpisodeTitle}"
+                                                                           FontWeight="SemiBold"
+                                                                           TextTrimming="CharacterEllipsis">
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4"
+                                                                        IsVisible="{Binding HasEpisodeRunTime}">
+                                                                <PathIcon Data="{StaticResource PlayRegular}"
+                                                                          Width="10" Height="10"
+                                                                          Foreground="{DynamicResource TextMutedBrush}">
+                                                                </PathIcon>
+                                                                <TextBlock Text="{Binding EpisodeRunTimeLabel}"
+                                                                           Foreground="{DynamicResource TextMutedBrush}"
+                                                                           FontSize="11">
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="3"
+                                                                    Orientation="Vertical"
+                                                                    VerticalAlignment="Center"
+                                                                    Spacing="0">
+                                                            <Button Classes="railIcon railReorder"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveEpisodeUpCommand}"
+                                                                    CommandParameter="{Binding ZeroBasedIndex}">
+                                                                <PathIcon Data="{StaticResource ChevronUp}" Width="12"
+                                                                          Height="12">
+                                                                </PathIcon>
+                                                            </Button>
+
+                                                            <Button Classes="railIcon railReorder"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveEpisodeDownCommand}"
+                                                                    CommandParameter="{Binding ZeroBasedIndex}">
+                                                                <PathIcon Data="{StaticResource ChevronDown}"
+                                                                          Width="12" Height="12">
+                                                                </PathIcon>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+
+                                                <Border Grid.Column="0"
+                                                        Classes="placeHolderCell"
+                                                        IsVisible="{Binding IsExtraFile}">
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                        <Border Classes="indexBadge warning">
+                                                            <TextBlock Text="!"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       FontStyle="Italic"
+                                                                       Foreground="{DynamicResource TextMutedBrush}">
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding EpisodeDisplayName}"
+                                                                   VerticalAlignment="Center"
+                                                                   FontStyle="Italic"
+                                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </Border>
+                                                <!-- Center is Link Node -->
+                                                <Grid Grid.Column="1"
+                                                      x:Name="{x:Static app:Constants+GridNames.LinkConnector}"
+                                                      ColumnDefinitions="*,Auto,*"
+                                                      VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsPaired}">
+                                                    <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineLeft}"
+                                                            Height="1"
+                                                            VerticalAlignment="Center"
+                                                            Background="{DynamicResource AccentBrush}"
+                                                            Opacity="0.75">
+                                                    </Border>
+                                                    <Grid Grid.Column="1" Width="16" Height="16">
+                                                        <Ellipse
+                                                            x:Name="{x:Static app:Constants+EllipseNames.LinkHalo}"
+                                                            Classes="linkHalo"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            RenderTransformOrigin="50%, 50%">
+                                                        </Ellipse>
+                                                        <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkDot}"
+                                                                 Classes="linkNode paired"
+                                                                 HorizontalAlignment="Center"
+                                                                 VerticalAlignment="Center"
+                                                                 RenderTransformOrigin="50%, 50%">
+                                                        </Ellipse>
+                                                    </Grid>
+                                                    <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineRight}"
+                                                            Grid.Column="2"
+                                                            Height="1"
+                                                            VerticalAlignment="Center"
+                                                            Background="{DynamicResource AccentBrush}"
+                                                            Opacity="0.75">
+                                                    </Border>
+                                                </Grid>
+                                                <Grid Grid.Column="1"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center"
+                                                      IsVisible="{Binding !IsPaired}">
+                                                    <Ellipse Classes="linkNode"></Ellipse>
+                                                </Grid>
+                                                <!-- Right Side Is File Cell -->
+                                                <Border Grid.Column="2"
+                                                        Classes="railPanelCell"
+                                                        IsVisible="{Binding HasMkv}">
+                                                    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="8">
+                                                        <Border Classes="gripHandel"
+                                                                views:RailGrip.Side="{x:Static models:RailReorderSide.File}"
+                                                                PointerPressed="OnGripPointerPressed">
+                                                            <PathIcon Classes="gripIcon"
+                                                                      Data="{StaticResource ReOrderDotsVerticalRegular}"
+                                                                      VerticalAlignment="Center">
+                                                            </PathIcon>
+                                                        </Border>
+                                                        <Border Grid.Column="1" Classes="indexBadge"
+                                                                Classes.active="{Binding IsPaired}">
+                                                            <TextBlock Text="{Binding IndexLabel}"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       FontWeight="Bold">
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <PathIcon Grid.Column="2"
+                                                                  Data="{StaticResource DocumentRegular}"
+                                                                  Width="14"
+                                                                  Height="14"
+                                                                  Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                  VerticalAlignment="Center">
+                                                        </PathIcon>
+                                                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding FileDisplayName}"
+                                                                       FontWeight="SemiBold"
+                                                                       TextTrimming="CharacterEllipsis">
+                                                            </TextBlock>
+                                                            <TextBlock Text="{Binding FileSizeLabel}"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                                       FontSize="11"
+                                                                       IsVisible="{Binding HasFileSizeLabel}">
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="4"
+                                                                    Orientation="Vertical"
+                                                                    VerticalAlignment="Center"
+                                                                    Spacing="0">
+                                                            <Button Classes="railReorder railIcon"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveMkvFileUpCommand}"
+                                                                    CommandParameter="{Binding ZeroBasedIndex}">
+                                                                <PathIcon Data="{StaticResource ChevronUp}" Width="12"
+                                                                          Height="12">
+                                                                </PathIcon>
+                                                            </Button>
+                                                            <Button Classes="railReorder railIcon"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveMkvFileDownCommand}"
+                                                                    CommandParameter="{Binding ZeroBasedIndex}">
+                                                                <PathIcon Data="{StaticResource ChevronDown}"
+                                                                          Width="12" Height="12">
+                                                                </PathIcon>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+
+                                                <Border Grid.Column="2"
+                                                        Classes="placeHolderCell"
+                                                        IsVisible="{Binding IsMissingFile}">
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                        <Border Classes="indexBadge warnChip">
+                                                            <TextBlock Text="!"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       Foreground="#FFB115"
+                                                                       FontWeight="Bold">
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding FileDisplayName}"
+                                                                   VerticalAlignment="Center"
+                                                                   FontStyle="Italic"
+                                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </Border>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Canvas x:Name="RailDragOverlay"
+                                IsHitTestVisible="False"
+                                IsVisible="{Binding IsRailDragging}"
+                                ZIndex="100">
+                            <Border x:Name="DragInsertLine"
+                                    Classes="dragInsertLine"
+                                    IsVisible="False"
+                                    Width="0"
+                                    Canvas.Left="0"
+                                    Canvas.Top="0">
+                            </Border>
+                            <Border x:Name="DragGhost"
+                                    Classes="dragGhost"
+                                    IsVisible="False"
+                                    Width="0"
+                                    Canvas.Left="0"
+                                    Canvas.Top="0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Border Classes="indexBadge active">
+                                        <TextBlock x:Name="DragGhostIndex"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="Bold">
+                                        </TextBlock>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock
+                                            x:Name="DragGhostLabel"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxWidth="300"
+                                            FontWeight="SemiBold">
+                                        </TextBlock>
+                                        <TextBlock
+                                            x:Name="DragGhostDetail"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxWidth="300"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource TextMutedBrush}">
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Canvas>
+                    </Grid>
+                </ScrollViewer>
+
+                <!-- Import Panel -->
+                <Grid ColumnDefinitions="*,48,*" IsVisible="{Binding ShowImportPanel}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding MatchRows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:RailMatchRowViewModel">
+                                    <Border Classes="railPanelCell">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                            <Border Classes="indexBadge">
+                                                <TextBlock Text="{Binding IndexLabel}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontWeight="Bold">
+                                                </TextBlock>
+                                            </Border>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding EpisodeDisplayName}"
+                                                       VerticalAlignment="Center"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis">
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <Border Grid.Column="1"
+                            Background="#2A2A2A"
+                            Width="1">
+                    </Border>
+                    <Grid Grid.Column="2"
+                          Margin="0,0,16,0"
+                          x:Name="DropZone"
+                          DragDrop.AllowDrop="True"
+                          DragDrop.DragOver="OnDropZoneDragOver"
+                          DragDrop.Drop="OnDropZoneDrop">
+                        <Border Classes="railPanelHeader"
+                                BorderBrush="{DynamicResource DividerBrush}"
+                                BorderThickness="2"
+                                CornerRadius="4"
+                                Padding="32"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                IsVisible="{Binding ShowEmptyImportPrompt}">
+                            <StackPanel HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        MaxWidth="420"
+                                        Spacing="12">
+                                <Border Width="62" Height="62" CornerRadius="16" BorderThickness="1"
+                                        BorderBrush="{DynamicResource AccentBrush}"
+                                        Background="#182C33">
+                                    <TextBlock Text="+"
+                                               FontSize="32"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource AccentBrush}">
+                                    </TextBlock>
+                                </Border>
+                                <TextBlock Text="Drop MKV files here"
+                                           FontSize="24"
+                                           FontWeight="Bold"
+                                           TextAlignment="Center">
+                                </TextBlock>
+                                <TextBlock
+                                    Text="Files will link to episodes in the order they appear. You can reorder either side before renaming them in the next page."
+                                    Foreground="{DynamicResource TextSecondaryBrush}"
+                                    TextWrapping="Wrap"
+                                    TextAlignment="Center">
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center"
+                                            Spacing="10">
+                                    <Button Content="Chose file(s)..." Command="{Binding OpenFilesCommand}"></Button>
+                                    <Button Content="Brows folder" Command="{Binding OpenFolderCommand}"></Button>
+                                </StackPanel>
+                                <Border Background="{DynamicResource CardBackgroundBrush}"
+                                        CornerRadius="4"
+                                        Padding="10,5">
+                                    <TextBlock Text="Recommended file name format of title_t00.mkv"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource TextMutedBrush}">
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel IsVisible="{Binding ShowErrorPanel}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    MaxWidth="520"
+                                    Spacing="14"
+                                    Margin="16">
+                            <Border Width="78"
+                                    Height="78"
+                                    CornerRadius="39"
+                                    Background="#342819"
+                                    BorderBrush="#6F4D22"
+                                    BorderThickness="1">
+                                <TextBlock
+                                    Text="!"
+                                    FontSize="32"
+                                    FontWeight="Bold"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="#FFB115">
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="{Binding ErrorTitle}"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center">
+                            </TextBlock>
+                            <TextBlock Text="{Binding ErrorDescription}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       LineHeight="20">
+                            </TextBlock>
+                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                    BorderBrush="{DynamicResource DividerBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="5">
+                                <Grid RowDefinitions="Auto,*">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="12,8">
+                                        <TextBlock Classes="eyebrow" Text="DETAILS"></TextBlock>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding IssueCount, StringFormat='{}{0} FILES}'}">
+                                        </TextBlock>
+                                    </Grid>
+                                    <ItemsControl Grid.Row="1"
+                                                  ItemsSource="{Binding ImportIssues}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderThickness="0,1,0,0"
+                                                        BorderBrush="{DynamicResource DividerBrush}"
+                                                        Padding="12,8">
+                                                    <TextBlock Text="{Binding Detail}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="12"
+                                                               TextTrimming="CharacterEllipsis">
+                                                    </TextBlock>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                            </Border>
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Spacing="10">
+                                <Button Content="{Binding PrimaryErrorActionText}"
+                                        Command="{Binding PrimaryErrorCommand}"
+                                        IsVisible="{Binding ShowPrimaryErrorButton}">
+                                </Button>
+                                <Button Content="{Binding SecondaryErrorActionText}"
+                                        Command="{Binding SecondaryErrorCommand}">
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+
+
 </UserControl>

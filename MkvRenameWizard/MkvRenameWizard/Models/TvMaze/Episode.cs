@@ -7,4 +7,5 @@ public class Episode
     public int Season { get; set; }
     public int? EpisodeNumber { get; set; }
     public string Type { get; set; } = string.Empty;
+    public long RunTime { get; set; }
 }
