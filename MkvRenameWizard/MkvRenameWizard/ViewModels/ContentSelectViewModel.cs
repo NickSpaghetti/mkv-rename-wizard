@@ -338,7 +338,15 @@ public class ContentSelectViewModel : ViewModelBase
         }
         
         var targetIndex = fromIndex <= 0 ? rails.Count - 1 : fromIndex - 1;
-        MoveItemToTargetWithSettle(rails, fromIndex, targetIndex, isLinked: false);
+        if (LinkRailReorder)
+        {
+            MoveLinkedChevronWithSettle(fromIndex, targetIndex);
+        }
+        else
+        {
+            MoveItemToTargetWithSettle(rails, fromIndex, targetIndex, isLinked: false);
+        }
+        
     }
     
     private void MoveChevronDown<T>(ObservableCollection<T> rails, int fromIndex)
@@ -349,7 +357,31 @@ public class ContentSelectViewModel : ViewModelBase
         }
         
         var targetIndex = fromIndex >= rails.Count -1 ? 0: fromIndex + 1;
-        MoveItemToTargetWithSettle(rails, fromIndex, targetIndex, isLinked: false);
+        if (LinkRailReorder)
+        {
+            MoveLinkedChevronWithSettle(fromIndex, targetIndex);
+        }
+        else
+        {
+            MoveItemToTargetWithSettle(rails, fromIndex, targetIndex, isLinked: false);   
+        }
+    }
+
+    private void MoveLinkedChevronWithSettle(int fromIndex, int targetIndex)
+    {
+        PrepareSettle(targetIndex, fromIndex, isLinked: true);
+        _deferMatchRefresh = true;
+        if (fromIndex < EpisodeCount)
+        {
+            MoveItemToTarget(Episodes, fromIndex, targetIndex);
+        }
+        if (fromIndex < ImportedFileCount)
+        {
+            MoveItemToTarget(MkvFiles, fromIndex, targetIndex);
+        }
+        _deferMatchRefresh = false;
+        RefreshMatchState();
+        ScheduleClearSettle();
     }
 
     private void MoveItemToTargetWithSettle<T>(ObservableCollection<T> rails, int fromIndex, int targetIndex,
