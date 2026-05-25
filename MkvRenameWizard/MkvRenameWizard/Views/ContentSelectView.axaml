@@ -5,7 +5,6 @@
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
              xmlns:views="clr-namespace:MkvRenameWizard.Views"
              xmlns:models="clr-namespace:MkvRenameWizard.Models.Rail"
-             xmlns:app="using:MkvRenameWizard"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
              x:Class="MkvRenameWizard.Views.ContentSelectView"
              x:Name="SelectRoot"
@@ -239,6 +238,17 @@
                             Spacing="0"
                             IsVisible="{Binding HasImportedFiles}">
                     <Button Classes="segment"
+                            Classes.selected="{Binding IsIndependentModeSelected}"
+                            Command="{Binding SetIndependentReorderCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="Linked" FontWeight="SemiBold"></TextBlock>
+                                <TextBlock Text="Move pairs together" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"></TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="segment"
                             Classes.selected="{Binding IsLinkedModelSelected}"
                             Command="{Binding SetLinkedReorderCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -249,11 +259,6 @@
                             </StackPanel>
                         </StackPanel>
                     </Button>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
-                        <TextBlock Text="Linked" FontWeight="SemiBold"></TextBlock>
-                        <TextBlock Text="Move pairs together" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"></TextBlock>
-                    </StackPanel>
                 </StackPanel>
                 
                 <TextBlock Text="Hold Shift to move pairs together" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" IsVisible="{Binding IsShiftLinkHintVisible}"></TextBlock>
@@ -416,7 +421,7 @@
                                                         </TextBlock>
                                                     </Border>
                                                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                                        <StackPanel HorizontalAlignment="Center" Spacing="6">
+                                                        <StackPanel Orientation="Horizontal" Spacing="6">
                                                             <TextBlock Text="{Binding EpisodeCode}"
                                                                        Foreground="{DynamicResource AccentBrush}"
                                                                        FontWeight="SemiBold"
@@ -427,19 +432,30 @@
                                                                        TextTrimming="CharacterEllipsis">
                                                             </TextBlock>
                                                         </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Spacing="4" 
+                                                                    IsVisible="{Binding HasEpisodeRunTime}">
+                                                            <PathIcon Data="{StaticResource PlayRegular}"
+                                                                      Width="10" Height="10"
+                                                                      Foreground="{DynamicResource TextMutedBrush}">
+                                                            </PathIcon>
+                                                            <TextBlock Text="{Binding EpisodeRuneTimeLabel}"
+                                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                                       FontSize="11">
+                                                            </TextBlock>
+                                                        </StackPanel>
                                                     </StackPanel>
                                                     <StackPanel Grid.Column="3"
                                                                 Orientation="Vertical"
                                                                 VerticalAlignment="Center"
                                                                 Spacing="0">
                                                         <Button Classes="railIcon railReorder"
-                                                                Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveEpisodeUpCommand}"
+                                                                Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveEpisodeUpCommand}"
                                                                 CommandParameter="{Binding ZeroBasedIndex}">
                                                             <PathIcon Data="{StaticResource ChevronUp}" Width="12" Height="12"></PathIcon>
                                                         </Button>
 
                                                         <Button Classes="railIcon railReorder"
-                                                                Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveEpisodeDownCommand}"
+                                                                Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveEpisodeDownCommand}"
                                                                 CommandParameter="{Binding ZeroBasedIndex}">
                                                             <PathIcon Data="{StaticResource ChevronDown}" Width="12" Height="12"></PathIcon>
                                                         </Button>
@@ -447,7 +463,8 @@
                                                 </Grid>
                                             </Border>
                                             
-                                            <Border Classes="placeHolderCell"
+                                            <Border Grid.Column="0" 
+                                                    Classes="placeHolderCell"
                                                     IsVisible="{Binding IsExtraFile}">
                                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                                                     <Border Classes="indexBadge warning">
@@ -455,7 +472,8 @@
                                                                    HorizontalAlignment="Center"
                                                                    VerticalAlignment="Center"
                                                                    FontStyle="Italic"
-                                                                   Foreground="{DynamicResource TextMutedBrush}"></TextBlock>
+                                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                                        </TextBlock>
                                                     </Border>
                                                     <TextBlock Grid.Column="1"
                                                                Text="{Binding EpisodeDisplayName}"
@@ -467,29 +485,29 @@
                                             </Border>
                                             <!-- Center is Link Node -->
                                             <Grid Grid.Column="1" 
-                                                x:Name="{x:Static app:Constants+GridNames.LinkConnector}"
+                                                x:Name="{X:Static App:Constants+GridNames.LinkConnector}"
                                                   ColumnDefinitions="*,Auto,*"
                                                   VerticalAlignment="Center"
                                                   IsVisible="{Binding IsPaired}">
-                                                <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineLeft}"
+                                                <Border x:Name="{X:Static App:Constants+BorderNames.LinkLineLeft}"
                                                         Height="1"
                                                         VerticalAlignment="Center"
                                                         Background="{DynamicResource AccentBrush}"
                                                         Opacity="0.75">
                                                 </Border>
                                                 <Grid Grid.Column="1" Width="16" Height="16">
-                                                    <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkHalo}"
+                                                    <Ellipse x:Name="{X:Static App:Constants+EllipseNames.LinkHalo}"
                                                              Classes="linkHalo"
                                                              HorizontalAlignment="Center"
                                                              VerticalAlignment="Center">
                                                     </Ellipse>
-                                                    <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkDot}"
+                                                    <Ellipse x:Name="{X:Static App:Constants+EllipseNames.LinkDot}"
                                                              Classes="linkNode paired"
                                                              HorizontalAlignment="Center"
                                                              VerticalAlignment="Center">
                                                     </Ellipse>
                                                 </Grid>
-                                                <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineRight}"
+                                                <Border x:Name="{X:Static App:Constants+BorderNames.LinkLineRight}"
                                                         Grid.Column="2"
                                                         Height="1"
                                                         VerticalAlignment="Center"
@@ -548,12 +566,12 @@
                                                                     VerticalAlignment="Center"
                                                                     Spacing="0">
                                                             <Button Classes="railReorder railIcon"
-                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveMkvFileUpCommand}"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveMkvFileUpCommand}"
                                                                     CommandParameter="{Binding ZeroBasedIndex}">
                                                                 <PathIcon Data="{StaticResource ChevronUp}" Width="12" Height="12"></PathIcon>
                                                             </Button>
                                                             <Button Classes="railReorder railIcon"
-                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveMkvFileDownCommand}"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveMkvFileDownCommand}"
                                                                     CommandParameter="{Binding ZeroBasedIndex}">
                                                                 <PathIcon Data="{StaticResource ChevronDown}" Width="12" Height="12"></PathIcon>
                                                             </Button>
