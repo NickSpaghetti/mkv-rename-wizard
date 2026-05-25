@@ -484,7 +484,7 @@
                                                              VerticalAlignment="Center">
                                                     </Ellipse>
                                                     <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkDot}"
-                                                             Classes="linkNode"
+                                                             Classes="linkNode paired"
                                                              HorizontalAlignment="Center"
                                                              VerticalAlignment="Center">
                                                     </Ellipse>

@@ -32,10 +32,14 @@ internal static class RailSettleAnimator
         try
         {
             await AnimateSettleAsync(row, startY, isLinked);
+            if (isLinked)
+            {
+                await AnimateLinkConnectorAsync(row);
+            }
         }
         catch
         {
-            // Animation can be intrupted by refresh so we will ignore it.
+            // Animation can be interrupted by refresh so we will ignore it.
         }
         
     }
@@ -105,12 +109,12 @@ internal static class RailSettleAnimator
                 scale = 1.6 - (t - 0.45) / 0.55 * 0.6;
             }
             
-            dot.RenderTransform = new TranslateTransform(0,0);
+            dot.RenderTransform = new ScaleTransform(scale, scale);
 
             if (halo != null)
             {
                 var haloScale = 1 + t * 1.2;
-                halo.RenderTransform = new TranslateTransform(haloScale, haloScale);
+                halo.RenderTransform = new ScaleTransform(haloScale, haloScale);
                 halo.Opacity = 0.45 * (1 - t);
             }
 
