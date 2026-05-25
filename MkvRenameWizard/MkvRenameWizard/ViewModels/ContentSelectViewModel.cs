@@ -121,7 +121,7 @@ public class ContentSelectViewModel : ViewModelBase
     public int IssueCount => ImportIssues.Count;
     public int PairedCount => Math.Min(Episodes.Count, MkvFiles.Count);
     public int SkippedCount => Math.Abs(EpisodeCount - ImportedFileCount) + IssueCount;
-    public bool HasImportedFiles => ImportIssues.Count > 0;
+    public bool HasImportedFiles => ImportedFileCount > 0;
     public bool HasIssues => ImportIssues.Count > 0;
     public bool HasPermissionDenied => ImportIssues.Any(issue => issue.Type == FileImportIssueType.PermissionDenied);
     public bool HasInvalidMkvIssues => ImportIssues.Any(issue => issue.Type == FileImportIssueType.InvalidContainer);
