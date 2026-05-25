@@ -438,7 +438,7 @@
                                                                       Width="10" Height="10"
                                                                       Foreground="{DynamicResource TextMutedBrush}">
                                                             </PathIcon>
-                                                            <TextBlock Text="{Binding EpisodeRuneTimeLabel}"
+                                                            <TextBlock Text="{Binding EpisodeRunTimeLabel}"
                                                                        Foreground="{DynamicResource TextMutedBrush}"
                                                                        FontSize="11">
                                                             </TextBlock>
