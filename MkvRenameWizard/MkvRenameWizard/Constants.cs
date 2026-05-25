@@ -22,8 +22,8 @@ public static class Constants
     public static class BorderNames
     {
         public const string SettleRail = nameof(SettleRail);
-        public const string LinkLifeLeft = nameof(LinkLifeLeft);
-        public const string LinkLifeRight = nameof(LinkLifeRight);
+        public const string LinkLineLeft = nameof(LinkLineLeft);
+        public const string LinkLineRight = nameof(LinkLineRight);
     }
 
     public static class GridNames

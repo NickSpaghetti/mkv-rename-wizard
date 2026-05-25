@@ -81,8 +81,8 @@ internal static class RailSettleAnimator
     {
         var dot = row.FindControl<Ellipse>(Constants.EllipseNames.LinkDot);
         var halo = row.FindControl<Ellipse>(Constants.EllipseNames.LinkHalo);
-        var lineLeft = row.FindControl<Border>(Constants.BorderNames.LinkLifeLeft);
-        var lineRight = row.FindControl<Border>(Constants.BorderNames.LinkLifeRight);
+        var lineLeft = row.FindControl<Border>(Constants.BorderNames.LinkLineLeft);
+        var lineRight = row.FindControl<Border>(Constants.BorderNames.LinkLineRight);
 
         if (dot == null)
         {

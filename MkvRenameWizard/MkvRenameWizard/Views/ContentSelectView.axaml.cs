@@ -657,7 +657,7 @@ public partial class ContentSelectView : UserControl
         }
     }
 
-    private async Task OnDropZoneDrop(object? sender, DragEventArgs e)
+    private async void OnDropZoneDrop(object? sender, DragEventArgs e)
     {
         if (RailReorderDragFormats.TryGet(e.DataTransfer, out _))
         {
@@ -666,6 +666,27 @@ public partial class ContentSelectView : UserControl
         }
 
         await HandelFileImportDropAsync(e);
+    }
+    
+    private void OnDropZoneDragOver(object? sender, DragEventArgs e)
+    {
+        if (RailReorderDragFormats.TryGet(e.DataTransfer, out _))
+        {
+            e.DragEffects = DragDropEffects.None;
+            e.Handled = true;
+            return;
+        }
+
+        if (HasImportableFiles(e.DataTransfer))
+        {
+            e.DragEffects =  DragDropEffects.Copy;
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+
+        e.Handled = true;
     }
 
     private async Task HandelFileImportDropAsync(DragEventArgs e)

@@ -58,7 +58,7 @@
             <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
         </Style>
         
-        <Style Selector="Border.indexBadge.warning > TextBlock">
+        <Style Selector="Border.indexBadge.warning">
             <Setter Property="Background" Value="#463721"></Setter>
             <Setter Property="BorderBrush" Value="#9A6720"></Setter>
         </Style>
@@ -134,11 +134,11 @@
         <Style Selector="Ellipse.linkNode">
             <Setter Property="Width" Value="8"></Setter>
             <Setter Property="Height" Value="8"></Setter>
-            <Setter Property="Fill" Value="{DynamicResource DividerBrush}"></Setter>r>
+            <Setter Property="Fill" Value="{DynamicResource DividerBrush}"></Setter>
         </Style>
         
         <Style Selector="Ellipse.linkNode.paired">
-            <Setter Property="Fill" Value="{DynamicResource AccentBrush}"></Setter>r>
+            <Setter Property="Fill" Value="{DynamicResource AccentBrush}"></Setter>
         </Style>
         
         <Style Selector="Button.toolbar">
@@ -342,7 +342,7 @@
             <Grid ColumnDefinitions="*,48,*" Margin="16,0,16,0">
                 <Border Classes="railPanelHeader">
                     <StackPanel>
-                        <TextBlock CacheMode="eyebrow" Text="EPISODES"></TextBlock>
+                        <TextBlock Classes="eyebrow" Text="EPISODES"></TextBlock>
                         <TextBlock Text="{Binding EpisodeColumnSubtitle}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"></TextBlock>
                     </StackPanel>
                 </Border>
@@ -422,13 +422,13 @@
                                                                 VerticalAlignment="Center"
                                                                 Spacing="0">
                                                         <Button Classes="railIcon railReorder"
-                                                                Command="{Binding #SelectRoot.DataContext.MoveEpisodeUpCommand}"
+                                                                Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveEpisodeUpCommand}"
                                                                 CommandParameter="{Binding ZeroBasedIndex}">
                                                             <PathIcon Data="{StaticResource ChevronUp}" Width="12" Height="12"></PathIcon>
                                                         </Button>
 
                                                         <Button Classes="railIcon railReorder"
-                                                                Command="{Binding #SelectRoot.DataContext.MoveEpisodeDownCommand}"
+                                                                Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveEpisodeDownCommand}"
                                                                 CommandParameter="{Binding ZeroBasedIndex}">
                                                             <PathIcon Data="{StaticResource ChevronDown}" Width="12" Height="12"></PathIcon>
                                                         </Button>
@@ -466,18 +466,18 @@
                                                         Opacity="0.75">
                                                 </Border>
                                                 <Grid Grid.Column="1" Width="16" Height="16">
-                                                    <Ellipse x:Name="{x:Static app:Constants+Ellipse.LinkHalo}"
+                                                    <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkHalo}"
                                                              Classes="linkHalo"
                                                              HorizontalAlignment="Center"
                                                              VerticalAlignment="Center">
                                                     </Ellipse>
-                                                    <Ellipse x:Name="{x:Static app:Constants+Ellipse.LinkDot}"
+                                                    <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkDot}"
                                                              Classes="linkNode"
                                                              HorizontalAlignment="Center"
                                                              VerticalAlignment="Center">
                                                     </Ellipse>
                                                 </Grid>
-                                                <Border x:Name="{x:Static app:Constants+Ellipse.LinkLineRight}"
+                                                <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineRight}"
                                                         Grid.Column="2"
                                                         Height="1"
                                                         VerticalAlignment="Center"
@@ -535,12 +535,12 @@
                                                                     VerticalAlignment="Center"
                                                                     Spacing="0">
                                                             <Button Classes="railReorder railIcon"
-                                                                    Command="{Binding #SelectRoot.DataContext.MoveMkvFileUpCommand}"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveMkvFileUpCommand}"
                                                                     CommandParameter="{Binding ZeroBasedIndex}">
                                                                 <PathIcon Data="{StaticResource ChevronUp}" Width="12" Height="12"></PathIcon>
                                                             </Button>
                                                             <Button Classes="railReorder railIcon"
-                                                                    Command="{Binding #SelectRoot.DataContext.MoveMkvFileDownCommand}"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext).MoveMkvFileDownCommand}"
                                                                     CommandParameter="{Binding ZeroBasedIndex}">
                                                                 <PathIcon Data="{StaticResource ChevronDown}" Width="12" Height="12"></PathIcon>
                                                             </Button>
