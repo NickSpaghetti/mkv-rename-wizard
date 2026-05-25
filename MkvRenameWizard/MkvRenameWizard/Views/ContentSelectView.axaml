@@ -220,11 +220,18 @@
             <StackPanel Spacing="8">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <Border Classes="statusChip" IsVisible="{Binding HasImportedFiles}" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding PairedChipText}"
-                                   FontSize="12"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource AccentBrush}">
-                        </TextBlock>
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="6"
+                                    VerticalAlignment="Center">
+                            <Ellipse Classes="linkNode paired"
+                                     VerticalAlignment="Center">
+                            </Ellipse>
+                            <TextBlock Text="{Binding PairedChipText}"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentBrush}">
+                            </TextBlock>
+                        </StackPanel>
                     </Border>
                     <Border Classes="warnChip" IsVisible="{Binding HasIssues}" VerticalAlignment="Center">
                         <TextBlock Text="{Binding SkippedChipText}"
