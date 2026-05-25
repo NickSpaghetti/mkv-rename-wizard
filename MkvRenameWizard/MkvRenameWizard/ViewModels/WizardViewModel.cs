@@ -84,9 +84,9 @@ public class WizardViewModel : ViewModelBase
         
         _contentSearchViewModel
             .WhenAnyValue(x => x.SelectedShow)
-            .Subscribe(_ =>
+            .Subscribe(async void (_) =>
             {
-                UpdateContentSelectViewModel();
+                await UpdateContentSelectViewModel();
             });
 
         Pages = new ObservableCollection<ViewModelBase>

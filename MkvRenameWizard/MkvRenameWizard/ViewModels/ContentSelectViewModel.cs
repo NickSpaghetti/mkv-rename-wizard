@@ -44,6 +44,9 @@ public class ContentSelectViewModel : ViewModelBase
         TogglePartialFailureDetailsCommand = ReactiveCommand.Create(() => {ShowPartialFailureDetails = !ShowPartialFailureDetails;});
         SetLinkedReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = true; });
         SetIndependentReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = false; });
+
+        Episodes.CollectionChanged += (_, _) => OnListChanged();
+        MkvFiles.CollectionChanged += (_, _) => OnListChanged();
     }
 
     public Os CurrentOs { get; } = ResolveCurrentOs();
@@ -321,7 +324,7 @@ public class ContentSelectViewModel : ViewModelBase
         MoveItem(Episodes, fromIndex, toIndex);
         if (fromIndex < ImportedFileCount)
         {
-            MoveItem(Episodes, fromIndex, toIndex);
+            MoveItem(MkvFiles, fromIndex, toIndex);
         }
         _deferMatchRefresh = false;
         RefreshMatchState();
@@ -359,7 +362,10 @@ public class ContentSelectViewModel : ViewModelBase
         }
         
         PrepareSettle(targetIndex, fromIndex, isLinked);
+        _deferMatchRefresh = true;
         MoveItemToTarget(rails, fromIndex, targetIndex);
+        _deferMatchRefresh = false;
+        RefreshMatchState();
         ScheduleClearSettle();
     }
     
@@ -373,7 +379,10 @@ public class ContentSelectViewModel : ViewModelBase
         }
         
         PrepareSettle(finalTo.Value, fromIndex, isLinked);
+        _deferMatchRefresh = true;
         MoveItemToTarget(rails, fromIndex, insertIndex);
+        _deferMatchRefresh = false;
+        RefreshMatchState();
         ScheduleClearSettle();
     }
 
