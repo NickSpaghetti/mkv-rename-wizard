@@ -253,8 +253,8 @@
                         <StackPanel Orientation="Horizontal"
                                     Spacing="0">
                             <Button Classes="segment"
-                                    Classes.selected="{Binding IsLinkedModelSelected}"
-                                    Command="{Binding SetLinkedReorderCommand}"
+                                    Classes.selected="{Binding IsIndependentModeSelected}"
+                                    Command="{Binding SetIndependentReorderCommand}"
                                     CornerRadius="20, 0, 0, 20">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <PathIcon Data="{StaticResource LinkDismissRegular}" Width="16" Height="16"></PathIcon>
@@ -272,8 +272,8 @@
 
                             </Border>
                             <Button Classes="segment"
-                                    Classes.selected="{Binding IsIndependentModeSelected}"
-                                    Command="{Binding SetIndependentReorderCommand}"
+                                    Classes.selected="{Binding SetLinkedReorderCommand}"
+                                    Command="{Binding SetLinkedReorderCommand}"
                                     CornerRadius="0,20,20,0">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
