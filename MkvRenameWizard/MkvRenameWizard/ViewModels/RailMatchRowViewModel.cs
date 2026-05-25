@@ -39,5 +39,7 @@ public class RailMatchRowViewModel(
 
     public bool HasEpisodeRunTime => Episode is { RunTime : > 0 };
     public string EpisodeRuneTimeLabel => HasEpisodeRunTime ? $"{Episode?.RunTime}"  : string.Empty;
-    public string FileDisplayName => HasMkv ? "File will not be mapped for this episode" : PathDisplay.GetSafeFileName(MkvFile?.FullPath);
+
+    public string FileDisplayName =>
+        HasMkv ? PathDisplay.GetSafeFileName(MkvFile?.FullPath) : "File will not be mapped for this episode";
 }
