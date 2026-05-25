@@ -500,12 +500,14 @@
                                                     <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkHalo}"
                                                              Classes="linkHalo"
                                                              HorizontalAlignment="Center"
-                                                             VerticalAlignment="Center">
+                                                             VerticalAlignment="Center"
+                                                             RenderTransform="0.5, 0.5">
                                                     </Ellipse>
                                                     <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkDot}"
                                                              Classes="linkNode paired"
                                                              HorizontalAlignment="Center"
-                                                             VerticalAlignment="Center">
+                                                             VerticalAlignment="Center"
+                                                             RenderTransform="0.5, 0.5">
                                                     </Ellipse>
                                                 </Grid>
                                                 <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineRight}"
