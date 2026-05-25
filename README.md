@@ -6,3 +6,5 @@ Clone this repo and run `dotnet run`.
 
 # Credits
 Thank you to the team over at [MakeMKV](https://www.makemkv.com/) for providing people with Media Preservation tools.
+
+The backend api uses [TvMaze](https://www.tvmaze.com/) you can check their site to see if the show you have exists.  Thank you to the team for providing this api.
