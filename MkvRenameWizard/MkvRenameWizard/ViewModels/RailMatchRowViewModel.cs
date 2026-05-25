@@ -1,3 +1,4 @@
+using System;
 using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.Models.Rail;
@@ -38,7 +39,26 @@ public class RailMatchRowViewModel(
         Episode != null ? $"{EpisodeCode}  {EpisodeTitle}" : "File will not be mapped to an episode";
 
     public bool HasEpisodeRunTime => Episode is { RunTime : > 0 };
-    public string EpisodeRuneTimeLabel => HasEpisodeRunTime ? $"{Episode?.RunTime}"  : string.Empty;
+
+    public string EpisodeRunTimeLabel
+    {
+        get
+        {
+            if (!HasEpisodeRunTime || Episode?.RunTime is not > 0)
+            {
+                return string.Empty;
+            }
+            
+            var time = TimeSpan.FromMinutes(Episode.RunTime);
+            
+            return (time.Hours, time.Minutes) switch
+            {
+                (0, var m) => $"{m} {(m == 1 ? "min" : "mins")}",
+                (var h, 0) => $"{h} {(h == 1 ? "hour" : "hours")}",
+                var (h, m) => $"{h} {(h == 1 ? "hour" : "hours")} {m} {(m == 1 ? "min" : "mins")}"
+            };
+        }
+    }
 
     public string FileDisplayName =>
         HasMkv ? PathDisplay.GetSafeFileName(MkvFile?.FullPath) : "File will not be mapped for this episode";
