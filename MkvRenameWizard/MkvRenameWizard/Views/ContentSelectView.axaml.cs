@@ -626,7 +626,7 @@ public partial class ContentSelectView : UserControl
             }
 
             if (c is not Border { Classes.Count: > 0 } border ||
-                !border.Classes.Contains(Constants.AxamlClasses.BorderRailPaneCell))
+                !border.Classes.Contains(Constants.AxamlClasses.BorderRailPanelCell))
             {
                 return;
             }

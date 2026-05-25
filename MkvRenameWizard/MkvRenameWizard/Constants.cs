@@ -16,7 +16,7 @@ public static class Constants
     {
         public const string DraggingClass = "dragging";
         public const string BorderMatchRow = "matchRow";
-        public const string BorderRailPaneCell = "railPaneCell";
+        public const string BorderRailPanelCell = "railPanelCell";
     }
 
     public static class BorderNames
