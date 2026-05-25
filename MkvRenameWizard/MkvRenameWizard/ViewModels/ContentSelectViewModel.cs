@@ -98,7 +98,7 @@ public class ContentSelectViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(IsIndependentModeSelected));
             this.RaisePropertyChanged(nameof(IsShiftLinkHintVisible));
         }
-    } = true;
+    } = false;
     
     public bool IsLinkedModelSelected => LinkRailReorder;
     public bool IsIndependentModeSelected => !LinkRailReorder;
