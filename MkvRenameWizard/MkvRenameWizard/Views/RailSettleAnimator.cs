@@ -50,6 +50,8 @@ internal static class RailSettleAnimator
         var settleRail = row.FindControl<Border>(Constants.BorderNames.SettleRail);
         var duration = isLinked ? TimeSpan.FromMilliseconds(520) : TimeSpan.FromSeconds(480);
         Easing easing = isLinked ? new BackEaseOut() : new CubicEaseOut();
+        duration = TimeSpan.FromMilliseconds(isLinked ? 520 : 480);
+        easing = new BackEaseOut();
         
         row.RenderTransform = new TranslateTransform(0,startY);
         settleRail?.Background = Brushes.Transparent;
