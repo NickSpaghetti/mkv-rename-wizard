@@ -232,6 +232,11 @@
                 <StackPanel Orientation="Horizontal"
                             Spacing="0"
                             IsVisible="{Binding HasImportedFiles}">
+                    <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Linked" FontWeight="SemiBold"></TextBlock>
+                        <TextBlock Text="Move pairs together" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"></TextBlock>
+                    </StackPanel>
                     <Button Classes="segment"
                             Classes.selected="{Binding IsLinkedModelSelected}"
                             Command="{Binding SetLinkedReorderCommand}">
@@ -239,7 +244,7 @@
                             <PathIcon Data="{StaticResource LinkDismissRegular}" Width="16" Height="16"></PathIcon>
                             <StackPanel Spacing="2">
                                 <TextBlock Text="Independent" FontWeight="SemiBold"></TextBlock>
-                                <TextBlock Text="Move side separately" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"></TextBlock>
+                                <TextBlock Text="Move sides separately" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"></TextBlock>
                             </StackPanel>
                         </StackPanel>
                     </Button>
@@ -386,7 +391,7 @@
                                                     x:Name="{x:Static app:Constants+BorderNames.SettleRail}"
                                                     ZIndex="10">
                                             </Border>
-                                            <Grid ColumnDefinitions="*,48,*"></Grid>
+                                            <Grid ColumnDefinitions="*,48,*">
                                             <!-- Left is Episode cell -->
                                             <Border Classes="railPanelCell" IsVisible="{Binding HasEpisode}">
                                                 <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
@@ -455,7 +460,8 @@
                                                 </Grid>
                                             </Border>
                                             <!-- Center is Link Node -->
-                                            <Grid x:Name="{x:Static app:Constants+GridNames.LinkConnector}"
+                                            <Grid Grid.Column="1" 
+                                                x:Name="{x:Static app:Constants+GridNames.LinkConnector}"
                                                   ColumnDefinitions="*,Auto,*"
                                                   VerticalAlignment="Center"
                                                   IsVisible="{Binding IsPaired}">
@@ -484,7 +490,8 @@
                                                         Background="{DynamicResource AccentBrush}"
                                                         Opacity="0.75">
                                                 </Border>
-                                                <Grid Grid.Column="1"
+                                                </Grid>
+                                            <Grid Grid.Column="1"
                                                       VerticalAlignment="Center"
                                                       HorizontalAlignment="Center"
                                                       IsVisible="{Binding !IsPaired}">
