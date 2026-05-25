@@ -5,6 +5,7 @@
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
              xmlns:views="clr-namespace:MkvRenameWizard.Views"
              xmlns:models="clr-namespace:MkvRenameWizard.Models.Rail"
+             xmlns:app="using:MkvRenameWizard"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
              x:Class="MkvRenameWizard.Views.ContentSelectView"
              x:Name="SelectRoot"
@@ -399,7 +400,7 @@
                                     <Border Classes="matchRow" DragDrop.AllowDrop="True" Loaded="OnMatchRowLoaded">
                                         <Grid>
                                             <Border Classes="settleRail"
-                                                    x:Name="{x:Static app:Constants+BorderNames.SettleRail}"
+                                                    x:Name="{x:Static App:Constants+BorderNames.SettleRail}"
                                                     ZIndex="10">
                                             </Border>
                                             <Grid ColumnDefinitions="*,48,*">
@@ -485,29 +486,29 @@
                                             </Border>
                                             <!-- Center is Link Node -->
                                             <Grid Grid.Column="1" 
-                                                x:Name="{X:Static App:Constants+GridNames.LinkConnector}"
+                                                x:Name="{x:Static App:Constants+GridNames.LinkConnector}"
                                                   ColumnDefinitions="*,Auto,*"
                                                   VerticalAlignment="Center"
                                                   IsVisible="{Binding IsPaired}">
-                                                <Border x:Name="{X:Static App:Constants+BorderNames.LinkLineLeft}"
+                                                <Border x:Name="{x:Static App:Constants+BorderNames.LinkLineLeft}"
                                                         Height="1"
                                                         VerticalAlignment="Center"
                                                         Background="{DynamicResource AccentBrush}"
                                                         Opacity="0.75">
                                                 </Border>
                                                 <Grid Grid.Column="1" Width="16" Height="16">
-                                                    <Ellipse x:Name="{X:Static App:Constants+EllipseNames.LinkHalo}"
+                                                    <Ellipse x:Name="{x:Static App:Constants+EllipseNames.LinkHalo}"
                                                              Classes="linkHalo"
                                                              HorizontalAlignment="Center"
                                                              VerticalAlignment="Center">
                                                     </Ellipse>
-                                                    <Ellipse x:Name="{X:Static App:Constants+EllipseNames.LinkDot}"
+                                                    <Ellipse x:Name="{x:Static App:Constants+EllipseNames.LinkDot}"
                                                              Classes="linkNode paired"
                                                              HorizontalAlignment="Center"
                                                              VerticalAlignment="Center">
                                                     </Ellipse>
                                                 </Grid>
-                                                <Border x:Name="{X:Static App:Constants+BorderNames.LinkLineRight}"
+                                                <Border x:Name="{x:Static App:Constants+BorderNames.LinkLineRight}"
                                                         Grid.Column="2"
                                                         Height="1"
                                                         VerticalAlignment="Center"
