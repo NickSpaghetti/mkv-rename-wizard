@@ -240,7 +240,7 @@
                         <Button Classes="segment"
                                 Classes.selected="{Binding IsLinkedModelSelected}"
                                 Command="{Binding SetLinkedReorderCommand}"
-                                CornerRadius="11, 0, 0, 11">
+                                CornerRadius="20, 0, 0, 20">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource LinkDismissRegular}" Width="16" Height="16"></PathIcon>
                                 <StackPanel Spacing="2">
@@ -254,7 +254,7 @@
                         <Button Classes="segment"
                                 Classes.selected="{Binding IsIndependentModeSelected}"
                                 Command="{Binding SetIndependentReorderCommand}"
-                                CornerRadius="0,11,11,0">
+                                CornerRadius="0,20,20,0">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
                                 <StackPanel Spacing="2">
@@ -266,12 +266,11 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-
-                    <TextBlock Text="Hold Shift to move pairs together" FontSize="11"
-                               Foreground="{DynamicResource TextMutedBrush}"
-                               IsVisible="{Binding IsShiftLinkHintVisible}">
-                    </TextBlock>
                 </StackPanel>
+                <TextBlock Text="Hold Shift to move pairs together" FontSize="11"
+                           Foreground="{DynamicResource TextMutedBrush}"
+                           IsVisible="{Binding IsShiftLinkHintVisible}">
+                </TextBlock>
             </StackPanel>
             <StackPanel Grid.Column="1"
                         Orientation="Horizontal"
@@ -521,13 +520,13 @@
                                                             Classes="linkHalo"
                                                             HorizontalAlignment="Center"
                                                             VerticalAlignment="Center"
-                                                            RenderTransform="0.5, 0.5">
+                                                            RenderTransformOrigin="50%, 50%">
                                                         </Ellipse>
                                                         <Ellipse x:Name="{x:Static app:Constants+EllipseNames.LinkDot}"
                                                                  Classes="linkNode paired"
                                                                  HorizontalAlignment="Center"
                                                                  VerticalAlignment="Center"
-                                                                 RenderTransform="0.5, 0.5">
+                                                                 RenderTransformOrigin="50%, 50%">
                                                         </Ellipse>
                                                     </Grid>
                                                     <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineRight}"
