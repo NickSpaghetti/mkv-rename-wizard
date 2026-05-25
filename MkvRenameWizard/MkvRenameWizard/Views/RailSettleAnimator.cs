@@ -48,7 +48,7 @@ internal static class RailSettleAnimator
     private static async Task AnimateSettleAsync(Border row, double startY, bool isLinked)
     {
         var settleRail = row.FindControl<Border>(Constants.BorderNames.SettleRail);
-        var duration = isLinked ? TimeSpan.FromMilliseconds(520) : TimeSpan.FromSeconds(480);
+        var duration = isLinked ? TimeSpan.FromMilliseconds(520) : TimeSpan.FromMilliseconds(480);
         Easing easing = isLinked ? new BackEaseOut() : new CubicEaseOut();
 
         row.RenderTransform = new TranslateTransform(0,startY);
