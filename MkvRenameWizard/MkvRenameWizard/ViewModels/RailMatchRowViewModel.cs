@@ -32,7 +32,7 @@ public class RailMatchRowViewModel(
     public bool HasFileSizeLabel => !string.IsNullOrEmpty(FileSizeLabel);
     public string FileSizeRootLabel => MkvFile?.Root ?? string.Empty;
 
-    public string EpisodeCode  => Episode?.EpisodeNumber is { } num ? $"{Episode.Season:D2}E{num:D2}" : string.Empty;
+    public string EpisodeCode  => Episode?.EpisodeNumber is { } num ? $"S{Episode.Season:D2}E{num:D2}" : string.Empty;
     public string EpisodeTitle => Episode?.Name ?? string.Empty;
 
     public string EpisodeDisplayName =>

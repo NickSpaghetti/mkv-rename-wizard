@@ -209,26 +209,29 @@ public partial class ContentSelectView : UserControl
 
     private void BeginRailDragUi(Border sourceRow, RailMatchRowViewModel rowVm, bool isMoveLinked)
     {
-        sourceRow.Classes.Add("dragging");
+        sourceRow.Classes.Add(Constants.AxamlClasses.DraggingClass);
+        
+        var isEpisodeSideDragged = isMoveLinked ? rowVm.HasEpisode : _dragSide == RailReorderSide.Episode;
 
-        if (DragGhostLabel != null)
+        if (DragGhostIndex != null)
         {
-            DragGhostLabel.Text = isMoveLinked
-                ? (rowVm.HasEpisode ? $"{rowVm.EpisodeCode}  {rowVm.EpisodeTitle}" : rowVm.FileDisplayName)
-                : _dragSide == RailReorderSide.Episode
-                    ? $"{rowVm.EpisodeCode}  {rowVm.EpisodeTitle}"
-                    : rowVm.FileDisplayName;
+            DragGhostIndex.Text = rowVm.IndexLabel;
         }
 
-        if (DragGhost != null)
+        DragGhostLabel?.Text = isEpisodeSideDragged
+            ? $"{rowVm.EpisodeCode}  {rowVm.EpisodeTitle}"
+            : $"{rowVm.FileDisplayName}";
+
+        if (DragGhostDetail != null)
         {
-            DragGhost.IsVisible = true;
+            DragGhostDetail.Text = isMoveLinked
+                ? rowVm.EpisodeRunTimeLabel
+                : rowVm.FileSizeLabel;
         }
 
-        if (DragInsertLine.IsVisible != null)
-        {
-            DragInsertLine.IsVisible = true;
-        }
+        DragGhost?.IsVisible = true;
+
+        DragInsertLine.IsVisible = true;
     }
 
     private void ClearRailDragUi()

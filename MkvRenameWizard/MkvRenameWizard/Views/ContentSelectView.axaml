@@ -624,12 +624,30 @@
                                     Width="0"
                                     Canvas.Left="0"
                                     Canvas.Top="0">
-                                <TextBlock
-                                    x:Name="DragGhostLabel"
-                                    TextTrimming="CharacterEllipsis"
-                                    MaxWidth="300"
-                                    FontWeight="SemiBold">
-                                </TextBlock>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Border Classes="indexBadge active">
+                                        <TextBlock x:Name="DragGhostIndex"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="Bold">
+                                        </TextBlock>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock
+                                            x:Name="DragGhostLabel"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxWidth="300"
+                                            FontWeight="SemiBold">
+                                        </TextBlock>
+                                        <TextBlock
+                                            x:Name="DragGhostDetail"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxWidth="300"
+                                            FontSize="11"
+                                            Foreground="{DynamicResource TextMutedBrush}">
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
                             </Border>
                         </Canvas>
                     </Grid>
