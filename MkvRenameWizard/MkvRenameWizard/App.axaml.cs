@@ -18,7 +18,7 @@ namespace MkvRenameWizard;
 
 public partial class App : Application
 {
-    private ServiceProvider _serviceProvider;
+    private ServiceProvider? _serviceProvider;
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -28,7 +28,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            _serviceProvider = RegisterServices();
+            _serviceProvider = RegisterDependencies();
             desktop.Exit += (_, _) => _serviceProvider?.Dispose();
             
             try
@@ -48,7 +48,7 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private static ServiceProvider RegisterServices()
+    private static ServiceProvider RegisterDependencies()
     {
         var services = new ServiceCollection();
         

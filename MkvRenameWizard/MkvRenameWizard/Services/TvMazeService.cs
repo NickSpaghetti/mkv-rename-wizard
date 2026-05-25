@@ -65,7 +65,7 @@ public partial class TvMazeService : ITvMazeService
             {
                 _logger.LogError(ex, $"Failed to get list of tv shows with the name {showName}");
             }
-            return null;
+            return new List<ShowSearchResult>();
         }
 
         public static string StripTvMazeHtml(string summaryHtml)

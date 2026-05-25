@@ -26,18 +26,18 @@ public class ListSeasonResultDto
     public string EndDate { get; set; } = string.Empty;
 
     [JsonPropertyName("network")]
-    public NetworkDto Network { get; set; }
+    public NetworkDto? Network { get; set; }
 
     [JsonPropertyName("webChannel")]
     public object? WebChannel { get; set; }
 
     [JsonPropertyName("image")]
-    public ImageDto Image { get; set; }
+    public ImageDto? Image { get; set; }
 
     [JsonPropertyName("summary")]
     public string Summary { get; set; } = string.Empty;
 
     [JsonPropertyName("_links")]
-    public LinksDto Links { get; set; }
+    public LinksDto? Links { get; set; }
     
 }

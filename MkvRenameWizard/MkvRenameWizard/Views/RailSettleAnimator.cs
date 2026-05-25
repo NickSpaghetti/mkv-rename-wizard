@@ -53,11 +53,11 @@ internal static class RailSettleAnimator
         row.RenderTransform = new TranslateTransform(0,startY);
         settleRail?.Background = Brushes.Transparent;
         const int steps = 24;
-        var stepDealy = duration.TotalMilliseconds / steps;
+        var stepDelay = duration.TotalMilliseconds / steps;
 
         for (var i = 0; i <= steps; i++)
         {
-            var t = (double)steps;
+            var t =  1 / (double)steps;
             var eased = easing.Ease(t);
             var y = startY * (1 - eased);
             row.RenderTransform = new TranslateTransform(0, y);
@@ -74,7 +74,7 @@ internal static class RailSettleAnimator
             }
             
             await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Render);
-            await Task.Delay((int)stepDealy);
+            await Task.Delay((int)stepDelay);
         }
         row.RenderTransform = null;
         row.Background = Brushes.Transparent;
@@ -98,7 +98,7 @@ internal static class RailSettleAnimator
 
         for (var i = 0; i <= steps; i++)
         {
-            var t = i/(double)steps;
+            var t = (double)steps;
             double scale;
             if (t < 0.45)
             {

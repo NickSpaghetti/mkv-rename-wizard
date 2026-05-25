@@ -60,7 +60,7 @@ public class MkvFinderService : IMkvFinderService
                     }
                     
                     isImportedItemFound = true;
-                    importedFiles.Add(CreateImportedFile(Path.GetFileName(Path.GetDirectoryName(storageFile.Path.LocalPath))
+                    importedFiles.Add(CreateImportedFile(Path.GetFileName(Path.GetDirectoryName(storageFile.Path.LocalPath)) ?? string.Empty
                         ,storageFile.Path.LocalPath));
                 }
             }
@@ -266,7 +266,7 @@ public class MkvFinderService : IMkvFinderService
         return issue;
     }
 
-    private MkvFile CreateImportedFile(string? root, string fullPath)
+    private MkvFile CreateImportedFile(string root, string fullPath)
     {
         var sizeInBytes = TryGetFileSize(fullPath);
         return new MkvFile(root, fullPath, sizeInBytes,true);
@@ -299,7 +299,7 @@ public class MkvFinderService : IMkvFinderService
             await foreach (var storageItem in folder.GetItemsAsync())
             {
                 if (storageItem is not { CanBookmark: true, Path.IsFile: true } ||
-                    System.IO.Path.GetExtension(storageItem.Path.LocalPath) != ".mkv")
+                    Path.GetExtension(storageItem.Path.LocalPath) != ".mkv")
                 {
                     continue;
                 }

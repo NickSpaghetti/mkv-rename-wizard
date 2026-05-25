@@ -211,6 +211,7 @@ public class ContentSelectViewModel : ViewModelBase
         {
             ReorderFromDrag(dragData, insertIndex);
             EndRailDrag();
+            return;
         }
         
         if (!IsValidDragSourceIndex(dragData, _dragEpisodeSnapshot?.Count ?? 0, _dragFileSnapshot?.Count ?? 0))
@@ -311,7 +312,7 @@ public class ContentSelectViewModel : ViewModelBase
 
     private void MoveLinkedWithSettle(int fromIndex, int toIndex)
     {
-        var finalTo = TryComputeFinalIndex(Episodes, fromIndex, toIndex);
+        var finalTo = TryComputeLinkedFinalIndex(fromIndex, toIndex,Episodes,MkvFiles);
         if (finalTo == null)
         {
             return;
@@ -415,7 +416,7 @@ public class ContentSelectViewModel : ViewModelBase
             return;
         }
         
-        _lastSettle = new RailSettleHint(toIndex, fromIndex, isLinked ? RailSettleType.Linked : RailSettleType.Independent);
+        _lastSettle = new RailSettleHint(toIndex, direction, isLinked ? RailSettleType.Linked : RailSettleType.Independent);
         if (isLinked)
         {
             LinkAnimationVersion++;
@@ -807,7 +808,7 @@ public class ContentSelectViewModel : ViewModelBase
             
             RailSettleType settleType = RailSettleType.None;
             var settleDirection = 0;
-            if (_lastSettle is { Targetindex: 1 } hint)
+            if (_lastSettle is { } hint && hint.Targetindex == 1 )
             {
                 settleType = hint.SettleType;
                 settleDirection = hint.Direction;

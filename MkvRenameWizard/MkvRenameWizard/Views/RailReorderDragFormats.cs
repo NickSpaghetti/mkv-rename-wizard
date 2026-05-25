@@ -8,9 +8,9 @@ internal static class RailReorderDragFormats
 {
     private const string Prefix = Constants.TransformsMetadata.RailReorderDragPrefix;
 
-    public static bool TryGet(IDataTransfer transfer, out RailReorderDragData outdragData)
+    public static bool TryGet(IDataTransfer transfer, out RailReorderDragData? outdragData)
     {
-        outdragData = default;
+        outdragData = null;
         var text = transfer.TryGetText();
         if(string.IsNullOrEmpty(text) || !text.StartsWith(Prefix, StringComparison.Ordinal))
         {
