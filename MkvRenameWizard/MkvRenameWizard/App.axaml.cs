@@ -55,6 +55,7 @@ public partial class App : Application
         services.AddLogging(configure =>
         {
             configure.SetMinimumLevel(LogLevel.Debug);
+            configure.AddConsole();
         });
         
         services.AddHttpClient<ITvMazeDataAccess, TvMazeDataAccess>(client =>
