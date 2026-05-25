@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
@@ -57,7 +58,7 @@ internal static class RailSettleAnimator
 
         for (var i = 0; i <= steps; i++)
         {
-            var t =  1 / (double)steps;
+            var t =  i / (double)steps;
             var eased = easing.Ease(t);
             var y = startY * (1 - eased);
             row.RenderTransform = new TranslateTransform(0, y);
@@ -93,12 +94,16 @@ internal static class RailSettleAnimator
             return;
         }
 
+        var center = new RelativePoint(0.5, 0.5, RelativeUnit.Relative);
+        dot.RenderTransformOrigin = center;
+        halo?.RenderTransformOrigin = center;
+
         const int steps = 20;
         const int stepMs = 20;
 
         for (var i = 0; i <= steps; i++)
         {
-            var t = (double)steps;
+            var t = i / (double)steps;
             double scale;
             if (t < 0.45)
             {

@@ -806,9 +806,9 @@ public class ContentSelectViewModel : ViewModelBase
             var episode = i < EpisodeCount ? Episodes[i] : null;
             var mkvFile = i < ImportedFileCount ? MkvFiles[i] : null;
             
-            RailSettleType settleType = RailSettleType.None;
+            var settleType = RailSettleType.None;
             var settleDirection = 0;
-            if (_lastSettle is { } hint && hint.Targetindex == 1 )
+            if (_lastSettle is { } hint && hint.Targetindex == i )
             {
                 settleType = hint.SettleType;
                 settleDirection = hint.Direction;

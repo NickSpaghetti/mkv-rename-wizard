@@ -177,7 +177,7 @@
         <Style Selector="Button.segment">
             <Setter Property="Background" Value="Transparent"></Setter>
             <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
-            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="BorderThickness" Value="0"></Setter>
             <Setter Property="Padding" Value="12,8"></Setter>
             <Setter Property="HorizontalContentAlignment" Value="Left"></Setter>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>

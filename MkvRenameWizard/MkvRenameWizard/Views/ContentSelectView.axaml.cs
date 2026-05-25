@@ -224,7 +224,7 @@ public partial class ContentSelectView : UserControl
 
         if (DragGhostDetail != null)
         {
-            DragGhostDetail.Text = isMoveLinked
+            DragGhostDetail.Text = isEpisodeSideDragged
                 ? rowVm.EpisodeRunTimeLabel
                 : rowVm.FileSizeLabel;
         }
