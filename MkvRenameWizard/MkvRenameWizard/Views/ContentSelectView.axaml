@@ -272,7 +272,7 @@
 
                             </Border>
                             <Button Classes="segment"
-                                    Classes.selected="{Binding SetLinkedReorderCommand}"
+                                    Classes.selected="{Binding IsLinkedModelSelected}"
                                     Command="{Binding SetLinkedReorderCommand}"
                                     CornerRadius="0,20,20,0">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
