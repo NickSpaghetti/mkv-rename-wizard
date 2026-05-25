@@ -234,38 +234,52 @@
                         </TextBlock>
                     </Border>
 
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="0"
-                                IsVisible="{Binding HasImportedFiles}">
-                        <Button Classes="segment"
-                                Classes.selected="{Binding IsLinkedModelSelected}"
-                                Command="{Binding SetLinkedReorderCommand}"
-                                CornerRadius="20, 0, 0, 20">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="{StaticResource LinkDismissRegular}" Width="16" Height="16"></PathIcon>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Independent" FontWeight="SemiBold"></TextBlock>
-                                    <TextBlock Text="Move sides separately" FontSize="11"
-                                               Foreground="{DynamicResource TextMutedBrush}">
-                                    </TextBlock>
+                    <Border
+                        CornerRadius="20"
+                        BorderBrush="{DynamicResource DividerBrush}"
+                        BorderThickness="1"
+                        Background="Transparent"
+                        ClipToBounds="True"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding HasImportedFiles}">
+
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="0">
+                            <Button Classes="segment"
+                                    Classes.selected="{Binding IsLinkedModelSelected}"
+                                    Command="{Binding SetLinkedReorderCommand}"
+                                    CornerRadius="20, 0, 0, 20">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{StaticResource LinkDismissRegular}" Width="16" Height="16"></PathIcon>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Independent" FontWeight="SemiBold"></TextBlock>
+                                        <TextBlock Text="Move sides separately" FontSize="11"
+                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                        </TextBlock>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </Button>
-                        <Button Classes="segment"
-                                Classes.selected="{Binding IsIndependentModeSelected}"
-                                Command="{Binding SetIndependentReorderCommand}"
-                                CornerRadius="0,20,20,0">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Linked" FontWeight="SemiBold"></TextBlock>
-                                    <TextBlock Text="Move pairs together" FontSize="11"
-                                               Foreground="{DynamicResource TextMutedBrush}">
-                                    </TextBlock>
+                            </Button>
+                            <Border Width="1"
+                                    Background="{DynamicResource DividerBrush}"
+                                    VerticalAlignment="Stretch">
+
+                            </Border>
+                            <Button Classes="segment"
+                                    Classes.selected="{Binding IsIndependentModeSelected}"
+                                    Command="{Binding SetIndependentReorderCommand}"
+                                    CornerRadius="0,20,20,0">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{StaticResource LinkRegular}" Width="16" Height="16"></PathIcon>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="Linked" FontWeight="SemiBold"></TextBlock>
+                                        <TextBlock Text="Move pairs together" FontSize="11"
+                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                        </TextBlock>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
                 <TextBlock Text="Hold Shift to move pairs together" FontSize="11"
                            Foreground="{DynamicResource TextMutedBrush}"

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -51,6 +52,8 @@ public partial class App : Application
     private static ServiceProvider RegisterDependencies()
     {
         var services = new ServiceCollection();
+        
+        var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), nameof(MkvRenameWizard),"logs");
         
         services.AddLogging(configure =>
         {
