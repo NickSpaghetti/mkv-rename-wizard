@@ -1,3 +1,5 @@
+using System;
+
 namespace MkvRenameWizard.Models.TvMaze;
 
 public class Episode
@@ -8,4 +10,5 @@ public class Episode
     public int? EpisodeNumber { get; set; }
     public string Type { get; set; } = string.Empty;
     public long RunTime { get; set; }
+    public DateOnly? AirDate { get; set; }
 }
