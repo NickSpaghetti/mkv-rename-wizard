@@ -8,4 +8,9 @@ public class MainWindowViewModel : ViewModelBase
     {
         WizardViewModel = wizardViewModel;
     }
+
+    public MainWindowViewModel()
+    {
+        throw new System.NotImplementedException();
+    }
 }

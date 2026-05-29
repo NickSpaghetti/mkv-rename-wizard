@@ -56,7 +56,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
     public string? TargetFolder { get; set => this.RaiseAndSetIfChanged(ref field, value); }
 
     public ObservableCollection<PatternError> PatternErrors { get; } = new();
-    public ObservableCollection<PatternSegment> PatternSegments { get; } = new();
+    public ObservableCollection<PatternSegmentViewModel> PatternSegments { get; } = new();
 
     public IReadOnlyList<PatternToken> AvailableTokens => FilePatternHelper.ValidTokens;
     
@@ -190,7 +190,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
        PatternSegments.Clear();
        foreach (var segment in segments)
        {
-           PatternSegments.Add(segment);
+           PatternSegments.Add(new PatternSegmentViewModel(){Text = segment.Text,SegmentType = segment.SegmentType});
        }
        
        IsPatternValid = errors.Count == 0;

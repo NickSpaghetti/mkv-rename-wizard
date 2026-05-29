@@ -14,7 +14,8 @@
         MinWidth="900"
         MinHeight="560"
         Background="{DynamicResource AppBackgroundBrush}">
-
+    
+    
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -22,7 +23,7 @@
     </Design.DataContext>
                                
     <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
-    <views:WizardView DataContext="{Binding WizardViewModel}"/>
+    <views:WizardView DataContext="{Binding WizardViewModel}" MinWidth="1440" MinHeight="1080" />
 
 
 </Window>

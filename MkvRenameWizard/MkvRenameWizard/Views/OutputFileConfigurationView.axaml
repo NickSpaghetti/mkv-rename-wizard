@@ -3,33 +3,461 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModel="clr-namespace:MkvRenameWizard.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:models="clr-namespace:MkvRenameWizard.Models.Renaming"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="600"
              x:Class="MkvRenameWizard.Views.OutputFileConfigurationView"
-             x:DataType="viewModel:OutputFileConfigurationViewModel">
-   
-
-    <StackPanel>
+             x:DataType="viewModel:OutputFileConfigurationViewModel"
+             x:Name="Root">
+    
+    <UserControl.Styles>
+        <Style Selector="TextBlock.selection-label">
+            <Setter Property="FontSize" Value="10"></Setter>
+            <Setter Property="FontWeight" Value="SemiBold"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Margin" Value="0,0,0,6"></Setter>
+        </Style>
+        <Style Selector="TextBox.panel-input">
+            <Setter Property="Background" Value="#262626"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="6"></Setter>
+            <Setter Property="Foreground" Value="#E8E8E8"></Setter>
+            <Setter Property="FontFamily" Value="Menlo,Consolas,monospace"></Setter>
+            <Setter Property="FontSize" Value="13"></Setter>
+            <Setter Property="Padding" Value="10,8"></Setter>
+        </Style>
+        <Style Selector="TextBox.input-error">
+            <Setter Property="BorderBrush" Value="#F59E0B"></Setter>
+        </Style>
+        <Style Selector="RadioButton.case-btn">
+            <Setter Property="Background" Value="#2A2A2A"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="Padding" Value="10,6"></Setter>
+            <Setter Property="CornerRadius" Value="5"></Setter>
+            <Setter Property="Margin" Value="0,0,6,6"></Setter>
+        </Style>
+        <Style Selector="RadioButton.case-btn:checked">
+            <Setter Property="Background" Value="#1D3040"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+        <Style Selector="Border.divider-h">
+            <Setter Property="Height" Value="1"></Setter>
+            <Setter Property="Background" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="Margin" Value="0,14,14,0"></Setter>
+        </Style>
+        <Style Selector="Border.prefight-card">
+            <Setter Property="Background" Value="#22222"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="6"></Setter>
+            <Setter Property="Padding" Value="12,10"></Setter>
+        </Style>
+        <Style Selector="Border.preview-row">
+            <Setter Property="MinHeight" Value="44"></Setter>
+            <Setter Property="Padding" Value="14,0"></Setter>
+        </Style>
+        <Style Selector="Border.preview-row:pointerover">
+            <Setter Property="Background" Value="#1A2A35"></Setter>
+        </Style>
+        <Style Selector="Border.preview-row:pointerover TextBlock.arrow">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge-ready">
+            <Setter Property="Background" Value="#0D2E1A"></Setter>
+            <Setter Property="BorderBrush" Value="#22543D"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="10"></Setter>
+            <Setter Property="Padding" Value="9,3"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge-error">
+            <Setter Property="Background" Value="#2D1A00"></Setter>
+            <Setter Property="BorderBrush" Value="#683A00"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="10"></Setter>
+            <Setter Property="Padding" Value="9,3"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge-conflict">
+            <Setter Property="Background" Value="#2D0D0D"></Setter>
+            <Setter Property="BorderBrush" Value="#6B1A1A"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="10"></Setter>
+            <Setter Property="Padding" Value="9,3"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge-skipped">
+            <Setter Property="Background" Value="#202020"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="10"></Setter>
+            <Setter Property="Padding" Value="9,3"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge-done">
+            <Setter Property="Background" Value="#0A2A18"></Setter>
+            <Setter Property="BorderBrush" Value="#1A4D30"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="10"></Setter>
+            <Setter Property="Padding" Value="9,3"></Setter>
+        </Style>
+        <Style Selector="Border.error-panel">
+            <Setter Property="Background" Value="#1E1200"></Setter>
+            <Setter Property="BorderBrush" Value="#1A4D30"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="6"></Setter>
+            <Setter Property="Padding" Value="12"></Setter>
+            <Setter Property="Margin" Value="0,0,8,0"></Setter>
+        </Style>
+        <Style Selector="Border.token-valid">
+            <Setter Property="Background" Value="#1A3B4A"></Setter>
+            <Setter Property="CornerRadius" Value="4"></Setter>
+            <Setter Property="Padding" Value="5,2"></Setter>
+            <Setter Property="Margin" Value="0,0,2,2"></Setter>
+        </Style>
+        <Style Selector="Border.token-invalid">
+            <Setter Property="Background" Value="#3D2800"></Setter>
+            <Setter Property="CornerRadius" Value="4"></Setter>
+            <Setter Property="Padding" Value="5,2"></Setter>
+            <Setter Property="Margin" Value="0,0,2,2"></Setter>
+        </Style>
+        <Style Selector="Border.token-table-row">
+            <Setter Property="Padding" Value="10,5"></Setter>
+        </Style>
+    </UserControl.Styles>
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- Root has two column layout -->
+    <Grid ColumnDefinitions="375,*">
+        <!-- Left Pannel -->
+        <Border Grid.Column="0"
+                BorderBrush="{DynamicResource AccentBrush}"
+                BorderThickness="0,0,1,0"
+                Background="#1C1C1DC">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="18,16,18,16">
+                <StackPanel>
+                    <!-- File name pattern header and reset -->
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                        <TextBlock Classes="selection-label" Text="FILENAME PATTERN" VerticalAlignment="Center"></TextBlock>
+                        <Button Grid.Column="1" Command="{Binding ResetPatternCommand}"
+                                Background="Transparent" Foreground="{DynamicResource AccentBrush}"
+                                BorderThickness="0" FontSize="12" Padding="0" Cursor="Hand" Content="Reset"></Button>
+                    </Grid>
+                    
+                    <!-- Pattern input -->
+                    <TextBox Classes="panel-input"
+                               Classes.input-error="{Binding !IsPatternValid}"
+                               Text="{Binding FileNamePattern, Mode=TwoWay}"
+                               PlaceholderText="{}{S##E## {Title}}">
+                    </TextBox>
+                    <!-- Pattern preview -->
+                    <Border Background="#1E2E38"
+                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="1" CornerRadius="6"
+                            Padding="10,8" Margin="0,6,0,0"
+                            IsVisible="{Binding IsPatternValid}">
+                        <WrapPanel>
+                            <Border Classes="token-invalid"
+                                    IsVisible="{Binding Prefix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <TextBlock Text="{Binding Prefix}"
+                                           Foreground="#48C8F6"
+                                           FontFamily="Menlo,Consolas,monospace"
+                                           FontSize="12">
+                                </TextBlock>
+                            </Border>
+                            <!-- Parsed segments -->
+                            <ItemsControl ItemsSource="{Binding PatternSegments}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel></WrapPanel></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="viewModel:PatternSegmentViewModel">
+                                        <Panel>
+                                            <TextBlock Text="{Binding Text}"
+                                                       Foreground="#C8C8C8"
+                                                       FontFamily="Menlo,Consolas,monospace"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding IsLiteral}">
+                                            </TextBlock>
+                                            <Border Classes="token-valid" IsVisible="{Binding IsValidToken}">
+                                                <TextBlock Text="{Binding PillText}"
+                                                           Foreground="#48C8F6"
+                                                           FontFamily="Menlo,Consolas,monospace" FontSize="12">
+                                                </TextBlock>
+                                            </Border>
+                                            <Border Classes="token-invalid" IsVisible="{Binding IsInvalidToken}">
+                                                <TextBlock Text="{Binding PillText}"
+                                                           Foreground="#F59E0B"
+                                                           FontFamily="Menlo,Consolas,monospace" FontSize="12">
+                                                </TextBlock>
+                                            </Border>
+                                        </Panel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text=".mkv"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       FontFamily="Menlo,Consolas,monospace" FontSize="12"
+                                       VerticalAlignment="Center"></TextBlock>
+                        </WrapPanel>
+                    </Border>
+                    
+                   <!-- Error Panel -->
+                    <Border Classes="error-panel" IsVisible="{Binding !IsPatternValid}">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Ellipse Width="14" Height="14" Fill="#F59E0B" VerticalAlignment="Center"></Ellipse>
+                                <TextBlock Text="{Binding PatternErrors.Count, StringFormat='{}{0} problems in your pattern'}"
+                                           Foreground="#F59E0B" FontWeight="SemiBold" FontSize="12"
+                                           VerticalAlignment="Center">
+                                </TextBlock>
+                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding PatternErrors}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:PatternError">
+                                        <StackPanel Margin="0,0,0,8" Spacing="4">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{Binding Column, StringFormat='col {0}'}"
+                                                           Foreground="{DynamicResource TextMutedBrush}" FontSize="11"
+                                                           VerticalAlignment="Center">
+                                                </TextBlock>
+                                                <Border Classes="token-invalid">
+                                                    <TextBlock Text="{Binding TokenName, StringFormat='{}{{{0}}}'}"
+                                                               Foreground="#F59E0B"
+                                                               FontFamily="Menlo,Consolas,monospace" FontSize="12">
+                                                    </TextBlock>
+                                                </Border>
+                                                <TextBlock Text="is not a valid token"
+                                                           Foreground="#F59E0B"
+                                                           VerticalAlignment="Center">
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="6"
+                                                        IsVisible="{Binding Suggestion, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                <TextBlock Text="Did you mean" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"
+                                                           VerticalAlignment="Center">
+                                                </TextBlock>
+                                                    <Border Classes="token-valid">
+                                                        <TextBlock Text="{Binding Suggestion, StringFormat='{}{{{0}}}'}"
+                                                                   Foreground="#48C8F6"
+                                                                   FontFamily="Menlo,Consolas,monospace">
+                                                        </TextBlock>
+                                                    </Border>
+                                                    <TextBlock Text="?"
+                                                               Foreground="{DynamicResource TextMutedBrush}"
+                                                               FontSize="11"
+                                                               VerticalAlignment="Center">
+                                                    </TextBlock>
+                                                <Button Content="Click to fix"
+                                                        Command="{Binding #Root.((viewModel:OutputFileConfigurationViewModel)DataContext)?.ApplySuggestionCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Background="Transparent"
+                                                        Foreground="{DynamicResource AccentBrush}"
+                                                        BorderThickness="0" FontSize="11" Padding="0" Cursor="Hand">
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Available Tokens -->
+                    <Button Command="{Binding ShowTokenTableCommand}"
+                            Background="Transparent" BorderThickness="0" Padding="0"
+                            Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            Margin="0,8,0,0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Classes="selection-label" Text="AVAILABLE TOKENS" VerticalAlignment="Center"></TextBlock>
+                            <PathIcon Grid.Column="1" Data="{StaticResource PlayRegular}"
+                                      IsVisible="{Binding IsTokenTableExpanded}"
+                                      Foreground="{DynamicResource TextMutedBrush}"
+                                      Width="11"
+                                      Height="11"
+                                      VerticalAlignment="Center"
+                                      RenderTransformOrigin="0.5,0.5">
+                                <PathIcon.RenderTransform>
+                                    <RotateTransform Angle="90"></RotateTransform>
+                                </PathIcon.RenderTransform>
+                            </PathIcon>
+                            <PathIcon Grid.Column="1" Data="{StaticResource PlayRegular}"
+                                      IsVisible="{Binding !IsTokenTableExpanded}"
+                                      Foreground="{DynamicResource TextMutedBrush}"
+                                      Width="11"
+                                      Height="11"
+                                      VerticalAlignment="Center">
+                            </PathIcon>
+                        </Grid>
+                    </Button>
+                    
+                    <Border IsVisible="{Binding IsTokenTableExpanded}"
+                            Background="#1A1A1A"
+                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="1" CornerRadius="6" Margin="0,4,0,0">
+                        <ItemsControl ItemsSource="{Binding AvailableTokens}" Padding="4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:PatternToken">
+                                    <Grid ColumnDefinitions="110,*,80" Margin="8,5">
+                                        <Border Classes="token-valid" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Name, StringFormat='{}{{{0}}}'}"
+                                                       Foreground="#48C8F6"
+                                                       FontFamily="Menlo,Consolas,monospace"
+                                                       FontSize="12">
+                                            </TextBlock>
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding Description}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="12" VerticalAlignment="Center">
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="2" Text="{Binding ExampleValue}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="12" TextAlignment="Right" VerticalAlignment="Center">
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    
+                    <Border Classes="divider-h"></Border>
+                    
+                    <!-- File Name Prefix -->
+                    <TextBlock Classes="selection-label" Text="File Name Prefix"></TextBlock>
+                    <TextBox Classes="panel-input"
+                             Text="{Binding Prefix, Mode=TwoWay}"
+                             PlaceholderText="Leave empty for none"
+                             MaxWidth="140" HorizontalAlignment="Left">
+                    </TextBox>
+                    <TextBlock Text="Prepended to evey renamed file.  Leave empty for none."
+                               FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                               Margin="0,6,0,0" TextWrapping="Wrap">
+                    </TextBlock>
+                    
+                    <Border Classes="divider-h"></Border>
+                    
+                    <!-- Case Style -->
+                    <TextBlock Classes="selection-label" Text="Case Style"></TextBlock>
+                    <WrapPanel>
+                        <RadioButton Classes="case-btn" GroupName="CaseStyle"
+                                     IsChecked="{Binding IsCaseDefault, Mode=TwoWay}">
+                            <StackPanel>
+                                <TextBlock Text="Title Case" FontSize="12" FontWeight="SemiBold"></TextBlock>
+                                <TextBlock Text="Spaces kept" FontSize="10" Opacity="0.6"></TextBlock>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Classes="case-btn" GroupName="CaseStyle"
+                                     IsChecked="{Binding IsCaseSnake, Mode=TwoWay}">
+                            <StackPanel>
+                                <TextBlock Text="snake_case" FontSize="12" FontWeight="SemiBold"></TextBlock>
+                                <TextBlock Text="lower_case" FontSize="10" Opacity="0.6"></TextBlock>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Classes="case-btn" GroupName="CaseStyle"
+                                     IsChecked="{Binding IsCasePascal, Mode=TwoWay}">
+                            <StackPanel>
+                                <TextBlock Text="PascalCase" FontSize="12" FontWeight="SemiBold"></TextBlock>
+                                <TextBlock Text="NoSpaces" FontSize="10" Opacity="0.6"></TextBlock>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Classes="case-btn" GroupName="CaseStyle"
+                                     IsChecked="{Binding IsCaseCamel, Mode=TwoWay}">
+                            <StackPanel>
+                                <TextBlock Text="camelCase" FontSize="12" FontWeight="SemiBold"></TextBlock>
+                                <TextBlock Text="noSpaces" FontSize="10" Opacity="0.6"></TextBlock>
+                            </StackPanel>
+                        </RadioButton>
+                    </WrapPanel>
+                    
+                    <Border Classes="divider-h"></Border>
+                    
+                    <!-- TargetFolder -->
+                    <TextBlock Classes="selection-label" Text="Target Folder"></TextBlock>
+                    <Button Command="{Binding PickTaregetFolderCommand}"
+                            Background="Transparent" BorderThickness="0" Padding="0"
+                            Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <Border Background="#222222" BorderBrush="{DynamicResource DividerBrush}"
+                                BorderThickness="1" CornerRadius="6" Padding="10,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" 
+                                          Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"></PathIcon>
+                                <TextBlock Text="{Binding TargetFolder}"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"></TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Button>
+                    <TextBlock Text="Renamed files will be placed in this folder.  Clikc to change."
+                               FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                               Margin="0,6,0,0"></TextBlock>
+                    
+                    <Border Classes="divider-h"></Border>
+                    
+                    <!-- Preflight -->
+                    <TextBlock Classes="selection-label" Text="Preflight"></TextBlock>
+                    <UniformGrid Columns="3">
+                        <Border Classes="prefight-card" Margin="0,0,0,6">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding ReadyCount}" FontSize="26"
+                                           FontWeight="Bold" Foreground="#4ADE80" HorizontalAlignment="Center">
+                                </TextBlock>
+                                <TextBlock Text="Ready" FontSize="10" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="prefight-card" Margin="0,0,0,6">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding ConflictCount}" FontSize="26"
+                                           FontWeight="Bold" Foreground="#F87171" HorizontalAlignment="Center">
+                                </TextBlock>
+                                <TextBlock Text="Conflicts" FontSize="10" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="prefight-card">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding ConflictCount}" FontSize="26"
+                                           FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
+                                </TextBlock>
+                                <TextBlock Text="Skipped" FontSize="10" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                    
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
         
-        <StackPanel Orientation="Horizontal">  <Label Content="File Name Prefix:"
-                   VerticalAlignment="Center"
-                   Margin="5,0,5,0"/>  <TextBox Text="{Binding Prefix, Mode=TwoWay}"
-                     PlaceholderText="Prefix:"
-                     TextAlignment="Left"
-                     VerticalAlignment="Center"
-                     Margin="0,5,5,5"  Padding="5"
-                     MinWidth="50"  HorizontalAlignment="Left">
-            </TextBox>
-        </StackPanel>
+        <!-- Right Panel -->
+        <Grid Grid.Column="1" RowDefinitions="36,*">
+            <!-- Column Header row -->
+            <Border Grid.Row="0"
+                    Background="#181818"
+                    BorderBrush="{DynamicResource DividerBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="14,0">
+                <Grid ColumnDefinitions="54,*,28,*,120">
+                    <TextBlock Grid.Column="0" Classes="selection-label" Text="Number" VerticalAlignment="Center"></TextBlock>
+                    <TextBlock Grid.Column="1" Classes="selection-label" Text="Current File Name" VerticalAlignment="Center"></TextBlock>
+                    <TextBlock Grid.Column="3" Classes="selection-label" Text="Renamed To" VerticalAlignment="Center"></TextBlock>
+                    <TextBlock Grid.Column="4" Classes="selection-label" Text="Status" HorizontalAlignment="Right" VerticalAlignment="Center"></TextBlock>
+                </Grid>
+            </Border>
+            
+            <!-- Preview Rows -->
+            
+        </Grid>
         
-        <RadioButton Content="Default Name" IsChecked="{Binding IsCaseDefault}" />
-        <RadioButton Content="Snake Case" IsChecked="{Binding IsCaseSnake}" />
-        <RadioButton Content="Pascal Case" IsChecked="{Binding IsCasePascal}" />
-
-        <Button Content="Update Preview" Command="{Binding ExecuteRenameCommand}" />
-
-        <ListBox ItemsSource="{Binding PreviewItems}" />
-        
-        <Button Content="Rename Files" Command="{Binding ExecuteRenameCommand}" />
-    </StackPanel>
+    </Grid>
     
 </UserControl>
