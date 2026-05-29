@@ -13,14 +13,14 @@ public static partial class FilePatternHelper
 {
     public static readonly IReadOnlyList<PatternToken> ValidTokens = new List<PatternToken>
     {
-        new(Constants.TokenNames.Show, "Show name", "Inital D"),
+        new(Constants.TokenNames.Show, "Show name", "Initial D"),
         new(Constants.TokenNames.Season, "Season Number", "1"),
         new(Constants.TokenNames.SeasonPadded, "Season Padded", "S01"),
         new(Constants.TokenNames.Episode, "Episode Number", "9"),
         new(Constants.TokenNames.EpisodePadded, "Episode Padded", "E09"),
         new(Constants.TokenNames.SeasonEpisodePadded, "Season & Episode Padded", "S01E09"),
-        new(Constants.TokenNames.Title, "Episode Title", ""),
-        new(Constants.TokenNames.Year, "Aired Year", "Act.  9: Battle to the Limit")
+        new(Constants.TokenNames.Title, "Episode Title", "Act.  9: Battle to the Limit"),
+        new(Constants.TokenNames.Year, "Aired Year", "1998")
     };
 
     public static readonly HashSet<string> ValidTokenNames =

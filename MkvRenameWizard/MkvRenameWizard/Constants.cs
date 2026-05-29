@@ -44,7 +44,7 @@ public static class Constants
         public const string SeasonPadded = "S##";
         public const string Episode  = nameof(Episode);
         public const string EpisodePadded = "E##";
-        public const string SeasonEpisodePadded = $"{SeasonPadded}{Episode}";
+        public const string SeasonEpisodePadded = $"{SeasonPadded}{EpisodePadded}";
         public const string Title = nameof(Title);
         public const string Year =  nameof(Year);
     }

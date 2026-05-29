@@ -49,7 +49,7 @@
             <Setter Property="Margin" Value="0,14,14,0"></Setter>
         </Style>
         <Style Selector="Border.prefight-card">
-            <Setter Property="Background" Value="#22222"></Setter>
+            <Setter Property="Background" Value="#222222"></Setter>
             <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="CornerRadius" Value="6"></Setter>
@@ -102,7 +102,7 @@
         </Style>
         <Style Selector="Border.error-panel">
             <Setter Property="Background" Value="#1E1200"></Setter>
-            <Setter Property="BorderBrush" Value="#1A4D30"></Setter>
+            <Setter Property="BorderBrush" Value="#F59E0B"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="CornerRadius" Value="6"></Setter>
             <Setter Property="Padding" Value="12"></Setter>
@@ -136,9 +136,9 @@
     <Grid ColumnDefinitions="375,*">
         <!-- Left Pannel -->
         <Border Grid.Column="0"
-                BorderBrush="{DynamicResource AccentBrush}"
+                BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,0,1,0"
-                Background="#1C1C1DC">
+                Background="#1C1C1C">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="18,16,18,16">
                 <StackPanel>
                     <!-- File name pattern header and reset -->
@@ -178,7 +178,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="viewModel:PatternSegmentViewModel">
                                         <Panel>
-                                            <TextBlock Text="{Binding Text}"
+                                            <TextBlock Text="{Binding PillText}"
                                                        Foreground="#C8C8C8"
                                                        FontFamily="Menlo,Consolas,monospace"
                                                        FontSize="12"
@@ -404,32 +404,20 @@
                     <UniformGrid Columns="3">
                         <Border Classes="prefight-card" Margin="0,0,0,6">
                             <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="{Binding ReadyCount}" FontSize="26"
-                                           FontWeight="Bold" Foreground="#4ADE80" HorizontalAlignment="Center">
-                                </TextBlock>
-                                <TextBlock Text="Ready" FontSize="10" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
-                                </TextBlock>
+                                <TextBlock Text="{Binding ReadyCount}" FontSize="26" FontWeight="Bold" Foreground="#4ADE80" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Ready" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
+    
                         <Border Classes="prefight-card" Margin="0,0,0,6">
                             <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="{Binding ConflictCount}" FontSize="26"
-                                           FontWeight="Bold" Foreground="#F87171" HorizontalAlignment="Center">
-                                </TextBlock>
-                                <TextBlock Text="Conflicts" FontSize="10" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
-                                </TextBlock>
+                                <TextBlock Text="{Binding ConflictCount}" FontSize="26" FontWeight="Bold" Foreground="#F87171" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Conflicts" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
-                        <Border Classes="prefight-card">
-                            <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                <TextBlock Text="{Binding ConflictCount}" FontSize="26"
-                                           FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
-                                </TextBlock>
-                                <TextBlock Text="Skipped" FontSize="10" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center">
-                                </TextBlock>
+    
+                        <Border Classes="prefight-card" Margin="0,0,0,6"> <StackPanel HorizontalAlignment="Center" Spacing="2"> <TextBlock Text="{Binding ConflictCount}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Skipped" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
                     </UniformGrid>

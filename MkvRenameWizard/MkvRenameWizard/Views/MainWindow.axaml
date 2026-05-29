@@ -9,8 +9,8 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="MkvRenameWizard"
-        Width="1024"
-        Height="640"
+        Width="1440"
+        Height="1080"
         MinWidth="900"
         MinHeight="560"
         Background="{DynamicResource AppBackgroundBrush}">
@@ -23,7 +23,7 @@
     </Design.DataContext>
                                
     <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
-    <views:WizardView DataContext="{Binding WizardViewModel}" MinWidth="1440" MinHeight="1080" />
+    <views:WizardView DataContext="{Binding WizardViewModel}" />
 
 
 </Window>
