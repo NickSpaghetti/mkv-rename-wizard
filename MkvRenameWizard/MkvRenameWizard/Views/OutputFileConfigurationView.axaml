@@ -379,7 +379,7 @@
                     
                     <!-- TargetFolder -->
                     <TextBlock Classes="selection-label" Text="Target Folder"></TextBlock>
-                    <Button Command="{Binding PickTaregetFolderCommand}"
+                    <Button Command="{Binding PickTargetFolderCommand}"
                             Background="Transparent" BorderThickness="0" Padding="0"
                             Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <Border Background="#222222" BorderBrush="{DynamicResource DividerBrush}"

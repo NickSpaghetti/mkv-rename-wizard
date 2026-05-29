@@ -41,7 +41,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref field, value);
             RebuildPreview();
         }
-    }
+    } = string.Empty;
     
     private const string DefaultFileNamePattern = "{S##E##} {Title}";
 
@@ -136,7 +136,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
    public ReactiveCommand<Unit, bool> ShowTokenTableCommand { get; }
    public ReactiveCommand<Unit, string> ResetPatternCommand { get; }
    public ReactiveCommand<PatternError, Unit> ApplySuggestionCommand { get; set; }
-   public ReactiveCommand<Unit, Unit> PickTaregetFolderCommand { get; }
+   public ReactiveCommand<Unit, Unit> PickTargetFolderCommand { get; }
    public ReactiveCommand<Unit, Unit> ExecuteRenameCommand { get; }
 
    private readonly ILogger<OutputFileConfigurationViewModel> _logger;
@@ -166,7 +166,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
            FileNamePattern = $"{{{Constants.TokenNames.SeasonEpisodePadded}}} {{{Constants.TokenNames.Title}}}");
 
        ApplySuggestionCommand = ReactiveCommand.Create<PatternError>(ApplySuggestion);
-       PickTaregetFolderCommand = ReactiveCommand.CreateFromTask(PickTargetFolder);
+       PickTargetFolderCommand = ReactiveCommand.CreateFromTask(PickTargetFolder);
        
        var canRename = this.WhenAnyValue(x => x.IsPatternValid ,
            x => x.ReadyCount, 
@@ -210,7 +210,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
            foreach (var entry in RenameEntities)
            {
                PreviewItems.Add(new RenamePreviewItem<RenameFileOperation>(
-                   new RenameFileOperation(++i,Path.GetFileName(entry.MkvFile.FullPath),null),
+                   new RenameFileOperation(++i,Path.GetFileName(entry.MkvFile.FullPath) ?? string.Empty,null),
                    RenamePreviewStatus.PatternError)
                );
            }
@@ -224,14 +224,14 @@ public class OutputFileConfigurationViewModel : ViewModelBase
        foreach (var entry in RenameEntities)
        {
            index++;
-           var source = Path.GetFileName(entry.MkvFile.FullPath);
+           var source = Path.GetFileName(entry.MkvFile.FullPath) ?? string.Empty;
            if (entry.Episode.EpisodeNumber == null)
            {
                rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,source,null),RenamePreviewStatus.Skipped));
                continue;
            }
            
-           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
+           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
            var isDone = string.Equals(target, target, StringComparison.OrdinalIgnoreCase);
            var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Skipped;
            rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,source,target),status));

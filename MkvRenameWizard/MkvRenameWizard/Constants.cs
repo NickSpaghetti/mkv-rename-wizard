@@ -47,6 +47,7 @@ public static class Constants
         public const string SeasonEpisodePadded = $"{SeasonPadded}{EpisodePadded}";
         public const string Title = nameof(Title);
         public const string Year =  nameof(Year);
+        public const string Ext = nameof(Ext);
     }
 
 }
