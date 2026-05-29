@@ -21,15 +21,15 @@
             </TextBox>
         </StackPanel>
         
-        <RadioButton Content="Default Name" IsChecked="{Binding UseDefaultName}" />
-        <RadioButton Content="Snake Case" IsChecked="{Binding UseSnakeCase}" />
-        <RadioButton Content="Pascal Case" IsChecked="{Binding UsePascalCase}" />
+        <RadioButton Content="Default Name" IsChecked="{Binding IsCaseDefault}" />
+        <RadioButton Content="Snake Case" IsChecked="{Binding IsCaseSnake}" />
+        <RadioButton Content="Pascal Case" IsChecked="{Binding IsCasePascal}" />
 
-        <Button Content="Update Preview" Command="{Binding UpdatePreviewCommand}" />
+        <Button Content="Update Preview" Command="{Binding ExecuteRenameCommand}" />
 
-        <ListBox ItemsSource="{Binding PreviewList}" />
+        <ListBox ItemsSource="{Binding PreviewItems}" />
         
-        <Button Content="Rename Files" Command="{Binding UpdatePreviewCommand}" />
+        <Button Content="Rename Files" Command="{Binding ExecuteRenameCommand}" />
     </StackPanel>
     
 </UserControl>
