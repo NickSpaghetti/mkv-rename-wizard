@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.Renaming;
-using MkvRenameWizard.Models.TvMaze;
 using ReactiveUI;
 using Path = System.IO.Path;
 
@@ -34,7 +33,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
         }
     } = new();
 
-    public Show? CurrentShow
+    public string CurrentShowName
     {
         get;
         set
@@ -220,7 +219,6 @@ public class OutputFileConfigurationViewModel : ViewModelBase
            return;
        }
        
-       var show = CurrentShow ?? new Show {Name = string.Empty};
        var rawItems = new List<RenamePreviewItem<RenameFileOperation>>();
        var index = 0;
        foreach (var entry in RenameEntities)
@@ -233,7 +231,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
                continue;
            }
            
-           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,show,Prefix,SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
+           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
            var isDone = string.Equals(target, target, StringComparison.OrdinalIgnoreCase);
            var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Skipped;
            rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,source,target),status));
@@ -351,7 +349,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
    public void Reset()
    {
        RenameEntities = new List<RenameEntity>();
-       CurrentShow = null;
+       CurrentShowName = string.Empty;
        FileNamePattern = DefaultFileNamePattern;
        Prefix = string.Empty;
        SelectedCaseStyle = CaseStyle.Default;

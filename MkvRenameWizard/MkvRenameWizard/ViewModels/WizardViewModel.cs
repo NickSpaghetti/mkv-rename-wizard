@@ -8,7 +8,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DynamicData;
 using MkvRenameWizard.Models.Renaming;
-using MkvRenameWizard.Models.TvMaze;
 using MkvRenameWizard.Services;
 using ReactiveUI;
 
@@ -316,14 +315,7 @@ public class WizardViewModel : ViewModelBase
                 MkvFile: _contentSelectViewModel.MkvFiles[i]));
         }
         
-        _outputFileConfigurationViewModel.CurrentShow = _contentSearchViewModel.SelectedShow is null
-            ? null
-            : new Show
-            {
-                Name = _contentSearchViewModel.SelectedShow.Name,
-                
-                AirNetworkLabel =  _contentSearchViewModel.SelectedShow.AirNetworkLabel,
-            };
+        _outputFileConfigurationViewModel.CurrentShowName = _contentSearchViewModel.SelectedShow?.Name ?? string.Empty;
         _outputFileConfigurationViewModel.RenameEntities = entries;
     }
 

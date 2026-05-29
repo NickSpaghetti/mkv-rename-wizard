@@ -87,14 +87,14 @@ public static partial class FilePatternHelper
         return segments;
     }
 
-    public static string Apply(string pattern, Episode episode, Show show, string prefix, CaseStyle caseStyle)
+    public static string Apply(string pattern, Episode episode, string showName, string prefix, CaseStyle caseStyle)
     {
         var expanded = TokenRegex().Replace(pattern, match =>
         {
             var name = match.Groups[TokenGroup].Value;
             return name switch
             {
-                Constants.TokenNames.Show => SanitizeToken(show.Name),
+                Constants.TokenNames.Show => SanitizeToken(showName),
                 Constants.TokenNames.Season => episode.Season.ToString(),
                 Constants.TokenNames.SeasonPadded => $"S{episode.Season:D2}",
                 Constants.TokenNames.Episode => episode.EpisodeNumber?.ToString() ?? string.Empty,
