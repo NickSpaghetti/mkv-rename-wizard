@@ -1,0 +1,6 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Generated from ./extract-svg-path.sh "https://raw.githubusercontent.com/microsoft/fluentui-system-icons/refs/heads/main/assets/Chevron%20Up/SVG/ic_fluent_chevron_up_24_regular.svg" -->
+    <StreamGeometry x:Key="CheckmarkFilled">M 5 18 L 15 28 L 31 8
+    </StreamGeometry>
+</ResourceDictionary>

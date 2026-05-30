@@ -4,11 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModel="clr-namespace:MkvRenameWizard.ViewModels"
              xmlns:models="clr-namespace:MkvRenameWizard.Models.Renaming"
+             xmlns:converters="clr-namespace:Avalonia.Controls.Converters;assembly=Avalonia.Controls"
              mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="600"
              x:Class="MkvRenameWizard.Views.OutputFileConfigurationView"
              x:DataType="viewModel:OutputFileConfigurationViewModel"
              x:Name="Root">
-    
+
+    <UserControl.Resources>
+        <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+    </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="TextBlock.selection-label">
             <Setter Property="FontSize" Value="10"></Setter>
@@ -164,7 +168,7 @@
     
     <!-- Root has two column layout -->
     <Grid ColumnDefinitions="375,*">
-        <!-- Left Pannel -->
+        <!-- Left Panel -->
         <Border Grid.Column="0"
                 BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,0,1,0"
@@ -192,7 +196,7 @@
                             Padding="10,8" Margin="0,6,0,0"
                             IsVisible="{Binding IsPatternValid}">
                         <WrapPanel>
-                            <Border Classes="token-invalid"
+                            <Border Classes="token-valid"
                                     IsVisible="{Binding Prefix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                 <TextBlock Text="{Binding Prefix}"
                                            Foreground="#48C8F6"
@@ -305,7 +309,7 @@
                             Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                             Margin="0,8,0,0">
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Classes="selection-label" Text="AVAILABLE TOKENS" VerticalAlignment="Center"></TextBlock>
+                            <TextBlock Classes="selection-label" Text="Available Tokens" VerticalAlignment="Center"></TextBlock>
                             <PathIcon Grid.Column="1" Data="{StaticResource PlayRegular}"
                                       IsVisible="{Binding IsTokenTableExpanded}"
                                       Foreground="{DynamicResource TextMutedBrush}"
@@ -478,10 +482,7 @@
                     BorderThickness="0,0,0,1"
                     Padding="14,0">
                 <Grid ColumnDefinitions="Auto,*,48,*,Auto">
-                    <Border Grid.Column="0" Width="30" Height="30" CornerRadius="6" Background="#252525" HorizontalAlignment="Left">
-                        <TextBlock Grid.Column="0" Classes="selection-label" Text="Number" VerticalAlignment="Center"></TextBlock>
-                    </Border>
-                    
+                    <TextBlock Grid.Column="0" Classes="selection-label" Text="#" VerticalAlignment="Center"></TextBlock>
                     <TextBlock Grid.Column="1" Classes="selection-label" Text="Current File Name" VerticalAlignment="Center"></TextBlock>
                     <TextBlock Grid.Column="3" Classes="selection-label" Text="Renamed To" VerticalAlignment="Center"></TextBlock>
                     <TextBlock Grid.Column="4" Classes="selection-label" Text="Status" HorizontalAlignment="Right" VerticalAlignment="Center"></TextBlock>
@@ -489,7 +490,135 @@
             </Border>
             
             <!-- Preview Rows -->
-            
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ListBox ItemsSource="{Binding PreviewItems}" Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.Styles>
+                        <Style Selector="ListBox:focus-visible">
+                            <Setter Property="BorderThickness" Value="0"></Setter>
+                        </Style>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0"></Setter>
+                            <Setter Property="Background" Value="Transparent"></Setter>
+                        </Style>
+                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                            <Setter Property="Background" Value="Transparent"></Setter>
+                        </Style>
+                        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="Transparent"></Setter>
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <DataTemplate.DataType>
+                                <x:Type TypeName="models:RenamePreviewItem" x:TypeArguments="models:RenameFileOperation" />
+                            </DataTemplate.DataType>
+                            <Border Classes="preview-row"
+                                    BorderBrush="{DynamicResource DividerBrush}"
+                                    BorderThickness="0,0,0,1">
+                                <Panel>
+                                    <Border Classes="row-select-indicator"
+                                            Width="3"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Stretch"
+                                            Background="{DynamicResource AccentBrush}"
+                                            Margin="-14,8,0,8"></Border>
+                                    <Grid VerticalAlignment="Center" ColumnDefinitions="44,*,48,*,Auto">
+                                        <Border Classes="index-pill" Grid.Column="0"
+                                                Width="30" 
+                                                Height="30"
+                                                CornerRadius="6"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Classes="row-num"
+                                                       Text="{Binding RenameOperation.OperationId, StringFormat='{}{0:D2}'}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       FontSize="11" FontWeight="SemiBold">
+                                                
+                                            </TextBlock>
+                                        </Border>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding SourceFileName}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="13"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center"
+                                                   ToolTip.Tip="{Binding  RenameOperation.SourcePath}">
+                                        </TextBlock>
+                                        <PathIcon Grid.Column="2" Classes="arrow"
+                                                  Data="{StaticResource RightArrowFilled}"
+                                                  Width="14"
+                                                  Height="14"
+                                                  Foreground="{DynamicResource TextMutedBrush}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center">
+                                        </PathIcon>
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding RenameOperation.TargetPath}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   FontSize="13"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   IsVisible="{Binding RenameOperation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                                   ToolTip.Tip="{Binding RenameOperation.TargetPath}">
+                                        </TextBlock>
+                                        <Panel Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <Border Classes="status-badge-ready" 
+                                                    IsVisible="{Binding RenamePreviewStatus, 
+                                                        Converter={StaticResource EnumToBoolConverter}, 
+                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Ready}}">
+                                               <StackPanel Orientation="Horizontal" Spacing="5">
+                                                   <Ellipse Width="6" Height="6" Fill="#4ADE80" VerticalAlignment="Center"></Ellipse>
+                                                   <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#4ADE80"></TextBlock>
+                                               </StackPanel>
+                                            </Border>   
+                                            <Border Classes="status-badge-ready" 
+                                                    IsVisible="{Binding RenamePreviewStatus, 
+                                                        Converter={StaticResource EnumToBoolConverter}, 
+                                                        ConverterParameter={x:Static models:RenamePreviewStatus.PatternError}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <Ellipse Width="6" Height="6" Fill="#F59E0B" VerticalAlignment="Center"></Ellipse>
+                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#F59E0B"></TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Classes="status-badge-ready" 
+                                                    IsVisible="{Binding RenamePreviewStatus, 
+                                                        Converter={StaticResource EnumToBoolConverter}, 
+                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Conflict}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <Ellipse Width="6" Height="6" Fill="#F87171" VerticalAlignment="Center"></Ellipse>
+                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#F87171"></TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Classes="status-badge-ready" 
+                                                    IsVisible="{Binding RenamePreviewStatus, 
+                                                        Converter={StaticResource EnumToBoolConverter}, 
+                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Skipped}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <Ellipse Width="6" Height="6" Fill="#888" VerticalAlignment="Center"></Ellipse>
+                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" 
+                                                               Foreground="{DynamicResource TextMutedBrush}">
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Border>  
+                                            
+                                            <Border Classes="status-badge-ready" 
+                                                    IsVisible="{Binding RenamePreviewStatus, 
+                                                        Converter={StaticResource EnumToBoolConverter}, 
+                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Done}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <Ellipse Width="6" Height="6" Fill="#4ADE80" VerticalAlignment="Center"></Ellipse>
+                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#4ADE80"></TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                            
+                                        </Panel>
+                                    </Grid>
+                                </Panel>
+                            </Border>
+                        </DataTemplate>   
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ScrollViewer>
         </Grid>
         
     </Grid>

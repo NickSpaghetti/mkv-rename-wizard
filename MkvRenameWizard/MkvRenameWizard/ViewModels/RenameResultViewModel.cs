@@ -22,10 +22,10 @@ public class RenameResultViewModel : ViewModelBase
     public int TotalCount => this.SuccessCount + this.FailureCount;
     public string? ShowSeasonLabel { get;set => this.RaiseAndSetIfChanged(ref field, value); }
     public string? TargetFolder { get;set => this.RaiseAndSetIfChanged(ref field, value); }
-    
-    public ObservableCollection<RenameOperationResult<RenameFileOperation>> OperationResults { get; }
 
-    public string SummaryHeadlines => IsFullSuccess
+    public ObservableCollection<RenameOperationResult<RenameFileOperation>> OperationResults { get; } = [];
+
+    public string SummaryHeadline => IsFullSuccess
         ? "file(s) renamed"
         : $"Renamed {SuccessCount} file(s) to {TargetFolder} of {TotalCount} files";
 
@@ -60,8 +60,8 @@ public class RenameResultViewModel : ViewModelBase
         } 
     }
 
-    public ReactiveCommand<Unit, Unit> OpenFolderCommand;
-    public ReactiveCommand<Unit, Unit> CopyErrorDetailsCommand;
+    public ReactiveCommand<Unit, Unit> OpenFolderCommand { get; }
+    public ReactiveCommand<Unit, Unit> CopyErrorDetailsCommand { get; }
 
     public event Action? ResetRequested;
     public event Action? RetryFailedRequested;
@@ -92,10 +92,11 @@ public class RenameResultViewModel : ViewModelBase
     private void OpenFolder()
     {
         var folder = TargetFolder;
-        if (!string.IsNullOrEmpty(TargetFolder) && Directory.Exists(TargetFolder))
+        if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
         {
             folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
+        
 
         try
         {
@@ -124,7 +125,7 @@ public class RenameResultViewModel : ViewModelBase
         ShowSeasonLabel = showSeasonLabel;
         TargetFolder = targetFolder;
         
-        this.RaisePropertyChanged(nameof(SummaryHeadlines));
+        this.RaisePropertyChanged(nameof(SummaryHeadline));
         this.RaisePropertyChanged(nameof(SummarySubtitle));
         this.RaisePropertyChanged(nameof(RetryButtonLabel));
         this.RaisePropertyChanged(nameof(StatsBarLabel));

@@ -64,7 +64,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
     
     public bool IsTokenTableExpanded { get; set => this.RaiseAndSetIfChanged(ref field, value);}
     
-    private string Prefix {get; set => this.RaiseAndSetIfChanged(ref field, value);} = string.Empty;
+    public string Prefix {get; set => this.RaiseAndSetIfChanged(ref field, value);} = string.Empty;
 
     public CaseStyle SelectedCaseStyle
     {
@@ -211,9 +211,11 @@ public class OutputFileConfigurationViewModel : ViewModelBase
            var i = 0;
            foreach (var entry in RenameEntities)
            {
+               var sourceFilePath = entry.MkvFile.FullPath ?? string.Empty;
+               var sourceFileName =   Path.GetFileName(sourceFilePath);
                PreviewItems.Add(new RenamePreviewItem<RenameFileOperation>(
-                   new RenameFileOperation(++i,Path.GetFileName(entry.MkvFile.FullPath) ?? string.Empty,null),
-                   RenamePreviewStatus.PatternError)
+                   new RenameFileOperation(++i,sourceFilePath,null),
+                   sourceFileName,RenamePreviewStatus.PatternError)
                );
            }
 
@@ -226,17 +228,18 @@ public class OutputFileConfigurationViewModel : ViewModelBase
        foreach (var entry in RenameEntities)
        {
            index++;
-           var source = Path.GetFileName(entry.MkvFile.FullPath) ?? string.Empty;
+           var sourceFileName = Path.GetFileName(entry.MkvFile.FullPath) ?? string.Empty;
+           var sourceFilePath = entry.MkvFile.FullPath ?? string.Empty;
            if (entry.Episode.EpisodeNumber == null)
            {
-               rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,source,null),RenamePreviewStatus.Skipped));
+               rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,null),sourceFileName,RenamePreviewStatus.Skipped));
                continue;
            }
            
            var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
            var isDone = string.Equals(target, target, StringComparison.OrdinalIgnoreCase);
            var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Skipped;
-           rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,source,target),status));
+           rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,target),sourceFileName,status));
        }
 
        var conflictNumbers = rawItems
@@ -291,7 +294,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
            return;
        }
 
-       FileNamePattern = FileNamePattern.Replace($"{{{error.TokenName}}}", $"{{{error.TokenName}}}");
+       FileNamePattern = FileNamePattern.Replace($"{{{error.TokenName}}}", $"{{{error.Suggestion}}}");
    }
    
    /// <summary>
@@ -299,7 +302,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
    /// Updates each successfully rename entity's source path to the new renamed file path
    /// so the preview table reflects what is on disk.
    ///
-   /// Pattern, prefix, CaseStyle, and TAregt folder are preserved.
+   /// Pattern, prefix, CaseStyle, and Target folder are preserved.
    /// Succesfully renamed entities will show a "Done" Status
    /// If a user edits the apttern the Done rows flip back to Ready.
    /// </summary>

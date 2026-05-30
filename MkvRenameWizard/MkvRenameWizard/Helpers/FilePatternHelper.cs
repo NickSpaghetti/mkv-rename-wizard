@@ -281,7 +281,7 @@ public static partial class FilePatternHelper
             }
         }
 
-        return bestDistance <= threshold ? bestTokenName : invalidTokenName;
+        return bestDistance <= threshold ? bestTokenName : null;
     }
 
     private static int LevenshteinDistance(ReadOnlySpan<char> source, ReadOnlySpan<char> target)
