@@ -136,7 +136,7 @@ public static partial class FilePatternHelper
         var firstInvalidIndex = token.IndexOfAny(InvalidFileNameChars);
         if (firstInvalidIndex == -1)
         {
-            return string.Empty;
+            return token.ToString();
         }
 
         char[]? borrowedArray = null;
