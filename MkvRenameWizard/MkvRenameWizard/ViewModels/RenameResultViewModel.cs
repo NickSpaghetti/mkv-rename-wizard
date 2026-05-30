@@ -47,7 +47,7 @@ public class RenameResultViewModel : ViewModelBase
             sb.AppendLine();
             foreach (var result in OperationResults)
             {
-                if (!result.IsSuccessful)
+                if (result.IsSuccessful)
                 {
                     continue;
                 }
@@ -92,7 +92,7 @@ public class RenameResultViewModel : ViewModelBase
     private void OpenFolder()
     {
         var folder = TargetFolder;
-        if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
+        if (!string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
         {
             folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
@@ -100,10 +100,7 @@ public class RenameResultViewModel : ViewModelBase
 
         try
         {
-            if (folder != null)
-            {
-                Process.Start(new ProcessStartInfo { FileName = folder, UseShellExecute = true });
-            }
+            Process.Start(new ProcessStartInfo { FileName = folder, UseShellExecute = true });
         }
         catch (Exception ex)
         {
@@ -124,12 +121,14 @@ public class RenameResultViewModel : ViewModelBase
         FailureCount = OperationResults.Count(r => !r.IsSuccessful);
         ShowSeasonLabel = showSeasonLabel;
         TargetFolder = targetFolder;
+        IsFullSuccess = FailureCount == 0 && SuccessCount > 0;
         
         this.RaisePropertyChanged(nameof(SummaryHeadline));
         this.RaisePropertyChanged(nameof(SummarySubtitle));
         this.RaisePropertyChanged(nameof(RetryButtonLabel));
         this.RaisePropertyChanged(nameof(StatsBarLabel));
         this.RaisePropertyChanged(nameof(ErrorDetailedText));
+        
 
     }
 }
