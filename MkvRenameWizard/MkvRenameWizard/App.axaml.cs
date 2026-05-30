@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.DataAccess;
 using MkvRenameWizard.FileTypes;
+using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Services;
 using MkvRenameWizard.ViewModels;
 using MkvRenameWizard.Views;
@@ -58,15 +59,15 @@ public partial class App : Application
         
         services.AddLogging(configure =>
         {
-            configure.SetMinimumLevel(
-                #if DEBUG 
-                LogLevel.Debug
-                #else
-                LogLevel.Warning
+            var logLevel = LogLevel.Warning;
+                #if DEBUG
+                logLevel = LogLevel.Debug;
                 #endif
+            configure.SetMinimumLevel(
+                logLevel
             );
             configure.AddJsonConsole();
-            configure.AddFile($"{logDirectory}/logs-{{Date}}.json",isJson: true);
+            configure.AddFile($"{logDirectory}/logs-{{Date}}.json", minimumLevel: logLevel, isJson: true);
         });
         
         services.AddHttpClient<ITvMazeDataAccess, TvMazeDataAccess>(client =>
@@ -83,6 +84,7 @@ public partial class App : Application
         services.TryAddSingleton<ITvMazeService, TvMazeService>();
         services.TryAddSingleton<IMkvFinderService, MkvFinderService>();
         services.TryAddSingleton<IFileRenameOperationService, FileRenameOperationService>();
+        services.TryAddSingleton<IFileLoggerService>(sp => new FileLoggerService(logDirectory,sp.GetService<ILogger<FileLoggerService>>()));
         
         services.TryAddSingleton<ContentSearchViewModel>();
         services.TryAddSingleton<ShowSearchResultViewModel>();

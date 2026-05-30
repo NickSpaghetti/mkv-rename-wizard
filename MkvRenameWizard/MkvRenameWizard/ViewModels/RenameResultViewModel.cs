@@ -8,6 +8,7 @@ using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.Renaming;
 using MkvRenameWizard.Services;
 using ReactiveUI;
@@ -62,6 +63,7 @@ public class RenameResultViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> OpenFolderCommand { get; }
     public ReactiveCommand<Unit, Unit> CopyErrorDetailsCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenLogFolderCommand { get; }
 
     public event Action? ResetRequested;
     public event Action? RetryFailedRequested;
@@ -75,19 +77,23 @@ public class RenameResultViewModel : ViewModelBase
     
 
     private readonly IClipboardService _clipboardService;
+    private readonly IFileLoggerService _fileLoggerService;
     private readonly ILogger<RenameResultViewModel> _logger;
-    public RenameResultViewModel(IClipboardService clipboardService, ILogger<RenameResultViewModel> logger)
+    public RenameResultViewModel(IClipboardService clipboardService, IFileLoggerService fileLoggerService, ILogger<RenameResultViewModel> logger)
     {
         _clipboardService = clipboardService;
+        _fileLoggerService = fileLoggerService;
         _logger = logger;
         CopyErrorDetailsCommand = ReactiveCommand.CreateFromTask(CopyErrorDetails);
         OpenFolderCommand = ReactiveCommand.Create(OpenFolder);
+        OpenLogFolderCommand = ReactiveCommand.Create(() => _fileLoggerService.OpenLogDirectory());
     }
 
     private Task CopyErrorDetails()
     {
         return _clipboardService.SetTextAsync(ErrorDetailedText);
     }
+    
 
     private void OpenFolder()
     {

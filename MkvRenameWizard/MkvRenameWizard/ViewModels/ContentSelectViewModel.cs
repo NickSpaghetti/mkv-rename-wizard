@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
+using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.FileImport;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.Models.Rail;
@@ -23,11 +25,13 @@ public class ContentSelectViewModel : ViewModelBase
 {
     private readonly ILogger<ContentSelectViewModel> _logger;
     private readonly IMkvFinderService _mkvFinderService;
+    private readonly IFileLoggerService _fileLoggerService;
 
-    public ContentSelectViewModel(IMkvFinderService mkvFinderService, ILogger<ContentSelectViewModel> logger)
+    public ContentSelectViewModel(IMkvFinderService mkvFinderService, IFileLoggerService fileLoggerService, ILogger<ContentSelectViewModel> logger)
     {
         _mkvFinderService =  mkvFinderService;
         _logger = logger;
+        _fileLoggerService = fileLoggerService;
 
         MoveEpisodeUpCommand = ReactiveCommand.Create<int>(i => MoveChevronUp(Episodes, i));
         MoveEpisodeDownCommand = ReactiveCommand.Create<int>(i => MoveChevronDown(Episodes, i));
@@ -35,6 +39,7 @@ public class ContentSelectViewModel : ViewModelBase
         MoveMkvFileDownCommand = ReactiveCommand.Create<int>(i => MoveChevronDown(MkvFiles, i));
         OpenFilesCommand = ReactiveCommand.CreateFromTask(ExecuteOpenFilesCommand);
         OpenFolderCommand = ReactiveCommand.CreateFromTask(ExecuteOpenFolderCommand);
+        OpenLogFolderCommand = ReactiveCommand.Create(() => _fileLoggerService.OpenLogDirectory());
         ClearFilesCommand = ReactiveCommand.Create(ClearImport);
         OpenSystemSettingsCommand = ReactiveCommand.Create(TryOpenPermissionsSetting);
         PrimaryErrorCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryErrorCommand);
@@ -60,6 +65,7 @@ public class ContentSelectViewModel : ViewModelBase
     
     public ReactiveCommand<Unit, Unit> OpenFilesCommand { get;  }
     public ReactiveCommand<Unit, Unit> OpenFolderCommand { get;  }
+    public ReactiveCommand<Unit, Unit> OpenLogFolderCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearFilesCommand { get;  }
     public ReactiveCommand<Unit, Unit> OpenSystemSettingsCommand { get;  }
     public ReactiveCommand<Unit, Unit> PrimaryErrorCommand { get;  }
@@ -672,6 +678,7 @@ public class ContentSelectViewModel : ViewModelBase
         var result = await _mkvFinderService.OpenMkvFoldersAsync(topLevel);
         ApplyImportResult(result, merge:true);
     }
+    
 
     internal async Task ImportFromPathsAsync(IReadOnlyList<string> paths)
     {

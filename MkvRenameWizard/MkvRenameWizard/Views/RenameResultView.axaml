@@ -372,6 +372,16 @@
                         </TextBlock>
                         <Button Grid.Column="2"
                                 Classes="ghost-result"
+                                Command="{Binding OpenLogFolderCommand}"
+                                VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="6">
+                                <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" VerticalAlignment="Center"></PathIcon>
+                                <TextBlock Text="Vew Logs" VerticalAlignment="Center"></TextBlock>
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2"
+                                Classes="ghost-result"
                                 Command="{Binding CopyErrorDetailsCommand}"
                                 VerticalAlignment="Center">
                             <Button.Content>

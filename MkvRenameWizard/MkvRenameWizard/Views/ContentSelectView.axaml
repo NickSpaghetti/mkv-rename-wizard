@@ -857,6 +857,13 @@
                                 <Button Content="{Binding SecondaryErrorActionText}"
                                         Command="{Binding SecondaryErrorCommand}">
                                 </Button>
+                                <Button Command="{Binding OpenLogFolderCommand}">
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="6">
+                                        <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" VerticalAlignment="Center"></PathIcon>
+                                        <TextBlock Text="Vew Logs" VerticalAlignment="Center"></TextBlock>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
