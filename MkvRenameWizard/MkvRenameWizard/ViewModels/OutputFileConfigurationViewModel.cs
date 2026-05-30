@@ -23,11 +23,11 @@ public class OutputFileConfigurationViewModel : ViewModelBase
             field = value;
             this.RaisePropertyChanged();
             var firstFullPath = value.FirstOrDefault()?.MkvFile.FullPath;
-            var sourceDirectory = firstFullPath is not null ? new DirectoryInfo(firstFullPath) : null;
+            var sourceDirectory = firstFullPath is not null ? Path.GetDirectoryName(firstFullPath) : null;
 
-            TargetFolder = string.IsNullOrEmpty(sourceDirectory?.FullName)
+            TargetFolder = string.IsNullOrEmpty(sourceDirectory)
                 ? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
-                : sourceDirectory.FullName;
+                : sourceDirectory;
 
             RebuildPreview();
         }
@@ -253,7 +253,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
                continue;
            }
            
-           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
+           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}";
            var isDone = string.Equals(sourceFileName, target, StringComparison.OrdinalIgnoreCase);
            var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Ready;
            rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,target),sourceFileName,status));
