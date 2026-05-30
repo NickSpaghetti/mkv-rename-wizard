@@ -46,7 +46,7 @@
         <Style Selector="Border.divider-h">
             <Setter Property="Height" Value="1"></Setter>
             <Setter Property="Background" Value="{DynamicResource DividerBrush}"></Setter>
-            <Setter Property="Margin" Value="0,14,14,0"></Setter>
+            <Setter Property="Margin" Value="0,14,0,14"></Setter>
         </Style>
         <Style Selector="Border.prefight-card">
             <Setter Property="Background" Value="#222222"></Setter>
@@ -59,11 +59,41 @@
             <Setter Property="MinHeight" Value="44"></Setter>
             <Setter Property="Padding" Value="14,0"></Setter>
         </Style>
+        <Style Selector="Border.index-pill">
+            <Setter Property="Background" Value="#252525"></Setter>
+            <Setter Property="BorderBrush" Value="Transparent"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+        </Style>
+        <Style Selector="Border.row-select-indicator">
+            <Setter Property="IsVisible" Value="False"></Setter>
+        </Style>
+        <Style Selector="Border.row-select-indicator">
+            <Setter Property="IsVisible" Value="False"></Setter>
+        </Style>
         <Style Selector="Border.preview-row:pointerover">
             <Setter Property="Background" Value="#1A2A35"></Setter>
         </Style>
-        <Style Selector="Border.preview-row:pointerover TextBlock.arrow">
+        <Style Selector="Border.index-pill > TextBlock.row-num">
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+        </Style>
+        <Style Selector="Border.preview-row:pointerover PathIcon.arrow">
             <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+        <Style Selector="Border.preview-row:pointerover PathIcon.index-pill">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+        <Style Selector="Border.preview-row:pointerover TextBlock.row-num">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+        <Style Selector="ListBoxItem:selected Border.index-pill">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Background" Value="#1F48C6"></Setter>
+        </Style>
+        <Style Selector="ListBoxItem:selected Border.index-pill > TextBlock.row-num">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+        <Style Selector="ListBoxItem:selected Border.preview-row">
+            <Setter Property="Background" Value="#1F48C6"></Setter>
         </Style>
         <Style Selector="Border.status-badge-ready">
             <Setter Property="Background" Value="#0D2E1A"></Setter>
@@ -379,21 +409,34 @@
                     
                     <!-- TargetFolder -->
                     <TextBlock Classes="selection-label" Text="Target Folder"></TextBlock>
-                    <Button Command="{Binding PickTargetFolderCommand}"
-                            Background="Transparent" BorderThickness="0" Padding="0"
-                            Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                        <Border Background="#222222" BorderBrush="{DynamicResource DividerBrush}"
-                                BorderThickness="1" CornerRadius="6" Padding="10,8">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" 
-                                          Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"></PathIcon>
-                                <TextBlock Text="{Binding TargetFolder}"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"></TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </Button>
-                    <TextBlock Text="Renamed files will be placed in this folder.  Clikc to change."
+                    <Border Background="#222222" BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="1" CornerRadius="6" Padding="2,0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0"
+                                       Text="{Binding TargetFolder, Mode=TwoWay}"
+                                       Background="Transparent"
+                                       BorderThickness="0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="12"
+                                       Padding="10,6"
+                                       MinWidth="0"
+                                       ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                       VerticalAlignment="Center"
+                                       PlaceholderText="Enter or pase a folder path..."
+                                       ToolTip.Tip="{Binding TargetFolder}">
+                            </TextBox>
+                            <Button Grid.Column="1"
+                                    Command="{Binding PickTargetFolderCommand}"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Padding="8,6"
+                                    Cursor="Hand"
+                                    ToolTip.Tip="Browser..">
+                                <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" Foreground="{DynamicResource TextMutedBrush}"></PathIcon>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <TextBlock Text="Type or paste a path directly, or click the fodler icon to browse."
                                FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
                                Margin="0,6,0,0"></TextBlock>
                     
@@ -434,8 +477,11 @@
                     BorderBrush="{DynamicResource DividerBrush}"
                     BorderThickness="0,0,0,1"
                     Padding="14,0">
-                <Grid ColumnDefinitions="54,*,28,*,120">
-                    <TextBlock Grid.Column="0" Classes="selection-label" Text="Number" VerticalAlignment="Center"></TextBlock>
+                <Grid ColumnDefinitions="Auto,*,48,*,Auto">
+                    <Border Grid.Column="0" Width="30" Height="30" CornerRadius="6" Background="#252525" HorizontalAlignment="Left">
+                        <TextBlock Grid.Column="0" Classes="selection-label" Text="Number" VerticalAlignment="Center"></TextBlock>
+                    </Border>
+                    
                     <TextBlock Grid.Column="1" Classes="selection-label" Text="Current File Name" VerticalAlignment="Center"></TextBlock>
                     <TextBlock Grid.Column="3" Classes="selection-label" Text="Renamed To" VerticalAlignment="Center"></TextBlock>
                     <TextBlock Grid.Column="4" Classes="selection-label" Text="Status" HorizontalAlignment="Right" VerticalAlignment="Center"></TextBlock>

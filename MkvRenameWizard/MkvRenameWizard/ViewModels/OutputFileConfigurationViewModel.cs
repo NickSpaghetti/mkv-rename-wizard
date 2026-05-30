@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.Renaming;
+using MkvRenameWizard.Models.TvMaze;
 using ReactiveUI;
 using Path = System.IO.Path;
 
@@ -231,7 +233,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
                continue;
            }
            
-           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
+           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
            var isDone = string.Equals(target, target, StringComparison.OrdinalIgnoreCase);
            var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Skipped;
            rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,source,target),status));

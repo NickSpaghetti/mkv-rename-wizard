@@ -21,7 +21,8 @@ public static partial class FilePatternHelper
         new(Constants.TokenNames.SeasonEpisodePadded, "Season & Episode Padded", "S01E09"),
         new(Constants.TokenNames.Title, "Episode Title", "Act.  9: Battle to the Limit"),
         new(Constants.TokenNames.Year, "Aired Year", "1998"),
-        new(Constants.TokenNames.Ext, "Extension", "mkv")
+        new(Constants.TokenNames.Ext, "Extension", "mkv"),
+        new(Constants.TokenNames.RunTime, "Run Time", "30m"),
     };
 
     public static readonly HashSet<string> ValidTokenNames =
@@ -88,7 +89,7 @@ public static partial class FilePatternHelper
         return segments;
     }
 
-    public static string Apply(string pattern, Episode episode, string showName, string prefix, string fileExtension, CaseStyle caseStyle)
+    public static string Apply(string pattern, Episode episode, string showName, string prefix, string fileExtension, string runTime, CaseStyle caseStyle)
     {
         var expanded = TokenRegex().Replace(pattern, match =>
         {
@@ -105,6 +106,7 @@ public static partial class FilePatternHelper
                 Constants.TokenNames.Title => SanitizeToken(episode.Name),
                 Constants.TokenNames.Year => episode?.AirDate?.Year.ToString() ?? string.Empty,
                 Constants.TokenNames.Ext => fileExtension,
+                Constants.TokenNames.RunTime => runTime,
                 _ => match.Value
             };
         });
