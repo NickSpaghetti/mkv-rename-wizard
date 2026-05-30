@@ -254,8 +254,8 @@ public class OutputFileConfigurationViewModel : ViewModelBase
            }
            
            var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
-           var isDone = string.Equals(target, target, StringComparison.OrdinalIgnoreCase);
-           var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Skipped;
+           var isDone = string.Equals(sourceFileName, target, StringComparison.OrdinalIgnoreCase);
+           var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Ready;
            rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,target),sourceFileName,status));
        }
 
