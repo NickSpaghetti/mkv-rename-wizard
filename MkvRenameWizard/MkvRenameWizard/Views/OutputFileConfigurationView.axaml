@@ -171,8 +171,8 @@
                 BorderBrush="{DynamicResource DividerBrush}"
                 BorderThickness="0,0,1,0"
                 Background="#1C1C1C">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="18,16,18,16">
-                <StackPanel>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="18,16,18,16">
                     <!-- File name pattern header and reset -->
                     <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
                         <TextBlock Classes="selection-label" Text="FILENAME PATTERN" VerticalAlignment="Center"></TextBlock>
@@ -333,7 +333,7 @@
                             Background="#1A1A1A"
                             BorderBrush="{DynamicResource DividerBrush}"
                             BorderThickness="1" CornerRadius="6" Margin="0,4,0,0">
-                        <ItemsControl ItemsSource="{Binding AvailableTokens}" Padding="4">
+                        <ItemsControl ItemsSource="{Binding AvailableTokens}" Padding="8">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:PatternToken">
                                     <Grid ColumnDefinitions="110,*,80" Margin="8,5">
