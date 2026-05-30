@@ -72,9 +72,6 @@
         <Style Selector="Border.row-select-indicator">
             <Setter Property="IsVisible" Value="False"></Setter>
         </Style>
-        <Style Selector="Border.row-select-indicator">
-            <Setter Property="IsVisible" Value="False"></Setter>
-        </Style>
         <Style Selector="Border.preview-row:pointerover">
             <Setter Property="Background" Value="#1A2A35"></Setter>
         </Style>
@@ -95,10 +92,10 @@
             <Setter Property="Background" Value="#1F48C6"></Setter>
         </Style>
         <Style Selector="ListBoxItem:selected Border.index-pill > TextBlock.row-num">
-            <Setter Property="Background" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="ListBoxItem:selected Border.preview-row">
-            <Setter Property="Background" Value="#1F48C6"></Setter>
+            <Setter Property="Background" Value="#1448C8F6"></Setter>
         </Style>
         <Style Selector="Border.status-badge-ready">
             <Setter Property="Background" Value="#0D2E1A"></Setter>
@@ -559,7 +556,16 @@
                                                    FontSize="13"
                                                    VerticalAlignment="Center"
                                                    Foreground="{DynamicResource TextMutedBrush}"
-                                                   IsVisible="{Binding RenameOperation, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                                   IsVisible="{Binding RenameOperation.TargetPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                                   ToolTip.Tip="{Binding RenameOperation.TargetPath}">
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="3"
+                                                   Text="{Binding RenameOperation.TargetPath}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   FontSize="13"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   IsVisible="{Binding RenameOperation.TargetPath, Converter={x:Static StringConverters.IsNullOrEmpty}}"
                                                    ToolTip.Tip="{Binding RenameOperation.TargetPath}">
                                         </TextBlock>
                                         <Panel Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center">
