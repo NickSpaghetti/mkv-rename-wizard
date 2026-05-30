@@ -4,7 +4,6 @@
              xmlns:local="using:MkvRenameWizard"
              RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-    
              <Application.Resources>
                  <ResourceDictionary>
                      <ResourceDictionary.MergedDictionaries>
@@ -16,6 +15,10 @@
                          <ResourceInclude Source="avares://MkvRenameWizard/Resources/LinkRegular.axaml" />
                          <ResourceInclude Source="avares://MkvRenameWizard/Resources/LinkDismissRegular.axaml" />
                          <ResourceInclude Source="avares://MkvRenameWizard/Resources/ReOrderDotsVerticalRegular.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/OpenFolderRegular.axaml" />
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/RightArrowFilled.axaml"/>
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/CopyRegular.axaml"/>
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/CheckmarkFilled.axaml"></ResourceInclude>
                      </ResourceDictionary.MergedDictionaries>
                      
                      <SolidColorBrush x:Key="AppBackgroundBrush" Color="#191919"/>

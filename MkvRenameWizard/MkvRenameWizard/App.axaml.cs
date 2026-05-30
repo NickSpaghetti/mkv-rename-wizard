@@ -71,13 +71,16 @@ public partial class App : Application
         services.AddHttpClient();
         
         services.TryAddTransient<IImageLoadingService, ImageLoadingService>();
+        services.TryAddTransient<IClipboardService, AvaloniaClipBoardService>();
         services.TryAddSingleton<ITvMazeService, TvMazeService>();
         services.TryAddSingleton<IMkvFinderService, MkvFinderService>();
+        services.TryAddSingleton<IFileRenameOperationService, FileRenameOperationService>();
         
         services.TryAddSingleton<ContentSearchViewModel>();
         services.TryAddSingleton<ShowSearchResultViewModel>();
         services.TryAddSingleton<ContentSelectViewModel>();
-        services.TryAddSingleton<OutputFileConfigurationViewModel>(_ => new OutputFileConfigurationViewModel(new Dictionary<string, MkvFile>()));
+        services.TryAddSingleton<OutputFileConfigurationViewModel>();
+        services.TryAddSingleton<RenameResultViewModel>();
         services.TryAddSingleton<WizardViewModel>();
         services.TryAddSingleton<MainWindowViewModel>();
 

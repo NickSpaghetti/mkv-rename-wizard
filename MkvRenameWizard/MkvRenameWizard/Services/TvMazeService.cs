@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -146,7 +147,9 @@ public partial class TvMazeService : ITvMazeService
                         EpisodeNumber = episodeDto.Number,
                         Season = episodeDto.Season,
                         Type = episodeDto.Type,
-                        RunTime = episodeDto.Runtime
+                        RunTime = episodeDto.Runtime,
+                        AirDate = DateOnly.TryParse(episodeDto.Airdate, CultureInfo.InvariantCulture, 
+                            DateTimeStyles.None, out var d) ? d : null,
                     });
                 }
 

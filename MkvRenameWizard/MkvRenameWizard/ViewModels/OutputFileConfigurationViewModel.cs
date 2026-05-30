@@ -4,9 +4,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Text.RegularExpressions;
-using Avalonia.Controls.Shapes;
-using MkvRenameWizard.Models.Mkv;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using MkvRenameWizard.Helpers;
+using MkvRenameWizard.Models.Renaming;
 using ReactiveUI;
 using Path = System.IO.Path;
 
@@ -14,97 +15,372 @@ namespace MkvRenameWizard.ViewModels;
 
 public class OutputFileConfigurationViewModel : ViewModelBase
 {
-    public Dictionary<string, MkvFile> FileContentMap;
-
-    public ObservableCollection<string> PreviewList { get; } = new ObservableCollection<string>();
-
-    public bool UseDefaultName { get; set; } = true;
-    public bool UseSnakeCase { get; set; }
-    public bool UsePascalCase { get; set; }
-
-    public ReactiveCommand<Unit, Unit> UpdatePreviewCommand { get; }
-    
-    private string _prefix = "e"; // Initialize in the ViewModel as well
-
-    public string Prefix
+    public List<RenameEntity> RenameEntities
     {
-        get => _prefix;
-        set => this.RaiseAndSetIfChanged(ref _prefix, value);
-    }
-
-    public OutputFileConfigurationViewModel(Dictionary<string, MkvFile> fileContentMap)
-    {
-        FileContentMap = fileContentMap ?? throw new ArgumentNullException(nameof(fileContentMap));
-
-        // Ensure only one checkbox is selected at a time
-        this.WhenAnyValue(
-                x => x.UseDefaultName,
-                x => x.UseSnakeCase,
-                x => x.UsePascalCase
-            )
-            .Subscribe(_ =>
-            {
-                if (UseDefaultName)
-                {
-                    UseSnakeCase = false;
-                    UsePascalCase = false;
-                }
-                else if (UseSnakeCase)
-                {
-                    UseDefaultName = false;
-                    UsePascalCase = false;
-                }
-                else if (UsePascalCase)
-                {
-                    UseDefaultName = false;
-                    UseSnakeCase = false;
-                }
-                UpdatePreviewList();
-            });
-
-        UpdatePreviewCommand = ReactiveCommand.Create(UpdatePreviewList);
-        
-        UpdatePreviewList();
-    }
-
-    private void UpdatePreviewList()
-    {
-        PreviewList.Clear();
-
-        foreach (var entry in FileContentMap)
+        get;
+        set
         {
-            var newName = Path.GetInvalidFileNameChars().Aggregate(entry.Key, (current, c) 
-                => current.Replace(c.ToString(), string.Empty));
+            field = value;
+            this.RaisePropertyChanged();
+            var firstFullPath = value.FirstOrDefault()?.MkvFile.FullPath;
+            var sourceDirectory = firstFullPath is not null ? new DirectoryInfo(firstFullPath) : null;
 
-            if (UseSnakeCase)
-            {
-                newName = newName.Replace(" ", "_").ToLowerInvariant();
-            }
-            else if (UsePascalCase)
-            {
-                try
-                {
-                    var snakeCase = newName.Replace(" ", "_").ToLowerInvariant();
-                    var words = snakeCase.Replace("_", " ").Split([' '], StringSplitOptions.RemoveEmptyEntries);
-                    newName = string.Join("", words.Select(word => word.First().ToString().ToUpper() + word[1..].ToLower()));
-                }
-                catch (Exception e)
-                {
-                    newName = "Invalid Regex";
-                }
-            }
+            TargetFolder = string.IsNullOrEmpty(sourceDirectory?.FullName)
+                ? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+                : sourceDirectory.FullName;
 
-            PreviewList.Add($"{Path.GetFileName(entry.Value.FullPath)} -> {newName}");
+            RebuildPreview();
+        }
+    } = new();
+
+    public string CurrentShowName
+    {
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            RebuildPreview();
+        }
+    } = string.Empty;
+    
+    private const string DefaultFileNamePattern = "{S##E##} {Title}";
+
+    public string FileNamePattern
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = DefaultFileNamePattern;
+    
+    public bool IsPatternValid { get; set => this.RaiseAndSetIfChanged(ref field, value); }
+    
+    public string? TargetFolder { get; set => this.RaiseAndSetIfChanged(ref field, value); }
+
+    public ObservableCollection<PatternError> PatternErrors { get; } = new();
+    public ObservableCollection<PatternSegmentViewModel> PatternSegments { get; } = new();
+
+    public IReadOnlyList<PatternToken> AvailableTokens => FilePatternHelper.ValidTokens;
+    public ObservableCollection<AvailableTokenViewModel> ActiveTokens { get; } = new();
+
+    public bool IsTokenTableExpanded { get; set => this.RaiseAndSetIfChanged(ref field, value);}
+    
+    public string Prefix {get; set => this.RaiseAndSetIfChanged(ref field, value);} = string.Empty;
+
+    public CaseStyle SelectedCaseStyle
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = CaseStyle.Default;
+    
+    public bool IsCaseDefault
+    {
+        get => SelectedCaseStyle ==  CaseStyle.Default;
+        set
+        {
+            if(value)
+            {
+                SelectedCaseStyle = CaseStyle.Default;
+            }
         }
     }
-
-    public void Reset()
+    
+    public bool IsCaseSnake
     {
-        FileContentMap.Clear();
-        PreviewList.Clear();
-        Prefix = "e";
-        UseDefaultName = true;
-        UseSnakeCase = false;
-        UsePascalCase = false;
+        get => SelectedCaseStyle ==  CaseStyle.SnakeCase;
+        set
+        {
+            if(value)
+            {
+                SelectedCaseStyle = CaseStyle.SnakeCase;
+            }
+        }
     }
+    
+    public bool IsCasePascal
+    {
+        get => SelectedCaseStyle ==  CaseStyle.PascalCase;
+        set
+        {
+            if(value)
+            {
+                SelectedCaseStyle = CaseStyle.PascalCase;
+            }
+        }
+    }
+    
+    public bool IsCaseCamel
+    {
+        get => SelectedCaseStyle ==  CaseStyle.CamelCase;
+        set
+        {
+            if(value)
+            {
+                SelectedCaseStyle = CaseStyle.CamelCase;
+            }
+        }
+    }
+    
+   public Func<Task<string?>>? PickFolderAsync { get; set; }
+
+   public ObservableCollection<RenamePreviewItem<RenameFileOperation>> PreviewItems { get; } = new();
+   
+   public int ReadyCount { get;
+       private set => this.RaiseAndSetIfChanged(ref field, value);
+   }
+   public int ConflictCount { get;
+       private set => this.RaiseAndSetIfChanged(ref field, value);
+   }
+   
+   public int SkippedCount { get;
+       private set => this.RaiseAndSetIfChanged(ref field, value);
+   }
+   
+   public ReactiveCommand<Unit, bool> ShowTokenTableCommand { get; }
+   public ReactiveCommand<Unit, string> ResetPatternCommand { get; }
+   public ReactiveCommand<PatternError, Unit> ApplySuggestionCommand { get; set; }
+   public ReactiveCommand<string, Unit> InsertTokenCommand { get; }
+   public ReactiveCommand<Unit, Unit> PickTargetFolderCommand { get; }
+   public ReactiveCommand<Unit, Unit> ExecuteRenameCommand { get; }
+
+   private readonly ILogger<OutputFileConfigurationViewModel> _logger;
+   public OutputFileConfigurationViewModel(ILogger<OutputFileConfigurationViewModel> logger)
+   {
+       _logger = logger;
+
+       this.WhenAnyValue(x => x.FileNamePattern)
+           .Subscribe(_ =>
+           {
+               RevalidatePattern();
+               RebuildPreview();
+           });
+
+       this.WhenAnyValue(x => x.Prefix, x => x.SelectedCaseStyle).Subscribe(_ => RebuildPreview());
+
+       this.WhenAnyValue(x => x.SelectedCaseStyle).Subscribe(_ =>
+       {
+           this.RaisePropertyChanged(nameof(IsCaseDefault));
+           this.RaisePropertyChanged(nameof(IsCaseSnake));
+           this.RaisePropertyChanged(nameof(IsCasePascal));
+           this.RaisePropertyChanged(nameof(IsCaseCamel));
+       });
+
+       ShowTokenTableCommand = ReactiveCommand.Create(() => IsTokenTableExpanded = !IsTokenTableExpanded);
+       ResetPatternCommand = ReactiveCommand.Create(() =>
+           FileNamePattern = string.Empty);
+
+       ApplySuggestionCommand = ReactiveCommand.Create<PatternError>(ApplySuggestion);
+       PickTargetFolderCommand = ReactiveCommand.CreateFromTask(PickTargetFolder);
+       InsertTokenCommand = ReactiveCommand.Create<string>(name => FileNamePattern += $"{{{name}}}");
+       
+       var canRename = this.WhenAnyValue(x => x.IsPatternValid ,
+           x => x.ReadyCount, 
+           (valid,ready) => valid && ready > 0);
+       ExecuteRenameCommand = ReactiveCommand.Create(() => {}, canRename);
+
+       RevalidatePattern();
+   }
+
+   private void RevalidatePattern()
+   {
+       var errors = FilePatternHelper.Validate(FileNamePattern);
+       var segments = FilePatternHelper.Parse(FileNamePattern);
+       
+       PatternErrors.Clear();
+       foreach (var error in errors)
+       {
+           PatternErrors.Add(error);
+       }
+       
+       PatternSegments.Clear();
+       foreach (var segment in segments)
+       {
+           PatternSegments.Add(new PatternSegmentViewModel(){Text = segment.Text,SegmentType = segment.SegmentType});
+       }
+       
+       IsPatternValid = errors.Count == 0;
+       if (!IsPatternValid)
+       {
+           IsTokenTableExpanded = true;
+       }
+       
+       RebuildAvailableTokenStatus();
+   }
+
+   private void RebuildAvailableTokenStatus()
+   {
+       var used = PatternSegments
+           .Where(s => s.IsValidToken)
+           .Select(s => s.Text)
+           .ToHashSet(StringComparer.Ordinal);
+       
+       ActiveTokens.Clear();
+       foreach (var token in FilePatternHelper.ValidTokens)
+       {
+           ActiveTokens.Add(new AvailableTokenViewModel(token.Name, token.Description,token.ExampleValue,used.Contains(token.Name)));
+       }
+   }
+
+   private void RebuildPreview()
+   {
+       PreviewItems.Clear();
+
+       if (!IsPatternValid)
+       {
+           var i = 0;
+           foreach (var entry in RenameEntities)
+           {
+               var sourceFilePath = entry.MkvFile.FullPath ?? string.Empty;
+               var sourceFileName =   Path.GetFileName(sourceFilePath);
+               PreviewItems.Add(new RenamePreviewItem<RenameFileOperation>(
+                   new RenameFileOperation(++i,sourceFilePath,null),
+                   sourceFileName,RenamePreviewStatus.PatternError)
+               );
+           }
+
+           SetPreflightCounts();
+           return;
+       }
+       
+       var rawItems = new List<RenamePreviewItem<RenameFileOperation>>();
+       var index = 0;
+       foreach (var entry in RenameEntities)
+       {
+           index++;
+           var sourceFileName = Path.GetFileName(entry.MkvFile.FullPath) ?? string.Empty;
+           var sourceFilePath = entry.MkvFile.FullPath ?? string.Empty;
+           if (entry.Episode.EpisodeNumber == null)
+           {
+               rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,null),sourceFileName,RenamePreviewStatus.Skipped));
+               continue;
+           }
+           
+           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}{Path.GetExtension(entry.MkvFile.FullPath)}";
+           var isDone = string.Equals(target, target, StringComparison.OrdinalIgnoreCase);
+           var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Skipped;
+           rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,target),sourceFileName,status));
+       }
+
+       var conflictNumbers = rawItems
+           .Where(r => r.RenamePreviewStatus == RenamePreviewStatus.Ready)
+           .GroupBy(r => r.RenameOperation.TargetPath, StringComparer.OrdinalIgnoreCase)
+           .Where(g => g.Count() > 1)
+           .SelectMany(g => g)
+           .ToHashSet();
+
+       foreach (var item in rawItems)
+       {
+           var finalStatus = item.RenamePreviewStatus;
+           if (item.RenamePreviewStatus == RenamePreviewStatus.Ready &&
+               conflictNumbers.Contains(item))
+           {
+               finalStatus = RenamePreviewStatus.Conflict;
+           }
+           
+           PreviewItems.Add(item with { RenamePreviewStatus = finalStatus });
+       }
+
+       SetPreflightCounts();
+
+   }
+
+   private void SetPreflightCounts()
+   {
+       ReadyCount = PreviewItems.Count(p => p.RenamePreviewStatus == RenamePreviewStatus.Ready);
+       ConflictCount = PreviewItems.Count(p => p.RenamePreviewStatus == RenamePreviewStatus.Conflict);
+       SkippedCount = PreviewItems.Count(p => p.RenamePreviewStatus == RenamePreviewStatus.Skipped);
+   }
+
+
+   private async Task PickTargetFolder()
+   {
+       if (PickFolderAsync is null)
+       {
+           return;
+       }
+       
+       var chosen = await PickFolderAsync();
+       if (chosen is not null)
+       {
+           TargetFolder = chosen;
+       }
+   }
+
+   private void ApplySuggestion(PatternError error)
+   {
+       if (error.Suggestion is null)
+       {
+           return;
+       }
+
+       FileNamePattern = FileNamePattern.Replace($"{{{error.TokenName}}}", $"{{{error.Suggestion}}}");
+   }
+   
+   /// <summary>
+   /// Called by the WizardViewModel when the use returns to the rename screen from the result view screen.
+   /// Updates each successfully rename entity's source path to the new renamed file path
+   /// so the preview table reflects what is on disk.
+   ///
+   /// Pattern, prefix, CaseStyle, and Target folder are preserved.
+   /// Succesfully renamed entities will show a "Done" Status
+   /// If a user edits the apttern the Done rows flip back to Ready.
+   /// </summary>
+   /// <param name="results"></param>
+
+   public void ApplyRenameResults(IEnumerable<RenameOperationResult<RenameFileOperation>> results)
+   {
+       var renamePaths = results
+           .Where(r => r.IsSuccessful && r.RenameOperation.TargetPath != null)
+           .ToDictionary(r => r.RenameOperation.SourcePath, r => r.RenameOperation.TargetPath, StringComparer.OrdinalIgnoreCase);
+
+
+       foreach (var entity in RenameEntities)
+       {
+           if (entity.MkvFile.FullPath != null && renamePaths.TryGetValue(entity.MkvFile.FullPath, out var renamePath))
+           {
+               entity.MkvFile.FullPath = renamePath;
+           }
+       }
+       RebuildPreview();
+   }
+
+   public IEnumerable<RenameFileOperation> BuildRenameOperations()
+   {
+       if (TargetFolder == null)
+       {
+           yield break;
+       }
+       
+       var validItemsPreviewItems = PreviewItems.Where(p => 
+           p.RenamePreviewStatus == RenamePreviewStatus.Ready && 
+           p.RenameOperation.TargetPath != null);
+       
+       foreach (var item in validItemsPreviewItems)
+       {
+           if (item.RenameOperation.TargetPath == null)
+           {
+               continue;
+           }
+           
+           yield return item.RenameOperation with
+           {
+               TargetPath = Path.Combine(TargetFolder, item.RenameOperation.TargetPath)
+           };
+               
+       }
+   }
+   
+   public void Reset()
+   {
+       RenameEntities = new List<RenameEntity>();
+       CurrentShowName = string.Empty;
+       FileNamePattern = DefaultFileNamePattern;
+       Prefix = string.Empty;
+       SelectedCaseStyle = CaseStyle.Default;
+       TargetFolder = string.Empty;
+       PreviewItems.Clear();
+       PatternErrors.Clear();
+       PatternSegments.Clear();
+       ReadyCount = 0;
+       ConflictCount = 0;
+       SkippedCount = 0;
+   }
 }

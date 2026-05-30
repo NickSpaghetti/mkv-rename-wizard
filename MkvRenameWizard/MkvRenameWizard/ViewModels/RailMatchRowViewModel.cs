@@ -49,14 +49,7 @@ public class RailMatchRowViewModel(
                 return string.Empty;
             }
             
-            var time = TimeSpan.FromMinutes(Episode.RunTime);
-            
-            return (time.Hours, time.Minutes) switch
-            {
-                (0, var m) => $"{m} {(m == 1 ? "min" : "mins")}",
-                (var h, 0) => $"{h} {(h == 1 ? "hour" : "hours")}",
-                var (h, m) => $"{h} {(h == 1 ? "hour" : "hours")} {m} {(m == 1 ? "min" : "mins")}"
-            };
+            return LabelFormaterHelper.FormatRunTime(Episode.RunTime);
         }
     }
 

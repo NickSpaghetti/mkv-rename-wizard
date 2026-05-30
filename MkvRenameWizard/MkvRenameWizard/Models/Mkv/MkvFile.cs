@@ -3,7 +3,7 @@ namespace MkvRenameWizard.Models.Mkv;
 public class MkvFile(string root, string fullPath, long? sizeInBytes, bool isIncluded)
 {
     public string Root { get; set; } = root;
-    public string FullPath { get; set; } = fullPath;
+    public string? FullPath { get; set; } = fullPath;
     public bool IsIncluded { get; set; } = isIncluded;
     public long? SizeInBytes { get; set; } = sizeInBytes;
     

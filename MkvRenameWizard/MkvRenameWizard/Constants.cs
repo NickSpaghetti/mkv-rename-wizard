@@ -37,4 +37,18 @@ public static class Constants
         public const string LinkHalo = nameof(LinkHalo);
     }
 
+    public static class TokenNames
+    {
+        public const string Show = nameof(Show);
+        public const string Season = nameof(Season);
+        public const string SeasonPadded = "S##";
+        public const string Episode  = nameof(Episode);
+        public const string EpisodePadded = "E##";
+        public const string SeasonEpisodePadded = $"{SeasonPadded}{EpisodePadded}";
+        public const string Title = nameof(Title);
+        public const string Year =  nameof(Year);
+        public const string Ext = nameof(Ext);
+        public const string RunTime = nameof(RunTime);
+    }
+
 }
