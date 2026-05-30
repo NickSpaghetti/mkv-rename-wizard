@@ -14,6 +14,7 @@ using MkvRenameWizard.FileTypes;
 using MkvRenameWizard.Services;
 using MkvRenameWizard.ViewModels;
 using MkvRenameWizard.Views;
+using Serilog;
 
 namespace MkvRenameWizard;
 
@@ -53,12 +54,19 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
         
-        var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), nameof(MkvRenameWizard),"logs");
+        var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), nameof(MkvRenameWizard),"Logs");
         
         services.AddLogging(configure =>
         {
-            configure.SetMinimumLevel(LogLevel.Debug);
-            configure.AddConsole();
+            configure.SetMinimumLevel(
+                #if DEBUG 
+                LogLevel.Debug
+                #else
+                LogLevel.Warning
+                #endif
+            );
+            configure.AddJsonConsole();
+            configure.AddFile($"{logDirectory}/logs-{{Date}}.json",isJson: true);
         });
         
         services.AddHttpClient<ITvMazeDataAccess, TvMazeDataAccess>(client =>
