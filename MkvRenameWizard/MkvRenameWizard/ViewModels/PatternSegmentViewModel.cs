@@ -8,7 +8,7 @@ public class PatternSegmentViewModel
     public PatternSegmentType SegmentType { get; set; }
     
     public bool IsLiteral => SegmentType == PatternSegmentType.Literal;
-    public bool IsValidToken => SegmentType == PatternSegmentType.InvalidToken;
+    public bool IsValidToken => SegmentType == PatternSegmentType.ValidToken;
     public bool IsInvalidToken  => SegmentType == PatternSegmentType.InvalidToken;
 
     public string PillText => $"{{{Text}}}";
