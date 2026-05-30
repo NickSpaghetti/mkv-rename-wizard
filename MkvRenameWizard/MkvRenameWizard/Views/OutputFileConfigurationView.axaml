@@ -62,6 +62,7 @@
         <Style Selector="Border.preview-row">
             <Setter Property="MinHeight" Value="44"></Setter>
             <Setter Property="Padding" Value="14,0"></Setter>
+            <Setter Property="ClipToBounds" Value="False"></Setter>
         </Style>
         <Style Selector="Border.index-pill">
             <Setter Property="Background" Value="#252525"></Setter>
@@ -481,7 +482,7 @@
                     BorderBrush="{DynamicResource DividerBrush}"
                     BorderThickness="0,0,0,1"
                     Padding="14,0">
-                <Grid ColumnDefinitions="Auto,*,48,*,Auto">
+                <Grid ColumnDefinitions="44,*,48,*,Auto">
                     <TextBlock Grid.Column="0" Classes="selection-label" Text="#" VerticalAlignment="Center"></TextBlock>
                     <TextBlock Grid.Column="1" Classes="selection-label" Text="Current File Name" VerticalAlignment="Center"></TextBlock>
                     <TextBlock Grid.Column="3" Classes="selection-label" Text="Renamed To" VerticalAlignment="Center"></TextBlock>
