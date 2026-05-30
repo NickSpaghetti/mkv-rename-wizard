@@ -571,7 +571,7 @@
                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#4ADE80"></TextBlock>
                                                </StackPanel>
                                             </Border>   
-                                            <Border Classes="status-badge-ready" 
+                                            <Border Classes="status-badge-error" 
                                                     IsVisible="{Binding RenamePreviewStatus, 
                                                         Converter={StaticResource EnumToBoolConverter}, 
                                                         ConverterParameter={x:Static models:RenamePreviewStatus.PatternError}}">
@@ -580,7 +580,7 @@
                                                     <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#F59E0B"></TextBlock>
                                                 </StackPanel>
                                             </Border>
-                                            <Border Classes="status-badge-ready" 
+                                            <Border Classes="status-badge-conflict" 
                                                     IsVisible="{Binding RenamePreviewStatus, 
                                                         Converter={StaticResource EnumToBoolConverter}, 
                                                         ConverterParameter={x:Static models:RenamePreviewStatus.Conflict}}">
@@ -589,7 +589,7 @@
                                                     <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#F87171"></TextBlock>
                                                 </StackPanel>
                                             </Border>
-                                            <Border Classes="status-badge-ready" 
+                                            <Border Classes="status-badge-skipped" 
                                                     IsVisible="{Binding RenamePreviewStatus, 
                                                         Converter={StaticResource EnumToBoolConverter}, 
                                                         ConverterParameter={x:Static models:RenamePreviewStatus.Skipped}}">
@@ -601,7 +601,7 @@
                                                 </StackPanel>
                                             </Border>  
                                             
-                                            <Border Classes="status-badge-ready" 
+                                            <Border Classes="status-badge-done" 
                                                     IsVisible="{Binding RenamePreviewStatus, 
                                                         Converter={StaticResource EnumToBoolConverter}, 
                                                         ConverterParameter={x:Static models:RenamePreviewStatus.Done}}">
