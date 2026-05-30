@@ -217,6 +217,7 @@ public class WizardViewModel : ViewModelBase
         if (CurrentPageIndex == 2)
         {
             await ExecuteRenameAsync(retryFailedOnly: false);
+            return;
         }
         if (IsLastPage)
         {

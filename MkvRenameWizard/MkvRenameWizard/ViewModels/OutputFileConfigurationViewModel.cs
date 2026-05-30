@@ -57,8 +57,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
 
     public ObservableCollection<PatternError> PatternErrors { get; } = new();
     public ObservableCollection<PatternSegmentViewModel> PatternSegments { get; } = new();
-
-    public IReadOnlyList<PatternToken> AvailableTokens => FilePatternHelper.ValidTokens;
+    
     public ObservableCollection<AvailableTokenViewModel> ActiveTokens { get; } = new();
 
     public bool IsTokenTableExpanded { get; set => this.RaiseAndSetIfChanged(ref field, value);}
@@ -195,6 +194,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
        {
            PatternSegments.Add(new PatternSegmentViewModel(){Text = segment.Text,SegmentType = segment.SegmentType});
        }
+       PatternSegments.Add(new PatternSegmentViewModel(){Text = ".mkv", SegmentType = PatternSegmentType.Literal});
        
        IsPatternValid = errors.Count == 0;
        if (!IsPatternValid)
@@ -252,8 +252,9 @@ public class OutputFileConfigurationViewModel : ViewModelBase
                rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,null),sourceFileName,RenamePreviewStatus.Skipped));
                continue;
            }
-           
-           var target = $"{FilePatternHelper.Apply(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}";
+
+           var fileExtension = Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty);
+           var target = $"{FilePatternHelper.ApplyTokenValues(FileNamePattern,entry.Episode,CurrentShowName,Prefix,Path.GetExtension(entry.MkvFile.FullPath ?? string.Empty),LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime),SelectedCaseStyle)}{fileExtension}";
            var isDone = string.Equals(sourceFileName, target, StringComparison.OrdinalIgnoreCase);
            var status = isDone ? RenamePreviewStatus.Done : RenamePreviewStatus.Ready;
            rawItems.Add(new RenamePreviewItem<RenameFileOperation>(new RenameFileOperation(index,sourceFilePath,target),sourceFileName,status));

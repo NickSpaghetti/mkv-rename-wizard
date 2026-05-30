@@ -242,10 +242,6 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <TextBlock Text=".mkv"
-                                       Foreground="{DynamicResource TextMutedBrush}"
-                                       FontFamily="Menlo,Consolas,monospace" FontSize="12"
-                                       VerticalAlignment="Center"></TextBlock>
                         </WrapPanel>
                     </Border>
                     
