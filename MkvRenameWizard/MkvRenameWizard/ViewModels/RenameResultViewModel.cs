@@ -92,7 +92,7 @@ public class RenameResultViewModel : ViewModelBase
     private void OpenFolder()
     {
         var folder = TargetFolder;
-        if (!string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+        if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
         {
             folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
