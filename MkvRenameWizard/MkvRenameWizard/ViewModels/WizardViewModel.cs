@@ -35,6 +35,8 @@ public class WizardViewModel : ViewModelBase
         }
     }
 
+    public RenameResultViewModel RenameResultViewModel => _renameResultViewModel;
+
     public bool CanGoBack => !ShowRenameResult && CurrentPageIndex > 0;
     public bool CanGoForward => !ShowRenameResult && CurrentPageIndex < Pages.Count - 1;
     public bool IsLastPage => !ShowRenameResult && CurrentPageIndex == Pages.Count - 1;

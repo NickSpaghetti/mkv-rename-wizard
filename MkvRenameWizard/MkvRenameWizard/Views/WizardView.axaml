@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
+             xmlns:views="clr-namespace:MkvRenameWizard.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MkvRenameWizard.Views.WizardView"
              x:DataType="viewModels:WizardViewModel">
@@ -48,14 +49,27 @@
         </Border>
         
         <Carousel Grid.Row="1"
+                  IsVisible="{Binding !ShowRenameResult}"
                   ItemsSource="{Binding Pages}"
                   SelectedIndex="{Binding CurrentPageIndex}">
             <Carousel.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:ViewModelBase">
-                    <ContentControl Content="{Binding}"></ContentControl>
+                    <ContentControl Content="{Binding }" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"></ContentControl>
                 </DataTemplate>
             </Carousel.ItemTemplate>
         </Carousel>
+        
+        <ContentControl Grid.Row="1"
+                        Grid.RowSpan="2"
+                        IsVisible="{Binding ShowRenameResult}"
+                        Content="{Binding RenameResultViewModel}">
+            <ContentControl.DataTemplates>
+              <DataTemplate DataType="viewModels:RenameResultViewModel">
+                  <views:RenameResultView/>
+              </DataTemplate>
+            </ContentControl.DataTemplates>
+        </ContentControl>
+        
         <Border Grid.Row="2"
                 Background="{DynamicResource FooterBackgroundBrush}"
                 BorderBrush="{DynamicResource DividerBrush}"
@@ -98,27 +112,5 @@
             </Grid>
         </Border>
     </Grid>
-    <!-- <Grid> -->
-    <!--     <Carousel ItemsSource="{Binding Pages}" -->
-    <!--               SelectedIndex="{Binding CurrentPageIndex}"> -->
-    <!--         <Carousel.ItemTemplate> -->
-    <!--             <DataTemplate> -->
-    <!--                 <ContentControl Content="{Binding}" /> -->
-    <!--             </DataTemplate> -->
-    <!--         </Carousel.ItemTemplate> -->
-    <!--     </Carousel> -->
-    <!--     <StackPanel Orientation="Horizontal"  -->
-    <!--                 HorizontalAlignment="Center"  -->
-    <!--                 VerticalAlignment="Bottom"> -->
-    <!--         <Button Content="Previous"  -->
-    <!--                 Command="{Binding PreviousCommand}" -->
-    <!--                 IsVisible="{Binding CanGoBack}"/> -->
-    <!--         <Button Content="Next"  -->
-    <!--                 Command="{Binding NextCommand}" -->
-    <!--                 IsVisible="{Binding CanGoForward}"/> -->
-    <!--         <Button Content="Finish"  -->
-    <!--                 Command="{Binding FinishCommand}" -->
-    <!--                 IsVisible="{Binding IsLastPage}"/> -->
-    <!--     </StackPanel> -->
-    <!-- </Grid> -->
+
 </UserControl>
