@@ -72,7 +72,9 @@
                         Margin="0,0,0,24">
                     <Ellipse Width="72" Height="72" Fill="#1A3D1A" Stroke="#2E6B2E" StrokeThickness="2"></Ellipse>
                     <Path Canvas.Left="18" Canvas.Top="18" Width="36" Height="36"
-                          Data="{StaticResource CheckmarkFilled}"  StrokeThickness="3"
+                          Data="{StaticResource CheckmarkFilled}"
+                          Stroke="#5DD85D"
+                          StrokeThickness="3"
                           Fill="Transparent"/>
                 </Canvas>
                 

@@ -18,7 +18,7 @@
                          <ResourceInclude Source="avares://MkvRenameWizard/Resources/OpenFolderRegular.axaml" />
                          <ResourceInclude Source="avares://MkvRenameWizard/Resources/RightArrowFilled.axaml"/>
                          <ResourceInclude Source="avares://MkvRenameWizard/Resources/CopyRegular.axaml"/>
-                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/CheckmarkFilled.axaml"></ResourceInclude>
+                         <ResourceInclude Source="avares://MkvRenameWizard/Resources/CheckmarkFilled.axaml"/>
                      </ResourceDictionary.MergedDictionaries>
                      
                      <SolidColorBrush x:Key="AppBackgroundBrush" Color="#191919"/>

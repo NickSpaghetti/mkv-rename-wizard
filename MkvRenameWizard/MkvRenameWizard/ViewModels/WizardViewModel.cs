@@ -198,7 +198,13 @@ public class WizardViewModel : ViewModelBase
         PrimaryCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryCommand, canUsePrimary);
     }
 
-    private void Previous() => CurrentPageIndex--;
+    private void Previous()
+    {
+        if (CurrentPageIndex == 2)
+        {
+            _contentSelectViewModel.ClearErrors();
+        }
+    }
     private void Next() => CurrentPageIndex++;
 
     private void Finish()

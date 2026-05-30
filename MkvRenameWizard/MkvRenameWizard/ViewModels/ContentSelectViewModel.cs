@@ -725,8 +725,13 @@ public class ContentSelectViewModel : ViewModelBase
 
     private void ClearImport()
     {
-        HasImportedAttempted = false;
         MkvFiles.Clear();
+        ClearErrors();
+    }
+
+    public void ClearErrors()
+    {
+        HasImportedAttempted = false;
         ImportIssues.Clear();
         RaiseImportStateProperties();
     }
@@ -900,6 +905,7 @@ public class ContentSelectViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(ErrorDescription));
         this.RaisePropertyChanged(nameof(PrimaryErrorActionText));
         this.RaisePropertyChanged(nameof(ShowPrimaryErrorButton));
+        this.RaisePropertyChanged(nameof(ShowPartialFailureBanner));
         this.RaisePropertyChanged(nameof(SecondaryErrorActionText));
         this.RaisePropertyChanged(nameof(PartialFailureTitle));
         this.RaisePropertyChanged(nameof(PartialFailureSummary));
