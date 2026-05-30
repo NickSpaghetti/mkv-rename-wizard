@@ -222,7 +222,7 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="viewModel:PatternSegmentViewModel">
                                         <Panel>
-                                            <TextBlock Text="{Binding PillText}"
+                                            <TextBlock Text="{Binding Text}"
                                                        Foreground="#C8C8C8"
                                                        FontFamily="Menlo,Consolas,monospace"
                                                        FontSize="12"
