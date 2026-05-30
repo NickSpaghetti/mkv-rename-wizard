@@ -76,7 +76,7 @@ public static partial class FilePatternHelper
 
             var name = match.Groups[TokenGroup].Value;
             segments.Add(new PatternSegment(name,
-                ValidTokenNames.Contains(name) ? PatternSegmentType.Literal : PatternSegmentType.InvalidToken));
+                ValidTokenNames.Contains(name) ? PatternSegmentType.ValidToken : PatternSegmentType.InvalidToken));
 
             pointer = match.Index + match.Length;
         }
