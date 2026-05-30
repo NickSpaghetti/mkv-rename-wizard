@@ -86,9 +86,10 @@
                            Margin="0,0,0,10">
                 </TextBlock>
                 <TextBlock Text="{Binding SummarySubtitle}"
-                           FontSize="28"
-                           FontWeight="Bold"
+                           FontSize="13"
                            Foreground="{DynamicResource TextSecondaryBrush}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,28">
                 </TextBlock>
