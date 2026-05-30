@@ -9,7 +9,6 @@
              x:DataType="viewModels:ContentSearchViewModel">
     
     <UserControl.Styles>
-        <Style>
             <Style Selector="TextBlock.section-heading">
                 <Setter Property="FontSize" Value ="12"></Setter>
                 <Setter Property="FontWeight" Value="SemiBold"></Setter>
@@ -97,8 +96,6 @@
                 <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
                 <Setter Property="Opacity" Value="0.55" />
             </Style>
-            
-        </Style>
     </UserControl.Styles>
     
     <Grid Background="{DynamicResource AppBackgroundBrush}">
