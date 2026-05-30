@@ -47,11 +47,41 @@
             <Setter Property="Padding" Value="10,6"></Setter>
             <Setter Property="CornerRadius" Value="5"></Setter>
             <Setter Property="Margin" Value="0,0,6,6"></Setter>
+            <Setter Property="Cursor" Value="Hand"></Setter>
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                ClipToBounds="True">
+                            <Panel>
+                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="Center"
+                                                  HorizontalContentAlignment="Center">
+                                </ContentPresenter>
+                                <Border Name="PART_Underline"
+                                        Height="2"
+                                        VerticalAlignment="Bottom"
+                                        Background="Transparent">
+                                </Border>
+                            </Panel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter>
+        </Style>
+        <Style Selector="RadioButton.case-btn-pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource TextMutedBrush}"></Setter>
         </Style>
         <Style Selector="RadioButton.case-btn:checked">
             <Setter Property="Background" Value="#1D3040"></Setter>
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
             <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
+        <Style Selector="RadioButton.case-btn:checked /template/ Border#PART_Underline">
+            <Setter Property="Background" Value="{DynamicResource  AccentBrush}"></Setter>
         </Style>
         <Style Selector="Border.divider-h">
             <Setter Property="Height" Value="1"></Setter>
