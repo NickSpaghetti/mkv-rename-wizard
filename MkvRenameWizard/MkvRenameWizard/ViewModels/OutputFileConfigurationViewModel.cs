@@ -5,11 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.Renaming;
-using MkvRenameWizard.Models.TvMaze;
 using ReactiveUI;
 using Path = System.IO.Path;
 
@@ -61,7 +59,8 @@ public class OutputFileConfigurationViewModel : ViewModelBase
     public ObservableCollection<PatternSegmentViewModel> PatternSegments { get; } = new();
 
     public IReadOnlyList<PatternToken> AvailableTokens => FilePatternHelper.ValidTokens;
-    
+    public ObservableCollection<AvailableTokenViewModel> ActiveTokens { get; } = new();
+
     public bool IsTokenTableExpanded { get; set => this.RaiseAndSetIfChanged(ref field, value);}
     
     public string Prefix {get; set => this.RaiseAndSetIfChanged(ref field, value);} = string.Empty;
@@ -138,6 +137,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
    public ReactiveCommand<Unit, bool> ShowTokenTableCommand { get; }
    public ReactiveCommand<Unit, string> ResetPatternCommand { get; }
    public ReactiveCommand<PatternError, Unit> ApplySuggestionCommand { get; set; }
+   public ReactiveCommand<string, Unit> InsertTokenCommand { get; }
    public ReactiveCommand<Unit, Unit> PickTargetFolderCommand { get; }
    public ReactiveCommand<Unit, Unit> ExecuteRenameCommand { get; }
 
@@ -165,10 +165,11 @@ public class OutputFileConfigurationViewModel : ViewModelBase
 
        ShowTokenTableCommand = ReactiveCommand.Create(() => IsTokenTableExpanded = !IsTokenTableExpanded);
        ResetPatternCommand = ReactiveCommand.Create(() =>
-           FileNamePattern = $"{{{Constants.TokenNames.SeasonEpisodePadded}}} {{{Constants.TokenNames.Title}}}");
+           FileNamePattern = string.Empty);
 
        ApplySuggestionCommand = ReactiveCommand.Create<PatternError>(ApplySuggestion);
        PickTargetFolderCommand = ReactiveCommand.CreateFromTask(PickTargetFolder);
+       InsertTokenCommand = ReactiveCommand.Create<string>(name => FileNamePattern += $"{{{name}}}");
        
        var canRename = this.WhenAnyValue(x => x.IsPatternValid ,
            x => x.ReadyCount, 
@@ -199,6 +200,22 @@ public class OutputFileConfigurationViewModel : ViewModelBase
        if (!IsPatternValid)
        {
            IsTokenTableExpanded = true;
+       }
+       
+       RebuildAvailableTokenStatus();
+   }
+
+   private void RebuildAvailableTokenStatus()
+   {
+       var used = PatternSegments
+           .Where(s => s.IsValidToken)
+           .Select(s => s.Text)
+           .ToHashSet(StringComparer.Ordinal);
+       
+       ActiveTokens.Clear();
+       foreach (var token in FilePatternHelper.ValidTokens)
+       {
+           ActiveTokens.Add(new AvailableTokenViewModel(token.Name, token.Description,token.ExampleValue,used.Contains(token.Name)));
        }
    }
 

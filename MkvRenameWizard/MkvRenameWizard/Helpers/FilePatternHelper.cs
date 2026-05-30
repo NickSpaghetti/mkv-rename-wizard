@@ -19,7 +19,7 @@ public static partial class FilePatternHelper
         new(Constants.TokenNames.Episode, "Episode Number", "9"),
         new(Constants.TokenNames.EpisodePadded, "Episode Padded", "E09"),
         new(Constants.TokenNames.SeasonEpisodePadded, "Season & Episode Padded", "S01E09"),
-        new(Constants.TokenNames.Title, "Episode Title", "Act.  9: Battle to the Limit"),
+        new(Constants.TokenNames.Title, "Episode Title", "Act. 9: Battle to the Limit"),
         new(Constants.TokenNames.Year, "Aired Year", "1998"),
         new(Constants.TokenNames.Ext, "Extension", "mkv"),
         new(Constants.TokenNames.RunTime, "Run Time", "30m"),

@@ -33,6 +33,12 @@
         <Style Selector="TextBox.input-error">
             <Setter Property="BorderBrush" Value="#F59E0B"></Setter>
         </Style>
+        <Style Selector="TextBlock.token-name">
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+        </Style>
+        <Style Selector="TextBlock.token-name.token-active">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+        </Style>
         <Style Selector="RadioButton.case-btn">
             <Setter Property="Background" Value="#2A2A2A"></Setter>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
@@ -145,6 +151,9 @@
             <Setter Property="CornerRadius" Value="4"></Setter>
             <Setter Property="Padding" Value="5,2"></Setter>
             <Setter Property="Margin" Value="0,0,2,2"></Setter>
+        </Style>
+        <Style Selector="Border.token-valid.token-inactive">
+            <Setter Property="Background" Value="Transparent"></Setter>
         </Style>
         <Style Selector="Border.token-invalid">
             <Setter Property="Background" Value="#3D2800"></Setter>
@@ -307,7 +316,7 @@
                             Cursor="Hand" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                             Margin="0,8,0,0">
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Classes="selection-label" Text="Available Tokens" VerticalAlignment="Center"></TextBlock>
+                            <TextBlock Grid.Column="0" Classes="selection-label" Text="Available Tokens" VerticalAlignment="Center"></TextBlock>
                             <PathIcon Grid.Column="1" Data="{StaticResource PlayRegular}"
                                       IsVisible="{Binding IsTokenTableExpanded}"
                                       Foreground="{DynamicResource TextMutedBrush}"
@@ -328,31 +337,49 @@
                             </PathIcon>
                         </Grid>
                     </Button>
-                    
+                    <TextBlock IsVisible="{Binding IsTokenTableExpanded}"
+                               Text="Click to insert"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               Margin="0,4,0,0">
+                    </TextBlock>
                     <Border IsVisible="{Binding IsTokenTableExpanded}"
                             Background="#1A1A1A"
                             BorderBrush="{DynamicResource DividerBrush}"
                             BorderThickness="1" CornerRadius="6" Margin="0,4,0,0">
-                        <ItemsControl ItemsSource="{Binding AvailableTokens}" Padding="8">
+                        <ItemsControl ItemsSource="{Binding ActiveTokens}" Padding="4">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="models:PatternToken">
-                                    <Grid ColumnDefinitions="110,*,80" Margin="8,5">
-                                        <Border Classes="token-valid" HorizontalAlignment="Left">
-                                            <TextBlock Text="{Binding Name, StringFormat='{}{{{0}}}'}"
-                                                       Foreground="#48C8F6"
-                                                       FontFamily="Menlo,Consolas,monospace"
-                                                       FontSize="12">
+                                <DataTemplate x:DataType="viewModel:AvailableTokenViewModel">
+                                    <Button Command="{Binding #Root.((viewModel:OutputFileConfigurationViewModel)DataContext)?.InsertTokenCommand}"
+                                            CommandParameter="{Binding Name}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            Cursor="Hand">
+        
+                                        <Grid ColumnDefinitions="110,*,80" Margin="8,5">
+                                            <Border Classes="token-valid" HorizontalAlignment="Left"
+                                                    Classes.token-inactive="{Binding !IsUsedInPattern}">
+                                                <TextBlock Classes="token-name"
+                                                           Classes.token-active="{Binding IsUsedInPattern}"
+                                                           Text="{Binding Name, StringFormat='{}{{{0}}}'}"
+                                                           FontFamily="Menlo,Consolas,monospace"
+                                                           FontSize="12">
+                                                </TextBlock>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{Binding Description}"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       FontSize="12" VerticalAlignment="Center">
                                             </TextBlock>
-                                        </Border>
-                                        <TextBlock Grid.Column="1" Text="{Binding Description}"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   FontSize="12" VerticalAlignment="Center">
-                                        </TextBlock>
-                                        <TextBlock Grid.Column="2" Text="{Binding ExampleValue}"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   FontSize="12" TextAlignment="Right" VerticalAlignment="Center">
-                                        </TextBlock>
-                                    </Grid>
+                                            <TextBlock Grid.Column="2" Text="{Binding ExampleValue}"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       FontSize="12" TextAlignment="Right" VerticalAlignment="Center">
+                                            </TextBlock>
+                                        </Grid>
+        
+                                    </Button>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
