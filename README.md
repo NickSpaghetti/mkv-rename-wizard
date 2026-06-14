@@ -4,6 +4,9 @@ Is a cross platform desktop app built on [avalonia](https://avaloniaui.net/) des
 # How to Run
 Clone this repo and run `dotnet run`.
 
+
+![MakeRenameWizzardShowCase.gif](MakeRenameWizzardShowCase.gif)
+
 # Credits
 Thank you to the team over at [MakeMKV](https://www.makemkv.com/) for providing people with Media Preservation tools.
 
