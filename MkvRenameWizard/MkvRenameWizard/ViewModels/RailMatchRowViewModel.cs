@@ -1,9 +1,7 @@
-using System;
 using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.Models.Rail;
 using MkvRenameWizard.Models.TvMaze;
-using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
@@ -73,46 +71,46 @@ public class RailMatchRowViewModel : ViewModelBase
 
         if (indexChanged)
         {
-            this.RaisePropertyChanged(nameof(Index));
-            this.RaisePropertyChanged(nameof(ZeroBasedIndex));
-            this.RaisePropertyChanged(nameof(IndexLabel));
+            OnPropertyChanged(nameof(Index));
+            OnPropertyChanged(nameof(ZeroBasedIndex));
+            OnPropertyChanged(nameof(IndexLabel));
         }
 
         if (episodeChanged)
         {
-            this.RaisePropertyChanged(nameof(Episode));
-            this.RaisePropertyChanged(nameof(HasEpisode));
-            this.RaisePropertyChanged(nameof(EpisodeCode));
-            this.RaisePropertyChanged(nameof(EpisodeTitle));
-            this.RaisePropertyChanged(nameof(EpisodeDisplayName));
-            this.RaisePropertyChanged(nameof(HasEpisodeRunTime));
-            this.RaisePropertyChanged(nameof(EpisodeRunTimeLabel));
+            OnPropertyChanged(nameof(Episode));
+            OnPropertyChanged(nameof(HasEpisode));
+            OnPropertyChanged(nameof(EpisodeCode));
+            OnPropertyChanged(nameof(EpisodeTitle));
+            OnPropertyChanged(nameof(EpisodeDisplayName));
+            OnPropertyChanged(nameof(HasEpisodeRunTime));
+            OnPropertyChanged(nameof(EpisodeRunTimeLabel));
         }
 
         if (mkvChanged)
         {
-            this.RaisePropertyChanged(nameof(MkvFile));
-            this.RaisePropertyChanged(nameof(HasMkv));
-            this.RaisePropertyChanged(nameof(FileDisplayName));
-            this.RaisePropertyChanged(nameof(FileSizeLabel));
-            this.RaisePropertyChanged(nameof(HasFileSizeLabel));
-            this.RaisePropertyChanged(nameof(FileSizeRootLabel));
+            OnPropertyChanged(nameof(MkvFile));
+            OnPropertyChanged(nameof(HasMkv));
+            OnPropertyChanged(nameof(FileDisplayName));
+            OnPropertyChanged(nameof(FileSizeLabel));
+            OnPropertyChanged(nameof(HasFileSizeLabel));
+            OnPropertyChanged(nameof(FileSizeRootLabel));
         }
 
         if (episodeChanged || mkvChanged)
         {
-            this.RaisePropertyChanged(nameof(IsPaired));
-            this.RaisePropertyChanged(nameof(IsMissingFile));
-            this.RaisePropertyChanged(nameof(IsExtraFile));
+            OnPropertyChanged(nameof(IsPaired));
+            OnPropertyChanged(nameof(IsMissingFile));
+            OnPropertyChanged(nameof(IsExtraFile));
         }
 
         if (settleChanged)
         {
-            this.RaisePropertyChanged(nameof(SettleType));
-            this.RaisePropertyChanged(nameof(SettleDirection));
-            this.RaisePropertyChanged(nameof(ShouldSettleIndependent));
-            this.RaisePropertyChanged(nameof(ShouldSettleLinked));
-            this.RaisePropertyChanged(nameof(ShouldAnimateLink));
+            OnPropertyChanged(nameof(SettleType));
+            OnPropertyChanged(nameof(SettleDirection));
+            OnPropertyChanged(nameof(ShouldSettleIndependent));
+            OnPropertyChanged(nameof(ShouldSettleLinked));
+            OnPropertyChanged(nameof(ShouldAnimateLink));
         }
     }
 

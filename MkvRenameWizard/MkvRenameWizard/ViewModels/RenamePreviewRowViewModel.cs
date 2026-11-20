@@ -1,5 +1,4 @@
 using MkvRenameWizard.Models.Renaming;
-using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
@@ -52,19 +51,19 @@ public sealed class RenamePreviewRowViewModel : ViewModelBase
         TargetPath = targetPath;
         RenamePreviewStatus = status;
 
-        if (idChanged) this.RaisePropertyChanged(nameof(OperationId));
-        if (sourcePathChanged) this.RaisePropertyChanged(nameof(SourcePath));
-        if (sourceNameChanged) this.RaisePropertyChanged(nameof(SourceFileName));
-        if (targetChanged) this.RaisePropertyChanged(nameof(TargetPath));
+        if (idChanged) OnPropertyChanged(nameof(OperationId));
+        if (sourcePathChanged) OnPropertyChanged(nameof(SourcePath));
+        if (sourceNameChanged) OnPropertyChanged(nameof(SourceFileName));
+        if (targetChanged) OnPropertyChanged(nameof(TargetPath));
 
         if (statusChanged)
         {
-            this.RaisePropertyChanged(nameof(RenamePreviewStatus));
-            this.RaisePropertyChanged(nameof(IsReady));
-            this.RaisePropertyChanged(nameof(IsPatternError));
-            this.RaisePropertyChanged(nameof(IsConflict));
-            this.RaisePropertyChanged(nameof(IsSkipped));
-            this.RaisePropertyChanged(nameof(IsDone));
+            OnPropertyChanged(nameof(RenamePreviewStatus));
+            OnPropertyChanged(nameof(IsReady));
+            OnPropertyChanged(nameof(IsPatternError));
+            OnPropertyChanged(nameof(IsConflict));
+            OnPropertyChanged(nameof(IsSkipped));
+            OnPropertyChanged(nameof(IsDone));
         }
     }
 }

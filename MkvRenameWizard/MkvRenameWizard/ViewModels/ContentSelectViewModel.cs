@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Models.FileImport;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.Models.Rail;
 using MkvRenameWizard.Models.TvMaze;
 using MkvRenameWizard.Services;
-using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
@@ -39,20 +38,20 @@ public class ContentSelectViewModel : ViewModelBase
         _logger = logger;
         _fileLoggerService = fileLoggerService;
 
-        MoveEpisodeUpCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.Episode, i, delta: -1));
-        MoveEpisodeDownCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.Episode, i, delta: 1));
-        MoveMkvFileUpCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.File, i, delta: -1));
-        MoveMkvFileDownCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.File, i, delta: 1));
-        OpenFilesCommand = ReactiveCommand.CreateFromTask(ExecuteOpenFilesCommand);
-        OpenFolderCommand = ReactiveCommand.CreateFromTask(ExecuteOpenFolderCommand);
-        OpenLogFolderCommand = ReactiveCommand.Create(() => _fileLoggerService.OpenLogDirectory());
-        ClearFilesCommand = ReactiveCommand.Create(ClearImport);
-        OpenSystemSettingsCommand = ReactiveCommand.Create(TryOpenPermissionsSetting);
-        PrimaryErrorCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryErrorCommand);
-        SecondaryErrorCommand = ReactiveCommand.CreateFromTask(ExecuteSecondaryErrorCommand);
-        TogglePartialFailureDetailsCommand = ReactiveCommand.Create(() => { ShowPartialFailureDetails = !ShowPartialFailureDetails; });
-        SetLinkedReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = true; });
-        SetIndependentReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = false; });
+        MoveEpisodeUpCommand = new RelayCommand<int>(i => MoveChevron(RailReorderSide.Episode, i, delta: -1));
+        MoveEpisodeDownCommand = new RelayCommand<int>(i => MoveChevron(RailReorderSide.Episode, i, delta: 1));
+        MoveMkvFileUpCommand = new RelayCommand<int>(i => MoveChevron(RailReorderSide.File, i, delta: -1));
+        MoveMkvFileDownCommand = new RelayCommand<int>(i => MoveChevron(RailReorderSide.File, i, delta: 1));
+        OpenFilesCommand = new AsyncRelayCommand(ExecuteOpenFilesCommand);
+        OpenFolderCommand = new AsyncRelayCommand(ExecuteOpenFolderCommand);
+        OpenLogFolderCommand = new RelayCommand(() => _fileLoggerService.OpenLogDirectory());
+        ClearFilesCommand = new RelayCommand(ClearImport);
+        OpenSystemSettingsCommand = new RelayCommand(TryOpenPermissionsSetting);
+        PrimaryErrorCommand = new AsyncRelayCommand(ExecutePrimaryErrorCommand);
+        SecondaryErrorCommand = new AsyncRelayCommand(ExecuteSecondaryErrorCommand);
+        TogglePartialFailureDetailsCommand = new RelayCommand(() => ShowPartialFailureDetails = !ShowPartialFailureDetails);
+        SetLinkedReorderCommand = new RelayCommand(() => LinkRailReorder = true);
+        SetIndependentReorderCommand = new RelayCommand(() => LinkRailReorder = false);
 
         Episodes.CollectionChanged += (_, _) => OnListChanged();
         MkvFiles.CollectionChanged += (_, _) => OnListChanged();
@@ -64,33 +63,35 @@ public class ContentSelectViewModel : ViewModelBase
     public ObservableCollection<FileImportIssueViewModel> ImportIssues { get; } = new();
     public ObservableCollection<RailMatchRowViewModel> MatchRows { get; } = new();
 
-    public ReactiveCommand<int, Unit> MoveEpisodeUpCommand { get; }
-    public ReactiveCommand<int, Unit> MoveEpisodeDownCommand { get; }
-    public ReactiveCommand<int, Unit> MoveMkvFileUpCommand { get; }
-    public ReactiveCommand<int, Unit> MoveMkvFileDownCommand { get; }
+    public IRelayCommand<int> MoveEpisodeUpCommand { get; }
+    public IRelayCommand<int> MoveEpisodeDownCommand { get; }
+    public IRelayCommand<int> MoveMkvFileUpCommand { get; }
+    public IRelayCommand<int> MoveMkvFileDownCommand { get; }
 
-    public ReactiveCommand<Unit, Unit> OpenFilesCommand { get; }
-    public ReactiveCommand<Unit, Unit> OpenFolderCommand { get; }
-    public ReactiveCommand<Unit, Unit> OpenLogFolderCommand { get; }
-    public ReactiveCommand<Unit, Unit> ClearFilesCommand { get; }
-    public ReactiveCommand<Unit, Unit> OpenSystemSettingsCommand { get; }
-    public ReactiveCommand<Unit, Unit> PrimaryErrorCommand { get; }
-    public ReactiveCommand<Unit, Unit> SecondaryErrorCommand { get; }
-    public ReactiveCommand<Unit, Unit> TogglePartialFailureDetailsCommand { get; }
-    public ReactiveCommand<Unit, Unit> SetLinkedReorderCommand { get; }
-    public ReactiveCommand<Unit, Unit> SetIndependentReorderCommand { get; }
+    public IAsyncRelayCommand OpenFilesCommand { get; }
+    public IAsyncRelayCommand OpenFolderCommand { get; }
+    public IRelayCommand OpenLogFolderCommand { get; }
+    public IRelayCommand ClearFilesCommand { get; }
+    public IRelayCommand OpenSystemSettingsCommand { get; }
+    public IAsyncRelayCommand PrimaryErrorCommand { get; }
+    public IAsyncRelayCommand SecondaryErrorCommand { get; }
+    public IRelayCommand TogglePartialFailureDetailsCommand { get; }
+    public IRelayCommand SetLinkedReorderCommand { get; }
+    public IRelayCommand SetIndependentReorderCommand { get; }
 
-    public bool IsRailDragging { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
-    public int LinkAnimationVersion { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
-    public bool HasImportedAttempted { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
+    public bool IsRailDragging { get; private set => SetProperty(ref field, value); }
+    public int LinkAnimationVersion { get; private set => SetProperty(ref field, value); }
+    public bool HasImportedAttempted { get; private set => SetProperty(ref field, value); }
 
     public bool ShowPartialFailureDetails
     {
         get;
         set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            this.RaisePropertyChanged(nameof(PartialFailureDetailsToggleText));
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(PartialFailureDetailsToggleText));
+            }
         }
     }
 
@@ -99,10 +100,12 @@ public class ContentSelectViewModel : ViewModelBase
         get;
         set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            this.RaisePropertyChanged(nameof(IsLinkedModelSelected));
-            this.RaisePropertyChanged(nameof(IsIndependentModeSelected));
-            this.RaisePropertyChanged(nameof(IsShiftLinkHintVisible));
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(IsLinkedModelSelected));
+                OnPropertyChanged(nameof(IsIndependentModeSelected));
+                OnPropertyChanged(nameof(IsShiftLinkHintVisible));
+            }
         }
     } = false;
 
@@ -115,8 +118,10 @@ public class ContentSelectViewModel : ViewModelBase
         get;
         set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            this.RaisePropertyChanged(nameof(EpisodeColumnSubtitle));
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(EpisodeColumnSubtitle));
+            }
         }
     } = string.Empty;
 
@@ -281,7 +286,6 @@ public class ContentSelectViewModel : ViewModelBase
             _deferMatchRefresh = false;
         }
 
-        // Only update the slice of MatchRows whose Episode or MkvFile index actually changed
         var start = Math.Max(0, Math.Min(fromIndex, toIndex));
         var end = Math.Min(MatchRows.Count - 1, Math.Max(fromIndex, toIndex));
         for (var i = start; i <= end; i++)
@@ -595,38 +599,38 @@ public class ContentSelectViewModel : ViewModelBase
 
     private void RaiseImportStateProperties()
     {
-        this.RaisePropertyChanged(nameof(EpisodeCount));
-        this.RaisePropertyChanged(nameof(ImportedFileCount));
-        this.RaisePropertyChanged(nameof(IssueCount));
-        this.RaisePropertyChanged(nameof(PairedCount));
-        this.RaisePropertyChanged(nameof(SkippedCount));
-        this.RaisePropertyChanged(nameof(HasImportedAttempted));
-        this.RaisePropertyChanged(nameof(HasImportedFiles));
-        this.RaisePropertyChanged(nameof(HasIssues));
-        this.RaisePropertyChanged(nameof(HasPermissionDenied));
-        this.RaisePropertyChanged(nameof(HasInvalidMkvIssues));
-        this.RaisePropertyChanged(nameof(HasNoMkvIssues));
-        this.RaisePropertyChanged(nameof(ShowEmptyImportPrompt));
-        this.RaisePropertyChanged(nameof(ShowMatchRails));
-        this.RaisePropertyChanged(nameof(ShowImportPanel));
-        this.RaisePropertyChanged(nameof(CanContinue));
-        this.RaisePropertyChanged(nameof(PairedChipText));
-        this.RaisePropertyChanged(nameof(SkippedChipText));
-        this.RaisePropertyChanged(nameof(EpisodeColumnSubtitle));
-        this.RaisePropertyChanged(nameof(FileColumnSubtitle));
-        this.RaisePropertyChanged(nameof(EpisodeHeaderText));
-        this.RaisePropertyChanged(nameof(FileHeaderText));
-        this.RaisePropertyChanged(nameof(ImportButtonText));
-        this.RaisePropertyChanged(nameof(ImportStatusText));
-        this.RaisePropertyChanged(nameof(FooterStatusText));
-        this.RaisePropertyChanged(nameof(ErrorEyebrowText));
-        this.RaisePropertyChanged(nameof(ErrorTitle));
-        this.RaisePropertyChanged(nameof(ErrorDescription));
-        this.RaisePropertyChanged(nameof(PrimaryErrorActionText));
-        this.RaisePropertyChanged(nameof(ShowPrimaryErrorButton));
-        this.RaisePropertyChanged(nameof(ShowPartialFailureBanner));
-        this.RaisePropertyChanged(nameof(SecondaryErrorActionText));
-        this.RaisePropertyChanged(nameof(PartialFailureTitle));
-        this.RaisePropertyChanged(nameof(PartialFailureSummary));
+        OnPropertyChanged(nameof(EpisodeCount));
+        OnPropertyChanged(nameof(ImportedFileCount));
+        OnPropertyChanged(nameof(IssueCount));
+        OnPropertyChanged(nameof(PairedCount));
+        OnPropertyChanged(nameof(SkippedCount));
+        OnPropertyChanged(nameof(HasImportedAttempted));
+        OnPropertyChanged(nameof(HasImportedFiles));
+        OnPropertyChanged(nameof(HasIssues));
+        OnPropertyChanged(nameof(HasPermissionDenied));
+        OnPropertyChanged(nameof(HasInvalidMkvIssues));
+        OnPropertyChanged(nameof(HasNoMkvIssues));
+        OnPropertyChanged(nameof(ShowEmptyImportPrompt));
+        OnPropertyChanged(nameof(ShowMatchRails));
+        OnPropertyChanged(nameof(ShowImportPanel));
+        OnPropertyChanged(nameof(CanContinue));
+        OnPropertyChanged(nameof(PairedChipText));
+        OnPropertyChanged(nameof(SkippedChipText));
+        OnPropertyChanged(nameof(EpisodeColumnSubtitle));
+        OnPropertyChanged(nameof(FileColumnSubtitle));
+        OnPropertyChanged(nameof(EpisodeHeaderText));
+        OnPropertyChanged(nameof(FileHeaderText));
+        OnPropertyChanged(nameof(ImportButtonText));
+        OnPropertyChanged(nameof(ImportStatusText));
+        OnPropertyChanged(nameof(FooterStatusText));
+        OnPropertyChanged(nameof(ErrorEyebrowText));
+        OnPropertyChanged(nameof(ErrorTitle));
+        OnPropertyChanged(nameof(ErrorDescription));
+        OnPropertyChanged(nameof(PrimaryErrorActionText));
+        OnPropertyChanged(nameof(ShowPrimaryErrorButton));
+        OnPropertyChanged(nameof(ShowPartialFailureBanner));
+        OnPropertyChanged(nameof(SecondaryErrorActionText));
+        OnPropertyChanged(nameof(PartialFailureTitle));
+        OnPropertyChanged(nameof(PartialFailureSummary));
     }
 }

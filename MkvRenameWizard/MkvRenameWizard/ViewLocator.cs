@@ -1,32 +1,22 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using MkvRenameWizard.ViewModels;
+using MkvRenameWizard.Views;
 
 namespace MkvRenameWizard;
 
 public class ViewLocator : IDataTemplate
 {
-    public Control? Build(object? param)
+    public Control? Build(object? param) => param switch
     {
-        if (param is null)
-        {
-            return null;
-        }
+        ContentSearchViewModel => new ContentSearchView(),
+        ContentSelectViewModel => new ContentSelectView(),
+        OutputFileConfigurationViewModel => new OutputFileConfigurationView(),
+        RenameResultViewModel => new RenameResultView(),
+        WizardViewModel => new WizardView(),
+        null => null,
+        _ => new TextBlock { Text = "Not Found: " + param.GetType().FullName }
+    };
 
-        var name = param.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
-        var type = Type.GetType(name);
-
-        if (type != null)
-        {
-            return (Control)Activator.CreateInstance(type)!;
-        }
-
-        return new TextBlock { Text = "Not Found: " + name };
-    }
-
-    public bool Match(object? data)
-    {
-        return data is ViewModelBase;
-    }
+    public bool Match(object? data) => data is ViewModelBase;
 }

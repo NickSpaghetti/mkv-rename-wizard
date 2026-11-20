@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Avalonia.Media.Imaging;
 using MkvRenameWizard.Models.TvMaze;
-using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
@@ -41,7 +40,7 @@ public sealed class ShowSearchResultViewModel : ViewModelBase, IDisposable
         {
             if (ReferenceEquals(field, value)) return;
             var old = field;
-            this.RaiseAndSetIfChanged(ref field, value);
+            SetProperty(ref field, value);
             old?.Dispose();
         }
     }
