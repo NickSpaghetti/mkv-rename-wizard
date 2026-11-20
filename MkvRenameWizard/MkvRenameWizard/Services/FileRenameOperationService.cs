@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Models.Renaming;
 
@@ -10,32 +8,50 @@ namespace MkvRenameWizard.Services;
 
 public class FileRenameOperationService(ILogger<FileRenameOperationService> logger) : IFileRenameOperationService
 {
-    public Task<List<RenameOperationResult<RenameFileOperation>>> ExecuteAsync(IEnumerable<RenameFileOperation> operations)
+    public List<RenameOperationResult<RenameFileOperation>> Execute(IReadOnlyList<RenameFileOperation> operations)
     {
-        var results = new List<RenameOperationResult<RenameFileOperation>>();
+        var results = new List<RenameOperationResult<RenameFileOperation>>(operations.Count);
+        string? lastCreatedDir = null;
+        HashSet<string>? createdDirs = null;
 
-        foreach (var operation in operations)
+        for (var i = 0; i < operations.Count; i++)
         {
+            var operation = operations[i];
             try
             {
-                var targetDir = Path.GetDirectoryName(operation.TargetPath);
-                if (!string.IsNullOrEmpty(targetDir))
+                if (string.IsNullOrEmpty(operation.TargetPath))
                 {
-                    Directory.CreateDirectory(targetDir);
+                    results.Add(new RenameOperationResult<RenameFileOperation>(
+                        operation, IsSuccessful: false, "Target path is empty."));
+                    continue;
+                }
+
+                var targetDir = Path.GetDirectoryName(operation.TargetPath);
+                if (!string.IsNullOrEmpty(targetDir) &&
+                    !string.Equals(targetDir, lastCreatedDir, StringComparison.Ordinal))
+                {
+                    createdDirs ??= new HashSet<string>(StringComparer.Ordinal);
+                    if (createdDirs.Add(targetDir))
+                    {
+                        Directory.CreateDirectory(targetDir);
+                    }
+                    lastCreatedDir = targetDir;
                 }
 
                 File.Move(operation.SourcePath, operation.TargetPath, overwrite: false);
 
-                results.Add(
-                    new RenameOperationResult<RenameFileOperation>(operation, IsSuccessful: true, string.Empty));
+                results.Add(new RenameOperationResult<RenameFileOperation>(
+                    operation, IsSuccessful: true, string.Empty));
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, ex.Message);
-                results.Add(new RenameOperationResult<RenameFileOperation>(operation, IsSuccessful: false, ex.Message));
+                logger.LogError(ex, "Failed to rename {SourcePath} to {TargetPath}",
+                    operation.SourcePath, operation.TargetPath);
+                results.Add(new RenameOperationResult<RenameFileOperation>(
+                    operation, IsSuccessful: false, ex.Message));
             }
         }
 
-        return Task.FromResult(results);
+        return results;
     }
 }

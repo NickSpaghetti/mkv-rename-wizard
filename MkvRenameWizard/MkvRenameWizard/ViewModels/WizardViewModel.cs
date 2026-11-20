@@ -239,7 +239,7 @@ public class WizardViewModel : ViewModelBase
 
     private async Task ExecuteRenameAsync(bool retryFailedOnly)
     {
-        IEnumerable<RenameFileOperation> operations;
+        List<RenameFileOperation> operations;
 
         if (retryFailedOnly)
         {
@@ -249,14 +249,16 @@ public class WizardViewModel : ViewModelBase
                 .ToHashSet();
 
             operations = _outputFileConfigurationViewModel.BuildRenameOperations()
-                .Where(j => failedOperations.Contains(j.OperationId));
+                .Where(j => failedOperations.Contains(j.OperationId))
+                .ToList();
         }
         else
         {
-            operations = _outputFileConfigurationViewModel.BuildRenameOperations();
+            operations = _outputFileConfigurationViewModel.BuildRenameOperations().ToList();
         }
-        
-        var results = await _fileRenameOperationService.ExecuteAsync(operations);
+
+        // Offload blocking filesystem syscalls (File.Move / Directory.CreateDirectory) from the UI thread
+        var results = await Task.Run(() => _fileRenameOperationService.Execute(operations));
 
         if (retryFailedOnly)
         {
