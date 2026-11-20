@@ -12,17 +12,17 @@ public static class PathDisplay
             return emptyFallBackName;
         }
 
-        var fileName = Path.GetFileName(path);
-        if (string.IsNullOrWhiteSpace(fileName))
+        var fileName = Path.GetFileName(path.AsSpan());
+        if (fileName.IsWhiteSpace())
         {
             return path;
         }
 
-        if (fileName.AsSpan().IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        if (fileName.IndexOfAny(FilePatternHelper.InvalidFileNameChars) >= 0)
         {
             return path;
         }
 
-        return fileName;
+        return new string(fileName);
     }
 }

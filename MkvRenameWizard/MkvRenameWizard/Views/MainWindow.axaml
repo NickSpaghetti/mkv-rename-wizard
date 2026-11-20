@@ -13,7 +13,7 @@
         Height="1080"
         MinWidth="900"
         MinHeight="560"
-        Background="{DynamicResource AppBackgroundBrush}">
+        Background="{StaticResource AppBackgroundBrush}">
     
     
     <Design.DataContext>

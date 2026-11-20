@@ -17,12 +17,12 @@
         <Style Selector="TextBlock.selection-label">
             <Setter Property="FontSize" Value="10"></Setter>
             <Setter Property="FontWeight" Value="SemiBold"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
             <Setter Property="Margin" Value="0,0,0,6"></Setter>
         </Style>
         <Style Selector="TextBox.panel-input">
             <Setter Property="Background" Value="#262626"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource TextMutedBrush}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="CornerRadius" Value="6"></Setter>
             <Setter Property="Foreground" Value="#E8E8E8"></Setter>
@@ -34,15 +34,15 @@
             <Setter Property="BorderBrush" Value="#F59E0B"></Setter>
         </Style>
         <Style Selector="TextBlock.token-name">
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
         </Style>
         <Style Selector="TextBlock.token-name.token-active">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="RadioButton.case-btn">
             <Setter Property="Background" Value="#2A2A2A"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="Padding" Value="10,6"></Setter>
             <Setter Property="CornerRadius" Value="5"></Setter>
@@ -73,24 +73,24 @@
                 </Setter>
         </Style>
         <Style Selector="RadioButton.case-btn-pointerover">
-            <Setter Property="BorderBrush" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource TextMutedBrush}"></Setter>
         </Style>
         <Style Selector="RadioButton.case-btn:checked">
             <Setter Property="Background" Value="#1D3040"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="RadioButton.case-btn:checked /template/ Border#PART_Underline">
-            <Setter Property="Background" Value="{DynamicResource  AccentBrush}"></Setter>
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="Border.divider-h">
             <Setter Property="Height" Value="1"></Setter>
-            <Setter Property="Background" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="Background" Value="{StaticResource DividerBrush}"></Setter>
             <Setter Property="Margin" Value="0,14,0,14"></Setter>
         </Style>
         <Style Selector="Border.prefight-card">
             <Setter Property="Background" Value="#222222"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="CornerRadius" Value="6"></Setter>
             <Setter Property="Padding" Value="12,10"></Setter>
@@ -112,23 +112,23 @@
             <Setter Property="Background" Value="#1A2A35"></Setter>
         </Style>
         <Style Selector="Border.index-pill > TextBlock.row-num">
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
         </Style>
         <Style Selector="Border.preview-row:pointerover PathIcon.arrow">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="Border.preview-row:pointerover PathIcon.index-pill">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="Border.preview-row:pointerover TextBlock.row-num">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="ListBoxItem:selected Border.index-pill">
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"></Setter>
             <Setter Property="Background" Value="#1F48C6"></Setter>
         </Style>
         <Style Selector="ListBoxItem:selected Border.index-pill > TextBlock.row-num">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
         <Style Selector="ListBoxItem:selected Border.preview-row">
             <Setter Property="Background" Value="#1448C8F6"></Setter>
@@ -136,40 +136,60 @@
         <Style Selector="ListBoxItem:selected Border.row-select-indicator">
             <Setter Property="IsVisible" Value="True"></Setter>
         </Style>
-        <Style Selector="Border.status-badge-ready">
+        <Style Selector="Border.status-badge">
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="10"></Setter>
+            <Setter Property="Padding" Value="9,3"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.ready">
             <Setter Property="Background" Value="#0D2E1A"></Setter>
             <Setter Property="BorderBrush" Value="#22543D"></Setter>
-            <Setter Property="BorderThickness" Value="1"></Setter>
-            <Setter Property="CornerRadius" Value="10"></Setter>
-            <Setter Property="Padding" Value="9,3"></Setter>
         </Style>
-        <Style Selector="Border.status-badge-error">
+        <Style Selector="Border.status-badge.ready Ellipse">
+            <Setter Property="Fill" Value="#4ADE80"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.ready TextBlock">
+            <Setter Property="Foreground" Value="#4ADE80"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.error">
             <Setter Property="Background" Value="#2D1A00"></Setter>
             <Setter Property="BorderBrush" Value="#683A00"></Setter>
-            <Setter Property="BorderThickness" Value="1"></Setter>
-            <Setter Property="CornerRadius" Value="10"></Setter>
-            <Setter Property="Padding" Value="9,3"></Setter>
         </Style>
-        <Style Selector="Border.status-badge-conflict">
+        <Style Selector="Border.status-badge.error Ellipse">
+            <Setter Property="Fill" Value="#F59E0B"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.error TextBlock">
+            <Setter Property="Foreground" Value="#F59E0B"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.conflict">
             <Setter Property="Background" Value="#2D0D0D"></Setter>
             <Setter Property="BorderBrush" Value="#6B1A1A"></Setter>
-            <Setter Property="BorderThickness" Value="1"></Setter>
-            <Setter Property="CornerRadius" Value="10"></Setter>
-            <Setter Property="Padding" Value="9,3"></Setter>
         </Style>
-        <Style Selector="Border.status-badge-skipped">
+        <Style Selector="Border.status-badge.conflict Ellipse">
+            <Setter Property="Fill" Value="#F87171"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.conflict TextBlock">
+            <Setter Property="Foreground" Value="#F87171"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.skipped">
             <Setter Property="Background" Value="#202020"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
-            <Setter Property="BorderThickness" Value="1"></Setter>
-            <Setter Property="CornerRadius" Value="10"></Setter>
-            <Setter Property="Padding" Value="9,3"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"></Setter>
         </Style>
-        <Style Selector="Border.status-badge-done">
+        <Style Selector="Border.status-badge.skipped Ellipse">
+            <Setter Property="Fill" Value="#888888"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.skipped TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.done">
             <Setter Property="Background" Value="#0A2A18"></Setter>
             <Setter Property="BorderBrush" Value="#1A4D30"></Setter>
-            <Setter Property="BorderThickness" Value="1"></Setter>
-            <Setter Property="CornerRadius" Value="10"></Setter>
-            <Setter Property="Padding" Value="9,3"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.done Ellipse">
+            <Setter Property="Fill" Value="#4ADE80"></Setter>
+        </Style>
+        <Style Selector="Border.status-badge.done TextBlock">
+            <Setter Property="Foreground" Value="#4ADE80"></Setter>
         </Style>
         <Style Selector="Border.error-panel">
             <Setter Property="Background" Value="#1E1200"></Setter>
@@ -210,7 +230,7 @@
     <Grid ColumnDefinitions="375,*">
         <!-- Left Panel -->
         <Border Grid.Column="0"
-                BorderBrush="{DynamicResource DividerBrush}"
+                BorderBrush="{StaticResource DividerBrush}"
                 BorderThickness="0,0,1,0"
                 Background="#1C1C1C">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -219,7 +239,7 @@
                     <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
                         <TextBlock Classes="selection-label" Text="FILENAME PATTERN" VerticalAlignment="Center"></TextBlock>
                         <Button Grid.Column="1" Command="{Binding ResetPatternCommand}"
-                                Background="Transparent" Foreground="{DynamicResource AccentBrush}"
+                                Background="Transparent" Foreground="{StaticResource AccentBrush}"
                                 BorderThickness="0" FontSize="12" Padding="0" Cursor="Hand" Content="Reset"></Button>
                     </Grid>
                     
@@ -231,7 +251,7 @@
                     </TextBox>
                     <!-- Pattern preview -->
                     <Border Background="#1E2E38"
-                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="1" CornerRadius="6"
                             Padding="10,8" Margin="0,6,0,0"
                             IsVisible="{Binding IsPatternValid}">
@@ -294,7 +314,7 @@
                                         <StackPanel Margin="0,0,0,8" Spacing="4">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <TextBlock Text="{Binding Column, StringFormat='col {0}'}"
-                                                           Foreground="{DynamicResource TextMutedBrush}" FontSize="11"
+                                                           Foreground="{StaticResource TextMutedBrush}" FontSize="11"
                                                            VerticalAlignment="Center">
                                                 </TextBlock>
                                                 <Border Classes="token-invalid">
@@ -310,7 +330,7 @@
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" Spacing="6"
                                                         IsVisible="{Binding Suggestion, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                                <TextBlock Text="Did you mean" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"
+                                                <TextBlock Text="Did you mean" Foreground="{StaticResource TextMutedBrush}" FontSize="11"
                                                            VerticalAlignment="Center">
                                                 </TextBlock>
                                                     <Border Classes="token-valid">
@@ -320,7 +340,7 @@
                                                         </TextBlock>
                                                     </Border>
                                                     <TextBlock Text="?"
-                                                               Foreground="{DynamicResource TextMutedBrush}"
+                                                               Foreground="{StaticResource TextMutedBrush}"
                                                                FontSize="11"
                                                                VerticalAlignment="Center">
                                                     </TextBlock>
@@ -328,7 +348,7 @@
                                                         Command="{Binding #Root.((viewModel:OutputFileConfigurationViewModel)DataContext)?.ApplySuggestionCommand}"
                                                         CommandParameter="{Binding}"
                                                         Background="Transparent"
-                                                        Foreground="{DynamicResource AccentBrush}"
+                                                        Foreground="{StaticResource AccentBrush}"
                                                         BorderThickness="0" FontSize="11" Padding="0" Cursor="Hand">
                                                 </Button>
                                             </StackPanel>
@@ -348,7 +368,7 @@
                             <TextBlock Grid.Column="0" Classes="selection-label" Text="Available Tokens" VerticalAlignment="Center"></TextBlock>
                             <PathIcon Grid.Column="1" Data="{StaticResource PlayRegular}"
                                       IsVisible="{Binding IsTokenTableExpanded}"
-                                      Foreground="{DynamicResource TextMutedBrush}"
+                                      Foreground="{StaticResource TextMutedBrush}"
                                       Width="11"
                                       Height="11"
                                       VerticalAlignment="Center"
@@ -359,7 +379,7 @@
                             </PathIcon>
                             <PathIcon Grid.Column="1" Data="{StaticResource PlayRegular}"
                                       IsVisible="{Binding !IsTokenTableExpanded}"
-                                      Foreground="{DynamicResource TextMutedBrush}"
+                                      Foreground="{StaticResource TextMutedBrush}"
                                       Width="11"
                                       Height="11"
                                       VerticalAlignment="Center">
@@ -369,12 +389,12 @@
                     <TextBlock IsVisible="{Binding IsTokenTableExpanded}"
                                Text="Click to insert"
                                FontSize="10"
-                               Foreground="{DynamicResource TextMutedBrush}"
+                               Foreground="{StaticResource TextMutedBrush}"
                                Margin="0,4,0,0">
                     </TextBlock>
                     <Border IsVisible="{Binding IsTokenTableExpanded}"
                             Background="#1A1A1A"
-                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="1" CornerRadius="6" Margin="0,4,0,0">
                         <ItemsControl ItemsSource="{Binding ActiveTokens}" Padding="4">
                             <ItemsControl.ItemTemplate>
@@ -399,11 +419,11 @@
                                                 </TextBlock>
                                             </Border>
                                             <TextBlock Grid.Column="1" Text="{Binding Description}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
                                                        FontSize="12" VerticalAlignment="Center">
                                             </TextBlock>
                                             <TextBlock Grid.Column="2" Text="{Binding ExampleValue}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
                                                        FontSize="12" TextAlignment="Right" VerticalAlignment="Center">
                                             </TextBlock>
                                         </Grid>
@@ -424,7 +444,7 @@
                              MaxWidth="140" HorizontalAlignment="Left">
                     </TextBox>
                     <TextBlock Text="Prepended to evey renamed file.  Leave empty for none."
-                               FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                               FontSize="11" Foreground="{StaticResource TextMutedBrush}"
                                Margin="0,6,0,0" TextWrapping="Wrap">
                     </TextBlock>
                     
@@ -467,14 +487,14 @@
                     
                     <!-- TargetFolder -->
                     <TextBlock Classes="selection-label" Text="Target Folder"></TextBlock>
-                    <Border Background="#222222" BorderBrush="{DynamicResource DividerBrush}"
+                    <Border Background="#222222" BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="1" CornerRadius="6" Padding="2,0">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBox Grid.Column="0"
                                        Text="{Binding TargetFolder, Mode=TwoWay}"
                                        Background="Transparent"
                                        BorderThickness="0"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
                                        FontSize="12"
                                        Padding="10,6"
                                        MinWidth="0"
@@ -490,12 +510,12 @@
                                     Padding="8,6"
                                     Cursor="Hand"
                                     ToolTip.Tip="Browser..">
-                                <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" Foreground="{DynamicResource TextMutedBrush}"></PathIcon>
+                                <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" Foreground="{StaticResource TextMutedBrush}"></PathIcon>
                             </Button>
                         </Grid>
                     </Border>
                     <TextBlock Text="Type or paste a path directly, or click the fodler icon to browse."
-                               FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                               FontSize="11" Foreground="{StaticResource TextMutedBrush}"
                                Margin="0,6,0,0"></TextBlock>
                     
                     <Border Classes="divider-h"></Border>
@@ -506,19 +526,21 @@
                         <Border Classes="prefight-card" Margin="0,0,0,6">
                             <StackPanel HorizontalAlignment="Center" Spacing="2">
                                 <TextBlock Text="{Binding ReadyCount}" FontSize="26" FontWeight="Bold" Foreground="#4ADE80" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Ready" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Ready" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
     
                         <Border Classes="prefight-card" Margin="0,0,0,6">
                             <StackPanel HorizontalAlignment="Center" Spacing="2">
                                 <TextBlock Text="{Binding ConflictCount}" FontSize="26" FontWeight="Bold" Foreground="#F87171" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Conflicts" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Conflicts" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
     
-                        <Border Classes="prefight-card" Margin="0,0,0,6"> <StackPanel HorizontalAlignment="Center" Spacing="2"> <TextBlock Text="{Binding ConflictCount}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Skipped" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                        <Border Classes="prefight-card" Margin="0,0,0,6">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="{Binding SkippedCount}" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Skipped" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
                     </UniformGrid>
@@ -532,7 +554,7 @@
             <!-- Column Header row -->
             <Border Grid.Row="0"
                     Background="#181818"
-                    BorderBrush="{DynamicResource DividerBrush}"
+                    BorderBrush="{StaticResource DividerBrush}"
                     BorderThickness="0,0,0,1"
                     Padding="14,0">
                 <Grid ColumnDefinitions="44,*,48,*,Auto">
@@ -544,144 +566,94 @@
             </Border>
             
             <!-- Preview Rows -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <ListBox ItemsSource="{Binding PreviewItems}" Background="Transparent"
-                         BorderThickness="0">
-                    <ListBox.Styles>
-                        <Style Selector="ListBox:focus-visible">
-                            <Setter Property="BorderThickness" Value="0"></Setter>
-                        </Style>
-                        <Style Selector="ListBoxItem">
-                            <Setter Property="Padding" Value="0"></Setter>
-                            <Setter Property="Background" Value="Transparent"></Setter>
-                        </Style>
-                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Transparent"></Setter>
-                        </Style>
-                        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Transparent"></Setter>
-                        </Style>
-                    </ListBox.Styles>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <DataTemplate.DataType>
-                                <x:Type TypeName="models:RenamePreviewItem" x:TypeArguments="models:RenameFileOperation" />
-                            </DataTemplate.DataType>
-                            <Border Classes="preview-row"
-                                    BorderBrush="{DynamicResource DividerBrush}"
-                                    BorderThickness="0,0,0,1">
-                                <Panel>
-                                    <Border Classes="row-select-indicator"
-                                            Width="3"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Stretch"
-                                            Background="{DynamicResource AccentBrush}"
-                                            Margin="-14,8,0,8"></Border>
-                                    <Grid VerticalAlignment="Center" ColumnDefinitions="44,*,48,*,Auto">
-                                        <Border Classes="index-pill" Grid.Column="0"
-                                                Width="30" 
-                                                Height="30"
-                                                CornerRadius="6"
-                                                HorizontalAlignment="Left">
-                                            <TextBlock Classes="row-num"
-                                                       Text="{Binding RenameOperation.OperationId, StringFormat='{}{0:D2}'}"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                       FontSize="11" FontWeight="SemiBold">
-                                                
-                                            </TextBlock>
-                                        </Border>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding SourceFileName}"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   FontSize="13"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   VerticalAlignment="Center"
-                                                   ToolTip.Tip="{Binding  RenameOperation.SourcePath}">
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding PreviewItems}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.Styles>
+                    <Style Selector="ListBox:focus-visible">
+                        <Setter Property="BorderThickness" Value="0"></Setter>
+                    </Style>
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0"></Setter>
+                        <Setter Property="Background" Value="Transparent"></Setter>
+                    </Style>
+                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent"></Setter>
+                    </Style>
+                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent"></Setter>
+                    </Style>
+                </ListBox.Styles>
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="viewModel:RenamePreviewRowViewModel">
+                        <Border Classes="preview-row"
+                                BorderBrush="{StaticResource DividerBrush}"
+                                BorderThickness="0,0,0,1">
+                            <Panel>
+                                <Border Classes="row-select-indicator"
+                                        Width="3"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Stretch"
+                                        Background="{StaticResource AccentBrush}"
+                                        Margin="-14,8,0,8"></Border>
+                                <Grid VerticalAlignment="Center" ColumnDefinitions="44,*,48,*,Auto">
+                                    <Border Classes="index-pill" Grid.Column="0"
+                                            Width="30"
+                                            Height="30"
+                                            CornerRadius="6"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Classes="row-num"
+                                                   Text="{Binding OperationId, StringFormat='{}{0:D2}'}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   FontSize="11" FontWeight="SemiBold">
                                         </TextBlock>
-                                        <PathIcon Grid.Column="2" Classes="arrow"
-                                                  Data="{StaticResource RightArrowFilled}"
-                                                  Width="14"
-                                                  Height="14"
-                                                  Foreground="{DynamicResource TextMutedBrush}"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center">
-                                        </PathIcon>
-                                        <TextBlock Grid.Column="3"
-                                                   Text="{Binding RenameOperation.TargetPath}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   FontSize="13"
-                                                   VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource TextMutedBrush}"
-                                                   IsVisible="{Binding RenameOperation.TargetPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                                                   ToolTip.Tip="{Binding RenameOperation.TargetPath}">
-                                        </TextBlock>
-                                        <TextBlock Grid.Column="3"
-                                                   Text="{Binding RenameOperation.TargetPath}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   FontSize="13"
-                                                   VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource TextMutedBrush}"
-                                                   IsVisible="{Binding RenameOperation.TargetPath, Converter={x:Static StringConverters.IsNullOrEmpty}}"
-                                                   ToolTip.Tip="{Binding RenameOperation.TargetPath}">
-                                        </TextBlock>
-                                        <Panel Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                            <Border Classes="status-badge-ready" 
-                                                    IsVisible="{Binding RenamePreviewStatus, 
-                                                        Converter={StaticResource EnumToBoolConverter}, 
-                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Ready}}">
-                                               <StackPanel Orientation="Horizontal" Spacing="5">
-                                                   <Ellipse Width="6" Height="6" Fill="#4ADE80" VerticalAlignment="Center"></Ellipse>
-                                                   <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#4ADE80"></TextBlock>
-                                               </StackPanel>
-                                            </Border>   
-                                            <Border Classes="status-badge-error" 
-                                                    IsVisible="{Binding RenamePreviewStatus, 
-                                                        Converter={StaticResource EnumToBoolConverter}, 
-                                                        ConverterParameter={x:Static models:RenamePreviewStatus.PatternError}}">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <Ellipse Width="6" Height="6" Fill="#F59E0B" VerticalAlignment="Center"></Ellipse>
-                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#F59E0B"></TextBlock>
-                                                </StackPanel>
-                                            </Border>
-                                            <Border Classes="status-badge-conflict" 
-                                                    IsVisible="{Binding RenamePreviewStatus, 
-                                                        Converter={StaticResource EnumToBoolConverter}, 
-                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Conflict}}">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <Ellipse Width="6" Height="6" Fill="#F87171" VerticalAlignment="Center"></Ellipse>
-                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#F87171"></TextBlock>
-                                                </StackPanel>
-                                            </Border>
-                                            <Border Classes="status-badge-skipped" 
-                                                    IsVisible="{Binding RenamePreviewStatus, 
-                                                        Converter={StaticResource EnumToBoolConverter}, 
-                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Skipped}}">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <Ellipse Width="6" Height="6" Fill="#888" VerticalAlignment="Center"></Ellipse>
-                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" 
-                                                               Foreground="{DynamicResource TextMutedBrush}">
-                                                    </TextBlock>
-                                                </StackPanel>
-                                            </Border>  
-                                            
-                                            <Border Classes="status-badge-done" 
-                                                    IsVisible="{Binding RenamePreviewStatus, 
-                                                        Converter={StaticResource EnumToBoolConverter}, 
-                                                        ConverterParameter={x:Static models:RenamePreviewStatus.Done}}">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <Ellipse Width="6" Height="6" Fill="#4ADE80" VerticalAlignment="Center"></Ellipse>
-                                                    <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold" Foreground="#4ADE80"></TextBlock>
-                                                </StackPanel>
-                                            </Border>
-                                            
-                                        </Panel>
-                                    </Grid>
-                                </Panel>
-                            </Border>
-                        </DataTemplate>   
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </ScrollViewer>
+                                    </Border>
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding SourceFileName}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="13"
+                                               TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center"
+                                               ToolTip.Tip="{Binding SourcePath}">
+                                    </TextBlock>
+                                    <PathIcon Grid.Column="2" Classes="arrow"
+                                              Data="{StaticResource RightArrowFilled}"
+                                              Width="14"
+                                              Height="14"
+                                              Foreground="{StaticResource TextMutedBrush}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center">
+                                    </PathIcon>
+                                    <TextBlock Grid.Column="3"
+                                               Text="{Binding TargetPath}"
+                                               TextTrimming="CharacterEllipsis"
+                                               FontSize="13"
+                                               VerticalAlignment="Center"
+                                               Foreground="{StaticResource TextMutedBrush}"
+                                               ToolTip.Tip="{Binding TargetPath}">
+                                    </TextBlock>
+                                    <Border Grid.Column="4"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Classes="status-badge"
+                                            Classes.ready="{Binding IsReady}"
+                                            Classes.error="{Binding IsPatternError}"
+                                            Classes.conflict="{Binding IsConflict}"
+                                            Classes.skipped="{Binding IsSkipped}"
+                                            Classes.done="{Binding IsDone}">
+                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                            <Ellipse Width="6" Height="6" VerticalAlignment="Center"></Ellipse>
+                                            <TextBlock Text="{Binding RenamePreviewStatus}" FontSize="11" FontWeight="SemiBold"></TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Panel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
         
     </Grid>

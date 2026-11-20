@@ -403,3 +403,7 @@ FodyWeavers.xsd
 *.iws
 out/
 .idea_modules/
+
+# Integration / E2E test media (generated locally, never commit)
+Tests/Integration/TestMedia/
+*.mkv

@@ -1,0 +1,1 @@
+T:System.Text.RegularExpressions.Regex;Regex is banned for performance and readability; use ReadOnlySpan<char>, IndexOf, or SearchValues instead.

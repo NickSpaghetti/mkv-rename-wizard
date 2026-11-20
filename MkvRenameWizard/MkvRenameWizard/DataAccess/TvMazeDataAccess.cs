@@ -1,9 +1,9 @@
-namespace MkvRenameWizard.DataAccess;
-
 using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
+
+namespace MkvRenameWizard.DataAccess;
 
 public class TvMazeDataAccess : ITvMazeDataAccess
 {
@@ -14,21 +14,21 @@ public class TvMazeDataAccess : ITvMazeDataAccess
         _httpClient = httpClient;
     }
 
-    public async Task<HttpResponseMessage> FindShowIdByNameAsync(string showName)
+    public Task<HttpResponseMessage> FindShowIdByNameAsync(string showName, CancellationToken cancellationToken = default)
     {
         var uri = $"search/shows?q={Uri.EscapeDataString(showName)}";
-        return await _httpClient.GetAsync(uri);
+        return _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 
-    public async Task<HttpResponseMessage> ListSeasonsAsync(long showId)
+    public Task<HttpResponseMessage> ListSeasonsAsync(long showId, CancellationToken cancellationToken = default)
     {
         var uri = $"shows/{showId}/seasons";
-        return await _httpClient.GetAsync(uri);
+        return _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 
-    public async Task<HttpResponseMessage> ListEpisodesBySeasonIdAsync(long seasonId)
+    public Task<HttpResponseMessage> ListEpisodesBySeasonIdAsync(long seasonId, CancellationToken cancellationToken = default)
     {
         var uri = $"seasons/{seasonId}/episodes";
-        return await _httpClient.GetAsync(uri);
+        return _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
     }
 }

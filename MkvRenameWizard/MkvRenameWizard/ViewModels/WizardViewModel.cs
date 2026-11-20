@@ -239,7 +239,7 @@ public class WizardViewModel : ViewModelBase
 
     private async Task ExecuteRenameAsync(bool retryFailedOnly)
     {
-        IEnumerable<RenameFileOperation> operations;
+        List<RenameFileOperation> operations;
 
         if (retryFailedOnly)
         {
@@ -249,20 +249,25 @@ public class WizardViewModel : ViewModelBase
                 .ToHashSet();
 
             operations = _outputFileConfigurationViewModel.BuildRenameOperations()
-                .Where(j => failedOperations.Contains(j.OperationId));
+                .Where(j => failedOperations.Contains(j.OperationId))
+                .ToList();
         }
         else
         {
-            operations = _outputFileConfigurationViewModel.BuildRenameOperations();
+            operations = _outputFileConfigurationViewModel.BuildRenameOperations().ToList();
         }
-        
-        var results = await _fileRenameOperationService.ExecuteAsync(operations);
+
+        // Offload blocking filesystem syscalls (File.Move / Directory.CreateDirectory) from the UI thread
+        var results = await Task.Run(() => _fileRenameOperationService.Execute(operations));
 
         if (retryFailedOnly)
         {
-            var merged = _renameResultViewModel.OperationResults
-                .Select(result => results.ToDictionary(r =>
-                    r.RenameOperation.OperationId).GetValueOrDefault(result.RenameOperation.OperationId, result)).ToList();
+            var resultsById = results.ToDictionary(r => r.RenameOperation.OperationId);
+            var merged = new List<RenameOperationResult<RenameFileOperation>>(_renameResultViewModel.OperationResults.Count);
+            foreach (var result in _renameResultViewModel.OperationResults)
+            {
+                merged.Add(resultsById.GetValueOrDefault(result.RenameOperation.OperationId, result));
+            }
             results = merged;
         }
 
@@ -294,38 +299,66 @@ public class WizardViewModel : ViewModelBase
 
     private async Task UpdateContentSelectViewModel()
     {
-        _contentSelectViewModel.Episodes.Clear();
         if (_contentSearchViewModel.SelectedShow == null)
         {
-            _contentSelectViewModel.ShowName =string.Empty;
+            _contentSelectViewModel.SetEpisodes(Array.Empty<Models.TvMaze.Episode>());
+            _contentSelectViewModel.ShowName = string.Empty;
             return;
         }
+
         _contentSelectViewModel.ShowName = _contentSearchViewModel.SelectedShow.Name;
+        var checkedSeasonIds = new List<long>();
         foreach (var seasonsCheckBox in _contentSearchViewModel.SeasonsCheckBoxes)
         {
-            if (!seasonsCheckBox.IsChecked)
+            if (seasonsCheckBox.IsChecked)
             {
-                continue;
+                checkedSeasonIds.Add(seasonsCheckBox.Value.Id);
             }
-            var episodes = await _tvMazeService.ListEpisodesBySeasonAsync(seasonsCheckBox.Value.Id);
-            _contentSelectViewModel.Episodes.AddRange(episodes);
         }
+
+        if (checkedSeasonIds.Count == 0)
+        {
+            _contentSelectViewModel.SetEpisodes(Array.Empty<Models.TvMaze.Episode>());
+            return;
+        }
+
+        var fetchTasks = new Task<List<Models.TvMaze.Episode>>[checkedSeasonIds.Count];
+        for (var i = 0; i < checkedSeasonIds.Count; i++)
+        {
+            fetchTasks[i] = _tvMazeService.ListEpisodesBySeasonAsync(checkedSeasonIds[i]);
+        }
+
+        var seasonEpisodeLists = await Task.WhenAll(fetchTasks);
+        var totalCount = 0;
+        for (var i = 0; i < seasonEpisodeLists.Length; i++)
+        {
+            totalCount += seasonEpisodeLists[i].Count;
+        }
+
+        var allEpisodes = new List<Models.TvMaze.Episode>(totalCount);
+        for (var i = 0; i < seasonEpisodeLists.Length; i++)
+        {
+            allEpisodes.AddRange(seasonEpisodeLists[i]);
+        }
+
+        _contentSelectViewModel.SetEpisodes(allEpisodes);
     }
-    
+
     private void UpdateFileOutputConfigurationViewModel()
     {
-        
         var maxCount = Math.Min(_contentSelectViewModel.ImportedFileCount, _contentSelectViewModel.EpisodeCount);
-        
+
         var entries = new List<RenameEntity>(maxCount);
         for (var i = 0; i < maxCount; i++)
         {
-            entries.Add(new RenameEntity(Episode: _contentSelectViewModel.Episodes[i],
+            entries.Add(new RenameEntity(
+                Episode: _contentSelectViewModel.Episodes[i],
                 MkvFile: _contentSelectViewModel.MkvFiles[i]));
         }
-        
-        _outputFileConfigurationViewModel.CurrentShowName = _contentSearchViewModel.SelectedShow?.Name ?? string.Empty;
-        _outputFileConfigurationViewModel.RenameEntities = entries;
+
+        _outputFileConfigurationViewModel.Configure(
+            _contentSearchViewModel.SelectedShow?.Name ?? string.Empty,
+            entries);
     }
 
     private void RaiseWizardChromeProperties()
