@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-aot:
+    name: Build & AOT (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: windows-latest
+            rid: win-x64
+          - os: macos-latest
+            rid: osx-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Linux Native AOT prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+      - name: Restore
+        run: dotnet restore MkvRenameWizard/MkvRenameWizard.sln
+
+      - name: Build (Release)
+        run: dotnet build MkvRenameWizard/MkvRenameWizard.sln -c Release --no-restore
+
+      - name: Verify Native AOT publish (${{ matrix.rid }})
+        run: >
+          dotnet publish MkvRenameWizard/MkvRenameWizard/MkvRenameWizard.csproj
+          -c Release
+          -r ${{ matrix.rid }}
+          -p:PublishAot=true
+          -p:StripSymbols=true
+          -o publish/${{ matrix.rid }}

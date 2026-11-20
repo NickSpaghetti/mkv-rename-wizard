@@ -1,0 +1,137 @@
+name: Release (Native AOT)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+      draft:
+        description: 'Create as draft release'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Validate version tag
+    runs-on: ubuntu-latest
+    outputs:
+      semver: ${{ steps.check.outputs.semver }}
+    steps:
+      - name: Validate SemVer tag format
+        id: check
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Version '$VERSION' must match SemVer tag format (e.g. v1.0.0 or v1.0.0-rc.1)"
+            exit 1
+          fi
+          echo "semver=${VERSION#v}" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.rid }}
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive_ext: tar.gz
+          - os: windows-latest
+            rid: win-x64
+            archive_ext: zip
+          - os: macos-latest
+            rid: osx-arm64
+            archive_ext: tar.gz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Linux Native AOT prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+      - name: Publish Native AOT (${{ matrix.rid }})
+        run: >
+          dotnet publish MkvRenameWizard/MkvRenameWizard/MkvRenameWizard.csproj
+          -c Release
+          -r ${{ matrix.rid }}
+          -p:PublishAot=true
+          -p:StripSymbols=true
+          -p:DebugType=none
+          -p:DebugSymbols=false
+          -p:Version=${{ needs.validate.outputs.semver }}
+          -o publish/${{ matrix.rid }}
+
+      - name: Remove debug symbols from publish output
+        shell: bash
+        run: rm -f publish/${{ matrix.rid }}/*.dbg publish/${{ matrix.rid }}/*.pdb
+
+      - name: Package archive (tar.gz)
+        if: matrix.archive_ext == 'tar.gz'
+        shell: bash
+        run: |
+          mkdir -p dist
+          tar -czf dist/MkvRenameWizard-${{ inputs.version }}-${{ matrix.rid }}.tar.gz -C publish/${{ matrix.rid }} .
+
+      - name: Package archive (zip)
+        if: matrix.archive_ext == 'zip'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path "publish/${{ matrix.rid }}/*" -DestinationPath "dist/MkvRenameWizard-${{ inputs.version }}-${{ matrix.rid }}.zip"
+
+      - name: Upload build artifact (7-day max retention)
+        uses: actions/upload-artifact@v7
+        with:
+          name: MkvRenameWizard-${{ matrix.rid }}
+          path: dist/MkvRenameWizard-${{ inputs.version }}-${{ matrix.rid }}.${{ matrix.archive_ext }}
+          retention-days: 7
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd dist
+          sha256sum MkvRenameWizard-* > SHA256SUMS.txt
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.version }}
+          name: MkvRenameWizard ${{ inputs.version }}
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: true
+          files: |
+            dist/MkvRenameWizard-*
+            dist/SHA256SUMS.txt

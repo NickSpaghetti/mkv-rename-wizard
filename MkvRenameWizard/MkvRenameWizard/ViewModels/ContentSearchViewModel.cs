@@ -1,18 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
-using DynamicData;
+using CommunityToolkit.Mvvm.Input;
 using MkvRenameWizard.Models.TvMaze;
 using MkvRenameWizard.Services;
-using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
@@ -29,7 +25,7 @@ public class ContentSearchViewModel : ViewModelBase
     public string SearchText
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        set => SetProperty(ref field, value);
     } = string.Empty;
 
     public ObservableCollection<ShowSearchResultViewModel> SearchResults { get; } = [];
@@ -39,9 +35,14 @@ public class ContentSearchViewModel : ViewModelBase
         get;
         set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            this.RaisePropertyChanged(nameof(HasSelectedShow));
-            this.RaisePropertyChanged(nameof(HasNoSelectedShow));
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(HasSelectedShow));
+                OnPropertyChanged(nameof(HasNoSelectedShow));
+                ClearAllSeasonsCommand.NotifyCanExecuteChanged();
+                _ = LoadPosterAsync(value);
+                _ = UpdateCheckboxOptions();
+            }
         }
     }
 
@@ -50,13 +51,13 @@ public class ContentSearchViewModel : ViewModelBase
     public Bitmap? SelectedShowPoster
     {
         get;
-        private set => this.RaiseAndSetIfChanged(ref field, value);
+        private set => SetProperty(ref field, value);
     }
 
     public bool IsPosterLoading
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        set => SetProperty(ref field, value);
     }
 
     public bool HasSearched
@@ -64,8 +65,10 @@ public class ContentSearchViewModel : ViewModelBase
         get;
         set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            RaiseSearchStateProperties();
+            if (SetProperty(ref field, value))
+            {
+                RaiseSearchStateProperties();
+            }
         }
     }
 
@@ -74,21 +77,29 @@ public class ContentSearchViewModel : ViewModelBase
         get;
         set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            RaiseSearchStateProperties();
+            if (SetProperty(ref field, value))
+            {
+                RaiseSearchStateProperties();
+            }
         }
     }
 
     public int SelectedSeasonCount
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                ClearAllSeasonsCommand.NotifyCanExecuteChanged();
+            }
+        }
     }
 
     public int SelectedEpisodeCount
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        set => SetProperty(ref field, value);
     }
 
     public int ResultCount => SearchResults.Count;
@@ -108,10 +119,10 @@ public class ContentSearchViewModel : ViewModelBase
     public string EpisodeSummary => SelectedEpisodeCount == 1 ? "1 episode" : $"{SelectedEpisodeCount} episodes";
     public string SelectedShowMeta => BuildSelectedShowMeta();
 
-    public ReactiveCommand<Unit, Unit> UpdateCheckboxOptionsCommand { get; }
-    public ReactiveCommand<Show, Unit> SearchCommand { get; }
-    public ReactiveCommand<Unit, Unit> SelectAllSeasonsCommand { get; }
-    public ReactiveCommand<Unit, Unit> ClearAllSeasonsCommand { get; }
+    public IAsyncRelayCommand UpdateCheckboxOptionsCommand { get; }
+    public IAsyncRelayCommand<Show?> SearchCommand { get; }
+    public IRelayCommand SelectAllSeasonsCommand { get; }
+    public IRelayCommand ClearAllSeasonsCommand { get; }
 
     private readonly ITvMazeService _tvMazeService;
     private readonly IImageLoadingService _imageLoadingService;
@@ -121,36 +132,29 @@ public class ContentSearchViewModel : ViewModelBase
         _tvMazeService = tvMazeService;
         _imageLoadingService = imageLoadingService;
 
+        SearchCommand = new AsyncRelayCommand<Show?>(ExecuteSearchCommand);
+        UpdateCheckboxOptionsCommand = new AsyncRelayCommand(UpdateCheckboxOptions);
+        SelectAllSeasonsCommand = new RelayCommand(SelectAllSeasons);
+        ClearAllSeasonsCommand = new RelayCommand(ClearAllSeasons, CanExecuteClearAllSeasons);
+
         SearchResults.CollectionChanged += (_, _) =>
         {
-            this.RaisePropertyChanged(nameof(ResultCountLabel));
+            OnPropertyChanged(nameof(ResultCount));
+            OnPropertyChanged(nameof(ResultCountLabel));
             RaiseSearchStateProperties();
         };
 
-        SeasonsCheckBoxes = new ObservableCollection<CheckboxOption<Season>>();
-
-        SearchCommand = ReactiveCommand.CreateFromTask<Show>(ExecuteSearchCommand);
-
-        UpdateCheckboxOptionsCommand = ReactiveCommand.CreateFromTask(UpdateCheckboxOptions);
-        this.WhenAnyValue(x => x.SelectedShow)
-            .Do(show => _ = LoadPosterAsync(show))
-            .Select(_ => Unit.Default)
-            .InvokeCommand(UpdateCheckboxOptionsCommand);
-
-        SelectAllSeasonsCommand = ReactiveCommand.Create(SelectAllSeasons);
-        var anySeasonChecked = Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => SeasonsCheckBoxes.CollectionChanged += h,
-                h => SeasonsCheckBoxes.CollectionChanged -= h)
-            .Select(_ => Unit.Default)
-            .StartWith(Unit.Default)
-            .Merge(this.WhenAnyValue(x => x.SelectedSeasonCount).Select(_ => Unit.Default))
-            .Select(_ => SelectedShow != null && SeasonsCheckBoxes.Any(x => x.IsChecked))
-            .DistinctUntilChanged();
-
-        ClearAllSeasonsCommand = ReactiveCommand.Create(ClearAllSeasons, anySeasonChecked);
+        SeasonsCheckBoxes.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(SeasonCount));
+            OnPropertyChanged(nameof(CanClearAllSeasons));
+            ClearAllSeasonsCommand.NotifyCanExecuteChanged();
+        };
     }
 
-    public async Task ExecuteSearchCommand(Show show)
+    private bool CanExecuteClearAllSeasons() => SelectedShow != null && SeasonsCheckBoxes.Any(x => x.IsChecked);
+
+    public async Task ExecuteSearchCommand(Show? show)
     {
         CancelAndDispose(ref _thumbnailLoadCancellationTokenSource);
 
@@ -176,10 +180,11 @@ public class ContentSearchViewModel : ViewModelBase
 
             SetSelectedShowPoster(null, ownsBitmap: false);
             DisposeAndClearSearchResults();
-            SearchResults.AddRange(showSearchResult);
+            for (var i = 0; i < showSearchResult.Count; i++)
+            {
+                SearchResults.Add(showSearchResult[i]);
+            }
 
-            // Start progressive thumbnail loading before selecting the first show so LoadPosterAsync
-            // shares the in-flight thumbnail request instead of downloading the same URL twice.
             _thumbnailLoadCancellationTokenSource = new CancellationTokenSource();
             var thumbToken = _thumbnailLoadCancellationTokenSource.Token;
             _isLoadingThumbnails = true;
@@ -198,8 +203,7 @@ public class ContentSearchViewModel : ViewModelBase
         var tasks = new Task[items.Count];
         for (var i = 0; i < items.Count; i++)
         {
-            var vm = items[i];
-            tasks[i] = LoadSingleThumbnailAsync(vm, cancellationToken);
+            tasks[i] = LoadSingleThumbnailAsync(items[i], cancellationToken);
         }
 
         try
@@ -229,7 +233,6 @@ public class ContentSearchViewModel : ViewModelBase
 
         vm.Thumbnail = bmp;
 
-        // If this show is currently selected and waiting for its poster, share the loaded thumbnail directly
         if (ReferenceEquals(SelectedShow, vm) && SelectedShowPoster is null && bmp is not null)
         {
             SetSelectedShowPoster(bmp, ownsBitmap: false);
@@ -278,8 +281,8 @@ public class ContentSearchViewModel : ViewModelBase
         var cancellationToken = _posterLoadCancellationTokenSource.Token;
 
         SetSelectedShowPoster(null, ownsBitmap: false);
-        this.RaisePropertyChanged(nameof(HasSelectedShow));
-        this.RaisePropertyChanged(nameof(SelectedShowMeta));
+        OnPropertyChanged(nameof(HasSelectedShow));
+        OnPropertyChanged(nameof(SelectedShowMeta));
 
         if (show == null || string.IsNullOrEmpty(show.MediumImageUrl))
         {
@@ -287,7 +290,6 @@ public class ContentSearchViewModel : ViewModelBase
             return;
         }
 
-        // Reuse the already-downloaded MediumImageUrl thumbnail instead of downloading the same URL twice
         if (show.Thumbnail != null)
         {
             SetSelectedShowPoster(show.Thumbnail, ownsBitmap: false);
@@ -295,8 +297,6 @@ public class ContentSearchViewModel : ViewModelBase
             return;
         }
 
-        // If the background thumbnail batch is currently fetching this show's thumbnail, wait for it
-        // rather than issuing a duplicate HTTP request for the exact same MediumImageUrl.
         if (_isLoadingThumbnails)
         {
             IsPosterLoading = true;
@@ -407,21 +407,22 @@ public class ContentSearchViewModel : ViewModelBase
         SelectedSeasonCount = selectedSeasons;
         SelectedEpisodeCount = selectedEpisodes;
 
-        this.RaisePropertyChanged(nameof(SelectionSummary));
-        this.RaisePropertyChanged(nameof(EpisodeSummary));
-        this.RaisePropertyChanged(nameof(SelectedShowMeta));
-        this.RaisePropertyChanged(nameof(CanContinue));
-        this.RaisePropertyChanged(nameof(CanClearAllSeasons));
+        OnPropertyChanged(nameof(SelectionSummary));
+        OnPropertyChanged(nameof(EpisodeSummary));
+        OnPropertyChanged(nameof(SelectedShowMeta));
+        OnPropertyChanged(nameof(CanContinue));
+        OnPropertyChanged(nameof(CanClearAllSeasons));
+        ClearAllSeasonsCommand.NotifyCanExecuteChanged();
         RaiseSearchStateProperties();
     }
 
     private void RaiseSearchStateProperties()
     {
-        this.RaisePropertyChanged(nameof(ShowInitialPrompt));
-        this.RaisePropertyChanged(nameof(ShowNoSearchResults));
-        this.RaisePropertyChanged(nameof(HasNoSelectedShow));
-        this.RaisePropertyChanged(nameof(HasSelectedShow));
-        this.RaisePropertyChanged(nameof(IsSearching));
+        OnPropertyChanged(nameof(ShowInitialPrompt));
+        OnPropertyChanged(nameof(ShowNoSearchResults));
+        OnPropertyChanged(nameof(HasNoSelectedShow));
+        OnPropertyChanged(nameof(HasSelectedShow));
+        OnPropertyChanged(nameof(IsSearching));
     }
 
     private string BuildSelectedShowMeta()
@@ -491,6 +492,7 @@ public class ContentSearchViewModel : ViewModelBase
         CancelAndDispose(ref _posterLoadCancellationTokenSource);
         CancelAndDispose(ref _thumbnailLoadCancellationTokenSource);
         CancelAndDispose(ref _seasonsLoadCancellationTokenSource);
+        _isLoadingThumbnails = false;
 
         foreach (var seasonSelectSubscription in _seasonSelectionSubscriptions)
         {
@@ -508,8 +510,8 @@ public class ContentSearchViewModel : ViewModelBase
         SelectedSeasonCount = 0;
         SelectedEpisodeCount = 0;
 
-        this.RaisePropertyChanged(nameof(SearchResults));
-        this.RaisePropertyChanged(nameof(SeasonCount));
+        OnPropertyChanged(nameof(SearchResults));
+        OnPropertyChanged(nameof(SeasonCount));
         UpdateSelectionMetrics();
     }
 }

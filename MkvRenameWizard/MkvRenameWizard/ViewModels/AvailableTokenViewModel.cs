@@ -1,5 +1,3 @@
-using ReactiveUI;
-
 namespace MkvRenameWizard.ViewModels;
 
 public sealed class AvailableTokenViewModel(string name, string description, string exampleValue, bool isUsedInPattern)
@@ -12,6 +10,6 @@ public sealed class AvailableTokenViewModel(string name, string description, str
     public bool IsUsedInPattern
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        set => SetProperty(ref field, value);
     } = isUsedInPattern;
 }

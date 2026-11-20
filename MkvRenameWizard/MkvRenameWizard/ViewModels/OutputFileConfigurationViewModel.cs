@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.Renaming;
-using ReactiveUI;
 using Path = System.IO.Path;
 
 namespace MkvRenameWizard.ViewModels;
@@ -26,7 +25,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
         set
         {
             field = value;
-            this.RaisePropertyChanged();
+            OnPropertyChanged();
             var firstFullPath = value.Count > 0 ? value[0].MkvFile.FullPath : null;
             var sourceDirectory = firstFullPath is not null ? Path.GetDirectoryName(firstFullPath) : null;
 
@@ -50,7 +49,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
             {
                 return;
             }
-            this.RaiseAndSetIfChanged(ref field, value);
+            SetProperty(ref field, value);
             _sanitizedShowName = FilePatternHelper.SanitizeToken(value.AsSpan());
             if (!_suppressRebuild)
             {
@@ -64,25 +63,68 @@ public class OutputFileConfigurationViewModel : ViewModelBase
     public string FileNamePattern
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                RevalidatePattern();
+                if (!_suppressRebuild)
+                {
+                    RebuildPreview();
+                }
+            }
+        }
     } = DefaultFileNamePattern;
 
-    public bool IsPatternValid { get; set => this.RaiseAndSetIfChanged(ref field, value); }
+    public bool IsPatternValid
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                ExecuteRenameCommand?.NotifyCanExecuteChanged();
+            }
+        }
+    }
 
-    public string? TargetFolder { get; set => this.RaiseAndSetIfChanged(ref field, value); }
+    public string? TargetFolder { get; set => SetProperty(ref field, value); }
 
     public ObservableCollection<PatternError> PatternErrors { get; } = new();
     public ObservableCollection<PatternSegmentViewModel> PatternSegments { get; } = new();
     public ObservableCollection<AvailableTokenViewModel> ActiveTokens { get; } = new();
 
-    public bool IsTokenTableExpanded { get; set => this.RaiseAndSetIfChanged(ref field, value); }
+    public bool IsTokenTableExpanded { get; set => SetProperty(ref field, value); }
 
-    public string Prefix { get; set => this.RaiseAndSetIfChanged(ref field, value); } = string.Empty;
+    public string Prefix
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value) && !_suppressRebuild)
+            {
+                RebuildPreview();
+            }
+        }
+    } = string.Empty;
 
     public CaseStyle SelectedCaseStyle
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(IsCaseDefault));
+                OnPropertyChanged(nameof(IsCaseSnake));
+                OnPropertyChanged(nameof(IsCasePascal));
+                OnPropertyChanged(nameof(IsCaseCamel));
+                if (!_suppressRebuild)
+                {
+                    RebuildPreview();
+                }
+            }
+        }
     } = CaseStyle.Default;
 
     public bool IsCaseDefault
@@ -113,16 +155,27 @@ public class OutputFileConfigurationViewModel : ViewModelBase
 
     public ObservableCollection<RenamePreviewRowViewModel> PreviewItems { get; } = new();
 
-    public int ReadyCount { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
-    public int ConflictCount { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
-    public int SkippedCount { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
+    public int ReadyCount
+    {
+        get;
+        private set
+        {
+            if (SetProperty(ref field, value))
+            {
+                ExecuteRenameCommand?.NotifyCanExecuteChanged();
+            }
+        }
+    }
 
-    public ReactiveCommand<Unit, bool> ShowTokenTableCommand { get; }
-    public ReactiveCommand<Unit, string> ResetPatternCommand { get; }
-    public ReactiveCommand<PatternError, Unit> ApplySuggestionCommand { get; set; }
-    public ReactiveCommand<string, Unit> InsertTokenCommand { get; }
-    public ReactiveCommand<Unit, Unit> PickTargetFolderCommand { get; }
-    public ReactiveCommand<Unit, Unit> ExecuteRenameCommand { get; }
+    public int ConflictCount { get; private set => SetProperty(ref field, value); }
+    public int SkippedCount { get; private set => SetProperty(ref field, value); }
+
+    public IRelayCommand ShowTokenTableCommand { get; }
+    public IRelayCommand ResetPatternCommand { get; }
+    public IRelayCommand<PatternError> ApplySuggestionCommand { get; set; }
+    public IRelayCommand<string> InsertTokenCommand { get; }
+    public IAsyncRelayCommand PickTargetFolderCommand { get; }
+    public IRelayCommand ExecuteRenameCommand { get; }
 
     private readonly ILogger<OutputFileConfigurationViewModel> _logger;
 
@@ -130,51 +183,23 @@ public class OutputFileConfigurationViewModel : ViewModelBase
     {
         _logger = logger;
 
-        // Populate ActiveTokens once; RevalidatePattern mutates IsUsedInPattern in-place
         foreach (var token in FilePatternHelper.ValidTokens)
         {
             ActiveTokens.Add(new AvailableTokenViewModel(token.Name, token.Description, token.ExampleValue, false));
         }
 
-        this.WhenAnyValue(x => x.FileNamePattern)
-            .Subscribe(_ =>
-            {
-                RevalidatePattern();
-                if (!_suppressRebuild)
-                {
-                    RebuildPreview();
-                }
-            });
-
-        this.WhenAnyValue(x => x.Prefix, x => x.SelectedCaseStyle)
-            .Subscribe(_ =>
-            {
-                if (!_suppressRebuild)
-                {
-                    RebuildPreview();
-                }
-            });
-
-        this.WhenAnyValue(x => x.SelectedCaseStyle).Subscribe(_ =>
+        ShowTokenTableCommand = new RelayCommand(() => IsTokenTableExpanded = !IsTokenTableExpanded);
+        ResetPatternCommand = new RelayCommand(() => FileNamePattern = string.Empty);
+        ApplySuggestionCommand = new RelayCommand<PatternError>(ApplySuggestion);
+        PickTargetFolderCommand = new AsyncRelayCommand(PickTargetFolder);
+        InsertTokenCommand = new RelayCommand<string>(name =>
         {
-            this.RaisePropertyChanged(nameof(IsCaseDefault));
-            this.RaisePropertyChanged(nameof(IsCaseSnake));
-            this.RaisePropertyChanged(nameof(IsCasePascal));
-            this.RaisePropertyChanged(nameof(IsCaseCamel));
+            if (!string.IsNullOrEmpty(name))
+            {
+                FileNamePattern += $"{{{name}}}";
+            }
         });
-
-        ShowTokenTableCommand = ReactiveCommand.Create(() => IsTokenTableExpanded = !IsTokenTableExpanded);
-        ResetPatternCommand = ReactiveCommand.Create(() => FileNamePattern = string.Empty);
-
-        ApplySuggestionCommand = ReactiveCommand.Create<PatternError>(ApplySuggestion);
-        PickTargetFolderCommand = ReactiveCommand.CreateFromTask(PickTargetFolder);
-        InsertTokenCommand = ReactiveCommand.Create<string>(name => FileNamePattern += $"{{{name}}}");
-
-        var canRename = this.WhenAnyValue(
-            x => x.IsPatternValid,
-            x => x.ReadyCount,
-            (valid, ready) => valid && ready > 0);
-        ExecuteRenameCommand = ReactiveCommand.Create(() => { }, canRename);
+        ExecuteRenameCommand = new RelayCommand(() => { }, () => IsPatternValid && ReadyCount > 0);
 
         RevalidatePattern();
     }
@@ -226,7 +251,6 @@ public class OutputFileConfigurationViewModel : ViewModelBase
             PatternSegments.Add(new PatternSegmentViewModel { Text = segments[i].Text, SegmentType = segments[i].SegmentType });
         }
 
-        // Trailing ".mkv" literal segment
         if (PatternSegments.Count > segments.Count)
         {
             if (PatternSegments[segments.Count].Text != ".mkv" || PatternSegments[segments.Count].SegmentType != PatternSegmentType.Literal)
@@ -410,9 +434,9 @@ public class OutputFileConfigurationViewModel : ViewModelBase
         }
     }
 
-    private void ApplySuggestion(PatternError error)
+    private void ApplySuggestion(PatternError? error)
     {
-        if (error.Suggestion is null)
+        if (error?.Suggestion is null)
         {
             return;
         }

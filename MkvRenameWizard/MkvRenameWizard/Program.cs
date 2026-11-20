@@ -1,7 +1,6 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.Dialogs;
-using ReactiveUI.Avalonia;
 
 namespace MkvRenameWizard;
 
@@ -20,9 +19,7 @@ sealed class Program
         var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .LogToTrace()
-            .UseReactiveUI(static _ => { })
-            .RegisterReactiveUIViewsFromEntryAssembly();
+            .LogToTrace();
 
         // On unsandboxed Linux Wayland sessions, Avalonia runs under XWayland and sends an x11:<XID>
         // parent handle to xdg-desktop-portal-gtk, which cannot parent a native Wayland portal dialog

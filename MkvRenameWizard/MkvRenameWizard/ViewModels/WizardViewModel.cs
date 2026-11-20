@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
-using DynamicData;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Models.Renaming;
 using MkvRenameWizard.Services;
-using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
@@ -20,18 +18,24 @@ public class WizardViewModel : ViewModelBase
         get;
         set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            RaiseWizardChromeProperties();
+            if (SetProperty(ref field, value))
+            {
+                RaiseWizardChromeProperties();
+            }
         }
     }
 
     public ObservableCollection<ViewModelBase> Pages { get; }
-    
-    public bool ShowRenameResult { get;
+
+    public bool ShowRenameResult
+    {
+        get;
         private set
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            RaiseWizardChromeProperties();
+            if (SetProperty(ref field, value))
+            {
+                RaiseWizardChromeProperties();
+            }
         }
     }
 
@@ -48,13 +52,13 @@ public class WizardViewModel : ViewModelBase
         2 => "Step 3 of 3 - Configure output",
         _ => string.Empty
     };
-    
+
     public string FooterStatusLine => CurrentPageIndex switch
     {
         0 => _contentSearchViewModel.SelectionSummary,
         1 => $"{_contentSelectViewModel.MkvFiles.Count} MKV files selected",
-        2 when !_outputFileConfigurationViewModel.IsPatternValid => 
-               $"{_outputFileConfigurationViewModel.PatternErrors.Count} pattern error(s).  the filename pattern uses an unknown token",
+        2 when !_outputFileConfigurationViewModel.IsPatternValid =>
+            $"{_outputFileConfigurationViewModel.PatternErrors.Count} pattern error(s).  the filename pattern uses an unknown token",
         2 => $"{_outputFileConfigurationViewModel.ReadyCount} files will be rename in place",
         _ => string.Empty
     };
@@ -76,19 +80,18 @@ public class WizardViewModel : ViewModelBase
         _ => string.Empty,
     };
 
-
     public string PrimaryButtonText => CurrentPageIndex switch
     {
-        2 => _outputFileConfigurationViewModel is { IsPatternValid: true, ReadyCount: > 0 } 
+        2 => _outputFileConfigurationViewModel is { IsPatternValid: true, ReadyCount: > 0 }
             ? $"{_outputFileConfigurationViewModel.ReadyCount} files(s)"
             : "Rename 0 files",
         _ => IsLastPage ? "Finish" : "Continue"
     };
 
-    public ReactiveCommand<Unit, Unit> PreviousCommand { get; }
-    public ReactiveCommand<Unit, Unit> NextCommand { get; }
-    public ReactiveCommand<Unit, Unit> FinishCommand { get; }
-    public ReactiveCommand<Unit, Unit> PrimaryCommand { get; }
+    public IRelayCommand PreviousCommand { get; }
+    public IAsyncRelayCommand NextCommand { get; }
+    public IRelayCommand FinishCommand { get; }
+    public IAsyncRelayCommand PrimaryCommand { get; }
 
     private readonly ContentSearchViewModel _contentSearchViewModel;
     private readonly ContentSelectViewModel _contentSelectViewModel;
@@ -98,19 +101,40 @@ public class WizardViewModel : ViewModelBase
     private readonly ITvMazeService _tvMazeService;
     private readonly ILogger<WizardViewModel> _logger;
 
-    public WizardViewModel(ContentSearchViewModel contentSearchViewModel, ContentSelectViewModel contentSelectViewModel,
-        OutputFileConfigurationViewModel outputFileConfigurationViewModel, RenameResultViewModel renameResultViewModel,
-        ITvMazeService tvMazeService, IFileRenameOperationService fileRenameOperationService,
+    public WizardViewModel(
+        ContentSearchViewModel contentSearchViewModel,
+        ContentSelectViewModel contentSelectViewModel,
+        OutputFileConfigurationViewModel outputFileConfigurationViewModel,
+        RenameResultViewModel renameResultViewModel,
+        ITvMazeService tvMazeService,
+        IFileRenameOperationService fileRenameOperationService,
         ILogger<WizardViewModel> logger)
     {
         _contentSearchViewModel = contentSearchViewModel;
         _contentSelectViewModel = contentSelectViewModel;
         _outputFileConfigurationViewModel = outputFileConfigurationViewModel;
         _renameResultViewModel = renameResultViewModel;
-        
+
         _fileRenameOperationService = fileRenameOperationService;
         _tvMazeService = tvMazeService;
         _logger = logger;
+
+        Pages = new ObservableCollection<ViewModelBase>
+        {
+            _contentSearchViewModel,
+            _contentSelectViewModel,
+            _outputFileConfigurationViewModel,
+        };
+
+        PreviousCommand = new RelayCommand(Previous, () => CanGoBack);
+        NextCommand = new AsyncRelayCommand(async () =>
+        {
+            Next();
+            await UpdateContentSelectViewModel();
+            UpdateFileOutputConfigurationViewModel();
+        }, () => CanGoForward);
+        FinishCommand = new RelayCommand(Finish, () => IsLastPage);
+        PrimaryCommand = new AsyncRelayCommand(ExecutePrimaryCommand, CanUsePrimary);
 
         _renameResultViewModel.ResetRequested += () =>
         {
@@ -124,78 +148,62 @@ public class WizardViewModel : ViewModelBase
             _outputFileConfigurationViewModel.ApplyRenameResults(_renameResultViewModel.OperationResults);
             ShowRenameResult = false;
         };
-        
-        _contentSearchViewModel
-            .WhenAnyValue(x => x.SelectedSeasonCount,
-                          x => x.SelectedEpisodeCount, 
-                         x => x.SelectedShow,
-                         x => x.CanContinue)
-            .Subscribe(checkboxOptions =>
-            {
-                RaiseWizardChromeProperties();
-            });
-        
-        _contentSearchViewModel
-            .WhenAnyValue(x => x.SelectedShow)
-            .Subscribe(async void (_) =>
-            {
-                try
-                {
-                    await UpdateContentSelectViewModel();
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, e.Message);
-                }
-            });
-        _outputFileConfigurationViewModel
-            .WhenAnyValue(x => x.IsPatternValid, x => x.ReadyCount)
-            .Subscribe(_ => RaiseWizardChromeProperties());
 
-        Pages = new ObservableCollection<ViewModelBase>
+        _contentSearchViewModel.PropertyChanged += OnContentSearchPropertyChanged;
+        _outputFileConfigurationViewModel.PropertyChanged += OnOutputConfigPropertyChanged;
+    }
+
+    private void OnContentSearchPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
         {
-            _contentSearchViewModel,
-            _contentSelectViewModel,
-            _outputFileConfigurationViewModel,
+            case nameof(ContentSearchViewModel.SelectedSeasonCount):
+            case nameof(ContentSearchViewModel.SelectedEpisodeCount):
+            case nameof(ContentSearchViewModel.CanContinue):
+                RaiseWizardChromeProperties();
+                break;
+
+            case nameof(ContentSearchViewModel.SelectedShow):
+                RaiseWizardChromeProperties();
+                _ = UpdateContentSelectSafeAsync();
+                break;
+        }
+    }
+
+    private async Task UpdateContentSelectSafeAsync()
+    {
+        try
+        {
+            await UpdateContentSelectViewModel();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to update episodes for selected show");
+        }
+    }
+
+    private void OnOutputConfigPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(OutputFileConfigurationViewModel.IsPatternValid)
+            or nameof(OutputFileConfigurationViewModel.ReadyCount))
+        {
+            RaiseWizardChromeProperties();
+        }
+    }
+
+    private bool CanUsePrimary()
+    {
+        if (ShowRenameResult)
+        {
+            return false;
+        }
+
+        return CurrentPageIndex switch
+        {
+            0 => _contentSearchViewModel.CanContinue,
+            2 => _outputFileConfigurationViewModel.IsPatternValid && _outputFileConfigurationViewModel.ReadyCount > 0,
+            _ => true
         };
-
-        var canGoBack = this.WhenAnyValue(x => x.CurrentPageIndex, x => x.ShowRenameResult).Select(_ => CanGoBack);
-        var canGoForward = this.WhenAnyValue(x => x.CurrentPageIndex, x => x.ShowRenameResult).Select(_ => CanGoForward);
-        var canFinish = this.WhenAnyValue(x => x.CurrentPageIndex,x => x.ShowRenameResult).Select(_ => IsLastPage);
-       
-        var canUsePrimary = this.WhenAnyValue(x => x.CurrentPageIndex,x => x.ShowRenameResult)
-            .CombineLatest(
-            _contentSearchViewModel.WhenAnyValue(x => x.CanContinue),
-            _outputFileConfigurationViewModel.WhenAnyValue(x => x.IsPatternValid),
-            _outputFileConfigurationViewModel.WhenAnyValue(x => x.ReadyCount),
-            (pageAndResult, canSearch, patternOk, readyCount) =>
-            {
-                var (pageIndex, hasShowResult) = pageAndResult;
-                if (hasShowResult)
-                {
-                    return false;
-                }
-
-                return pageIndex switch
-                {
-                    0 => canSearch,
-                    2 => patternOk && readyCount > 0,
-                    _ => true
-                };
-            }
-        );
-        
-        PreviousCommand = ReactiveCommand.Create(Previous, canGoBack);
-        NextCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                Next();
-                await UpdateContentSelectViewModel();
-                UpdateFileOutputConfigurationViewModel();
-            },
-            canGoForward);
-
-        FinishCommand = ReactiveCommand.Create(Finish, canFinish);
-        PrimaryCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryCommand, canUsePrimary);
     }
 
     private void Previous()
@@ -204,7 +212,12 @@ public class WizardViewModel : ViewModelBase
         {
             _contentSelectViewModel.ClearErrors();
         }
+        if (CurrentPageIndex > 0)
+        {
+            CurrentPageIndex--;
+        }
     }
+
     private void Next() => CurrentPageIndex++;
 
     private void Finish()
@@ -257,7 +270,6 @@ public class WizardViewModel : ViewModelBase
             operations = _outputFileConfigurationViewModel.BuildRenameOperations().ToList();
         }
 
-        // Offload blocking filesystem syscalls (File.Move / Directory.CreateDirectory) from the UI thread
         var results = await Task.Run(() => _fileRenameOperationService.Execute(operations));
 
         if (retryFailedOnly)
@@ -291,10 +303,9 @@ public class WizardViewModel : ViewModelBase
                 results,
                 showSeasonLabel,
                 _outputFileConfigurationViewModel.TargetFolder);
-            
+
             ShowRenameResult = true;
         }
-            
     }
 
     private async Task UpdateContentSelectViewModel()
@@ -363,13 +374,18 @@ public class WizardViewModel : ViewModelBase
 
     private void RaiseWizardChromeProperties()
     {
-        this.RaisePropertyChanged(nameof(CanGoBack));
-        this.RaisePropertyChanged(nameof(CanGoForward));
-        this.RaisePropertyChanged(nameof(IsLastPage));
-        this.RaisePropertyChanged(nameof(StepSubtitle));
-        this.RaisePropertyChanged(nameof(FooterStatusLine));
-        this.RaisePropertyChanged(nameof(FooterDetailLine));
-        this.RaisePropertyChanged(nameof(FooterLabel));
-        this.RaisePropertyChanged(nameof(PrimaryButtonText));
+        OnPropertyChanged(nameof(CanGoBack));
+        OnPropertyChanged(nameof(CanGoForward));
+        OnPropertyChanged(nameof(IsLastPage));
+        OnPropertyChanged(nameof(StepSubtitle));
+        OnPropertyChanged(nameof(FooterStatusLine));
+        OnPropertyChanged(nameof(FooterDetailLine));
+        OnPropertyChanged(nameof(FooterLabel));
+        OnPropertyChanged(nameof(PrimaryButtonText));
+
+        PreviousCommand.NotifyCanExecuteChanged();
+        NextCommand.NotifyCanExecuteChanged();
+        FinishCommand.NotifyCanExecuteChanged();
+        PrimaryCommand.NotifyCanExecuteChanged();
     }
 }
