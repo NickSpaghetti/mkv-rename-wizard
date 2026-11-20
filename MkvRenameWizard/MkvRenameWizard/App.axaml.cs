@@ -1,6 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -73,6 +74,11 @@ public partial class App : Application
             client.BaseAddress = new Uri("https://api.tvmaze.com/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Add("User-Agent", "MkvRenameWizard/1.0 (+https://github.com/NickSpaghetti/mkv-rename-wizard)");
+        })
+        .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+        {
+            AutomaticDecompression = DecompressionMethods.All,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5)
         });
 
         services.AddHttpClient();

@@ -21,8 +21,10 @@ public class ContentSearchViewModel : ViewModelBase
     private readonly List<INotifyPropertyChanged> _seasonSelectionSubscriptions = [];
     private CancellationTokenSource? _posterLoadCancellationTokenSource;
     private CancellationTokenSource? _thumbnailLoadCancellationTokenSource;
+    private CancellationTokenSource? _seasonsLoadCancellationTokenSource;
     private bool _ownsSelectedShowPoster;
     private bool _suppressSelectionMetrics;
+    private bool _isLoadingThumbnails;
 
     public string SearchText
     {
@@ -172,17 +174,17 @@ public class ContentSearchViewModel : ViewModelBase
                 showSearchResult.Add(new ShowSearchResultViewModel(r));
             }
 
-            _thumbnailLoadCancellationTokenSource = new CancellationTokenSource();
-            var thumbToken = _thumbnailLoadCancellationTokenSource.Token;
-
-            await Task.WhenAll(showSearchResult.Select(async vm =>
-            {
-                vm.Thumbnail = await LoadResultThumbnailAsync(vm.MediumImageUrl, thumbToken);
-            }));
-
             SetSelectedShowPoster(null, ownsBitmap: false);
             DisposeAndClearSearchResults();
             SearchResults.AddRange(showSearchResult);
+
+            // Start progressive thumbnail loading before selecting the first show so LoadPosterAsync
+            // shares the in-flight thumbnail request instead of downloading the same URL twice.
+            _thumbnailLoadCancellationTokenSource = new CancellationTokenSource();
+            var thumbToken = _thumbnailLoadCancellationTokenSource.Token;
+            _isLoadingThumbnails = true;
+            _ = LoadResultThumbnailsAsync(showSearchResult, thumbToken);
+
             SelectedShow = SearchResults.FirstOrDefault();
         }
         finally
@@ -191,8 +193,56 @@ public class ContentSearchViewModel : ViewModelBase
         }
     }
 
+    private async Task LoadResultThumbnailsAsync(List<ShowSearchResultViewModel> items, CancellationToken cancellationToken)
+    {
+        var tasks = new Task[items.Count];
+        for (var i = 0; i < items.Count; i++)
+        {
+            var vm = items[i];
+            tasks[i] = LoadSingleThumbnailAsync(vm, cancellationToken);
+        }
+
+        try
+        {
+            await Task.WhenAll(tasks);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                _isLoadingThumbnails = false;
+            }
+        }
+    }
+
+    private async Task LoadSingleThumbnailAsync(ShowSearchResultViewModel vm, CancellationToken cancellationToken)
+    {
+        var bmp = await LoadResultThumbnailAsync(vm.MediumImageUrl, cancellationToken);
+        if (cancellationToken.IsCancellationRequested)
+        {
+            bmp?.Dispose();
+            return;
+        }
+
+        vm.Thumbnail = bmp;
+
+        // If this show is currently selected and waiting for its poster, share the loaded thumbnail directly
+        if (ReferenceEquals(SelectedShow, vm) && SelectedShowPoster is null && bmp is not null)
+        {
+            SetSelectedShowPoster(bmp, ownsBitmap: false);
+            IsPosterLoading = false;
+        }
+    }
+
     private async Task UpdateCheckboxOptions()
     {
+        CancelAndDispose(ref _seasonsLoadCancellationTokenSource);
+        _seasonsLoadCancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = _seasonsLoadCancellationTokenSource.Token;
+
         foreach (var seasonSelectionSubscription in _seasonSelectionSubscriptions)
         {
             seasonSelectionSubscription.PropertyChanged -= OnSeasonSelectionChanged;
@@ -200,9 +250,16 @@ public class ContentSearchViewModel : ViewModelBase
 
         _seasonSelectionSubscriptions.Clear();
         SeasonsCheckBoxes.Clear();
-        if (SelectedShow != null)
+
+        var selectedShow = SelectedShow;
+        if (selectedShow != null)
         {
-            var seasons = await _tvMazeService.ListSeasonsAsync(SelectedShow.Id);
+            var seasons = await _tvMazeService.ListSeasonsAsync(selectedShow.Id, cancellationToken);
+            if (cancellationToken.IsCancellationRequested || !ReferenceEquals(SelectedShow, selectedShow))
+            {
+                return;
+            }
+
             foreach (var season in seasons)
             {
                 var option = new CheckboxOption<Season>($"Season: {season.Number}  .  {season.TotalEpisodeCount}", season);
@@ -210,6 +267,7 @@ public class ContentSearchViewModel : ViewModelBase
                 _seasonSelectionSubscriptions.Add(option);
                 SeasonsCheckBoxes.Add(option);
             }
+            UpdateSelectionMetrics();
         }
     }
 
@@ -234,6 +292,14 @@ public class ContentSearchViewModel : ViewModelBase
         {
             SetSelectedShowPoster(show.Thumbnail, ownsBitmap: false);
             IsPosterLoading = false;
+            return;
+        }
+
+        // If the background thumbnail batch is currently fetching this show's thumbnail, wait for it
+        // rather than issuing a duplicate HTTP request for the exact same MediumImageUrl.
+        if (_isLoadingThumbnails)
+        {
+            IsPosterLoading = true;
             return;
         }
 
@@ -424,6 +490,7 @@ public class ContentSearchViewModel : ViewModelBase
     {
         CancelAndDispose(ref _posterLoadCancellationTokenSource);
         CancelAndDispose(ref _thumbnailLoadCancellationTokenSource);
+        CancelAndDispose(ref _seasonsLoadCancellationTokenSource);
 
         foreach (var seasonSelectSubscription in _seasonSelectionSubscriptions)
         {

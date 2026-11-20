@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.DataAccess;
@@ -15,8 +16,14 @@ namespace MkvRenameWizard.Services;
 
 public class TvMazeService : ITvMazeService
 {
+    private const int MaxSearchCacheEntries = 50;
+    private const int MaxSeasonCacheEntries = 100;
+    private const int MaxEpisodeCacheEntries = 200;
+
     private readonly ITvMazeDataAccess _tvMazeDataAccess;
     private readonly ILogger<TvMazeService> _logger;
+    private readonly ConcurrentDictionary<string, List<ShowSearchResult>> _searchCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<long, List<Season>> _seasonsCache = new();
     private readonly ConcurrentDictionary<long, List<Episode>> _seasonEpisodesCache = new();
 
     public TvMazeService(ITvMazeDataAccess tvMazeDataAccess, ILogger<TvMazeService> logger)
@@ -25,20 +32,26 @@ public class TvMazeService : ITvMazeService
         _logger = logger;
     }
 
-    public async Task<List<ShowSearchResult>> FindShowIdByNameAsync(string showName)
+    public async Task<List<ShowSearchResult>> FindShowIdByNameAsync(string showName, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(showName))
+        if (string.IsNullOrWhiteSpace(showName))
         {
             return new List<ShowSearchResult>();
         }
 
+        var cacheKey = showName.Trim();
+        if (_searchCache.TryGetValue(cacheKey, out var cached))
+        {
+            return cached;
+        }
+
         try
         {
-            using var response = await _tvMazeDataAccess.FindShowIdByNameAsync(showName);
+            using var response = await _tvMazeDataAccess.FindShowIdByNameAsync(cacheKey, cancellationToken);
             response.EnsureSuccessStatusCode();
-            await using var stream = await response.Content.ReadAsStreamAsync();
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var tvShowResultsDtoList = await JsonSerializer.DeserializeAsync(
-                stream, TvMazeJsonContext.Default.ListShowSearchResultDto);
+                stream, TvMazeJsonContext.Default.ListShowSearchResultDto, cancellationToken);
 
             if (tvShowResultsDtoList is null || tvShowResultsDtoList.Count == 0)
             {
@@ -68,7 +81,17 @@ public class TvMazeService : ITvMazeService
                 tvShowResults.Add(new ShowSearchResult(showResultDto.Score, show));
             }
 
+            if (_searchCache.Count >= MaxSearchCacheEntries)
+            {
+                _searchCache.Clear();
+            }
+            _searchCache[cacheKey] = tvShowResults;
+
             return tvShowResults;
+        }
+        catch (OperationCanceledException)
+        {
+            return new List<ShowSearchResult>();
         }
         catch (Exception ex)
         {
@@ -131,7 +154,7 @@ public class TvMazeService : ITvMazeService
         }
     }
 
-    public async Task<List<Season>> ListSeasonsAsync(long showId)
+    public async Task<List<Season>> ListSeasonsAsync(long showId, CancellationToken cancellationToken = default)
     {
         if (showId <= 0)
         {
@@ -139,39 +162,68 @@ public class TvMazeService : ITvMazeService
             return new List<Season>();
         }
 
+        if (_seasonsCache.TryGetValue(showId, out var cached))
+        {
+            return cached;
+        }
+
         try
         {
-            using var response = await _tvMazeDataAccess.ListSeasonsAsync(showId);
+            using var response = await _tvMazeDataAccess.ListSeasonsAsync(showId, cancellationToken);
             response.EnsureSuccessStatusCode();
-            await using var stream = await response.Content.ReadAsStreamAsync();
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var seasonDtoList = await JsonSerializer.DeserializeAsync(
-                stream, TvMazeJsonContext.Default.ListListSeasonResultDto);
+                stream, TvMazeJsonContext.Default.ListListSeasonResultDto, cancellationToken);
 
             if (seasonDtoList is null || seasonDtoList.Count == 0)
             {
                 return new List<Season>();
             }
 
+            // Fetch any seasons with unknown EpisodeOrder in parallel instead of serially
+            Dictionary<long, Task<List<Episode>>>? missingOrderTasks = null;
+            foreach (var dto in seasonDtoList)
+            {
+                if (dto.EpisodeOrder == null)
+                {
+                    missingOrderTasks ??= new Dictionary<long, Task<List<Episode>>>();
+                    missingOrderTasks[dto.Id] = ListEpisodesBySeasonAsync(dto.Id, cancellationToken);
+                }
+            }
+
+            if (missingOrderTasks is not null)
+            {
+                await Task.WhenAll(missingOrderTasks.Values);
+            }
+
             var seasons = new List<Season>(seasonDtoList.Count);
             foreach (var seasonResultDto in seasonDtoList)
             {
-                var totalEpisodeCount = seasonResultDto.EpisodeOrder;
-                if (totalEpisodeCount == null)
-                {
-                    var episodes = await ListEpisodesBySeasonAsync(seasonResultDto.Id);
-                    _seasonEpisodesCache[seasonResultDto.Id] = episodes;
-                    totalEpisodeCount = episodes.Count;
-                }
+                var totalEpisodeCount = seasonResultDto.EpisodeOrder
+                    ?? (missingOrderTasks is not null && missingOrderTasks.TryGetValue(seasonResultDto.Id, out var epTask)
+                        ? epTask.Result.Count
+                        : 0);
+
                 seasons.Add(new Season
                 {
                     Id = seasonResultDto.Id,
                     Name = seasonResultDto.Name,
                     Number = seasonResultDto.Number,
-                    TotalEpisodeCount = totalEpisodeCount.Value
+                    TotalEpisodeCount = totalEpisodeCount
                 });
             }
 
+            if (_seasonsCache.Count >= MaxSeasonCacheEntries)
+            {
+                _seasonsCache.Clear();
+            }
+            _seasonsCache[showId] = seasons;
+
             return seasons;
+        }
+        catch (OperationCanceledException)
+        {
+            return new List<Season>();
         }
         catch (Exception ex)
         {
@@ -180,7 +232,7 @@ public class TvMazeService : ITvMazeService
         return new List<Season>();
     }
 
-    public async Task<List<Episode>> ListEpisodesBySeasonAsync(long seasonId)
+    public async Task<List<Episode>> ListEpisodesBySeasonAsync(long seasonId, CancellationToken cancellationToken = default)
     {
         if (seasonId <= 0)
         {
@@ -188,18 +240,18 @@ public class TvMazeService : ITvMazeService
             return new List<Episode>();
         }
 
-        if (_seasonEpisodesCache.TryRemove(seasonId, out var cached))
+        if (_seasonEpisodesCache.TryGetValue(seasonId, out var cached))
         {
             return cached;
         }
 
         try
         {
-            using var response = await _tvMazeDataAccess.ListEpisodesBySeasonIdAsync(seasonId);
+            using var response = await _tvMazeDataAccess.ListEpisodesBySeasonIdAsync(seasonId, cancellationToken);
             response.EnsureSuccessStatusCode();
-            await using var stream = await response.Content.ReadAsStreamAsync();
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var episodesDto = await JsonSerializer.DeserializeAsync(
-                stream, TvMazeJsonContext.Default.ListEpisodeDto);
+                stream, TvMazeJsonContext.Default.ListEpisodeDto, cancellationToken);
 
             if (episodesDto is null || episodesDto.Count == 0)
             {
@@ -222,7 +274,17 @@ public class TvMazeService : ITvMazeService
                 });
             }
 
+            if (_seasonEpisodesCache.Count >= MaxEpisodeCacheEntries)
+            {
+                _seasonEpisodesCache.Clear();
+            }
+            _seasonEpisodesCache[seasonId] = episodes;
+
             return episodes;
+        }
+        catch (OperationCanceledException)
+        {
+            return new List<Episode>();
         }
         catch (Exception ex)
         {
