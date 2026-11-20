@@ -446,7 +446,7 @@
                         </ListBox.Styles>
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:RailMatchRowViewModel">
-                                    <Border Classes="matchRow" DragDrop.AllowDrop="True" Loaded="OnMatchRowLoaded">
+                                    <Border Classes="matchRow">
                                         <Grid>
                                             <Border Classes="settleRail"
                                                     x:Name="{x:Static app:Constants+BorderNames.SettleRail}"
@@ -509,7 +509,7 @@
                                                             </Button>
 
                                                             <Button Classes="railIcon railReorder"
-                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveEpisodeUpCommand}"
+                                                                    Command="{Binding #SelectRoot.((viewModels:ContentSelectViewModel)DataContext)?.MoveEpisodeDownCommand}"
                                                                     CommandParameter="{Binding ZeroBasedIndex}">
                                                                 <PathIcon Data="{StaticResource ChevronDown}" Width="12"
                                                                           Height="12">

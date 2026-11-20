@@ -2,16 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
-using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Models.FileImport;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.Models.Rail;
@@ -27,16 +24,25 @@ public class ContentSelectViewModel : ViewModelBase
     private readonly IMkvFinderService _mkvFinderService;
     private readonly IFileLoggerService _fileLoggerService;
 
-    public ContentSelectViewModel(IMkvFinderService mkvFinderService, IFileLoggerService fileLoggerService, ILogger<ContentSelectViewModel> logger)
+    private bool _deferMatchRefresh;
+    private RailReorderDragData? _activeDrag;
+    private int _dragCurrentIndex = -1;
+
+    public event Action<int, int, RailSettleType>? RowSettled;
+
+    public ContentSelectViewModel(
+        IMkvFinderService mkvFinderService,
+        IFileLoggerService fileLoggerService,
+        ILogger<ContentSelectViewModel> logger)
     {
-        _mkvFinderService =  mkvFinderService;
+        _mkvFinderService = mkvFinderService;
         _logger = logger;
         _fileLoggerService = fileLoggerService;
 
-        MoveEpisodeUpCommand = ReactiveCommand.Create<int>(i => MoveChevronUp(Episodes, i));
-        MoveEpisodeDownCommand = ReactiveCommand.Create<int>(i => MoveChevronDown(Episodes, i));
-        MoveMkvFileUpCommand = ReactiveCommand.Create<int>(i => MoveChevronUp(MkvFiles, i));
-        MoveMkvFileDownCommand = ReactiveCommand.Create<int>(i => MoveChevronDown(MkvFiles, i));
+        MoveEpisodeUpCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.Episode, i, delta: -1));
+        MoveEpisodeDownCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.Episode, i, delta: 1));
+        MoveMkvFileUpCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.File, i, delta: -1));
+        MoveMkvFileDownCommand = ReactiveCommand.Create<int>(i => MoveChevron(RailReorderSide.File, i, delta: 1));
         OpenFilesCommand = ReactiveCommand.CreateFromTask(ExecuteOpenFilesCommand);
         OpenFolderCommand = ReactiveCommand.CreateFromTask(ExecuteOpenFolderCommand);
         OpenLogFolderCommand = ReactiveCommand.Create(() => _fileLoggerService.OpenLogDirectory());
@@ -44,7 +50,7 @@ public class ContentSelectViewModel : ViewModelBase
         OpenSystemSettingsCommand = ReactiveCommand.Create(TryOpenPermissionsSetting);
         PrimaryErrorCommand = ReactiveCommand.CreateFromTask(ExecutePrimaryErrorCommand);
         SecondaryErrorCommand = ReactiveCommand.CreateFromTask(ExecuteSecondaryErrorCommand);
-        TogglePartialFailureDetailsCommand = ReactiveCommand.Create(() => {ShowPartialFailureDetails = !ShowPartialFailureDetails;});
+        TogglePartialFailureDetailsCommand = ReactiveCommand.Create(() => { ShowPartialFailureDetails = !ShowPartialFailureDetails; });
         SetLinkedReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = true; });
         SetIndependentReorderCommand = ReactiveCommand.Create(() => { LinkRailReorder = false; });
 
@@ -57,41 +63,35 @@ public class ContentSelectViewModel : ViewModelBase
     public ObservableCollection<MkvFile> MkvFiles { get; } = new();
     public ObservableCollection<FileImportIssueViewModel> ImportIssues { get; } = new();
     public ObservableCollection<RailMatchRowViewModel> MatchRows { get; } = new();
-    
-    public ReactiveCommand<int, Unit> MoveEpisodeUpCommand { get;  }
-    public ReactiveCommand<int, Unit> MoveEpisodeDownCommand { get;  }
-    public ReactiveCommand<int, Unit> MoveMkvFileUpCommand { get;  }
-    public ReactiveCommand<int, Unit> MoveMkvFileDownCommand { get;  }
-    
-    public ReactiveCommand<Unit, Unit> OpenFilesCommand { get;  }
-    public ReactiveCommand<Unit, Unit> OpenFolderCommand { get;  }
-    public ReactiveCommand<Unit, Unit> OpenLogFolderCommand { get; }
-    public ReactiveCommand<Unit, Unit> ClearFilesCommand { get;  }
-    public ReactiveCommand<Unit, Unit> OpenSystemSettingsCommand { get;  }
-    public ReactiveCommand<Unit, Unit> PrimaryErrorCommand { get;  }
-    public ReactiveCommand<Unit, Unit> SecondaryErrorCommand { get; }
-    public ReactiveCommand<Unit, Unit> TogglePartialFailureDetailsCommand { get;  }
-    public ReactiveCommand<Unit, Unit> SetLinkedReorderCommand { get; }
-    public ReactiveCommand<Unit, Unit> SetIndependentReorderCommand { get;  }
 
-    private RailSettleHint? _lastSettle;
-    private bool _deferMatchRefresh;
-    private bool _suppressSettle;
-    private List<Episode>? _dragEpisodeSnapshot;
-    private List<MkvFile>? _dragFileSnapshot;
-    private int _dragPreviewInsertIndex = -1;
-    private DispatcherTimer? _settleClearTimer;
+    public ReactiveCommand<int, Unit> MoveEpisodeUpCommand { get; }
+    public ReactiveCommand<int, Unit> MoveEpisodeDownCommand { get; }
+    public ReactiveCommand<int, Unit> MoveMkvFileUpCommand { get; }
+    public ReactiveCommand<int, Unit> MoveMkvFileDownCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenFilesCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenFolderCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenLogFolderCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearFilesCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenSystemSettingsCommand { get; }
+    public ReactiveCommand<Unit, Unit> PrimaryErrorCommand { get; }
+    public ReactiveCommand<Unit, Unit> SecondaryErrorCommand { get; }
+    public ReactiveCommand<Unit, Unit> TogglePartialFailureDetailsCommand { get; }
+    public ReactiveCommand<Unit, Unit> SetLinkedReorderCommand { get; }
+    public ReactiveCommand<Unit, Unit> SetIndependentReorderCommand { get; }
 
     public bool IsRailDragging { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
-    
     public int LinkAnimationVersion { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
-    
     public bool HasImportedAttempted { get; private set => this.RaiseAndSetIfChanged(ref field, value); }
-    
+
     public bool ShowPartialFailureDetails
     {
         get;
-        set { this.RaiseAndSetIfChanged(ref field, value); this.RaisePropertyChanged(nameof(PartialFailureDetailsToggleText)); }
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            this.RaisePropertyChanged(nameof(PartialFailureDetailsToggleText));
+        }
     }
 
     public bool LinkRailReorder
@@ -105,7 +105,7 @@ public class ContentSelectViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(IsShiftLinkHintVisible));
         }
     } = false;
-    
+
     public bool IsLinkedModelSelected => LinkRailReorder;
     public bool IsIndependentModeSelected => !LinkRailReorder;
     public bool IsShiftLinkHintVisible => LinkRailReorder;
@@ -119,7 +119,7 @@ public class ContentSelectViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(EpisodeColumnSubtitle));
         }
     } = string.Empty;
-    
+
     public int EpisodeCount => Episodes.Count;
     public int ImportedFileCount => MkvFiles.Count;
     public int IssueCount => ImportIssues.Count;
@@ -138,8 +138,9 @@ public class ContentSelectViewModel : ViewModelBase
     public bool CanContinue => PairedCount > 0;
     public string PairedChipText => PairedCount == 1 ? "1 pared" : $"{PairedCount} pared";
     public string SkippedChipText => SkippedCount == 1 ? "1 skipped" : $"{SkippedCount} skipped";
-    public string EpisodeColumnSubtitle => string.IsNullOrWhiteSpace(ShowName) 
-        ? EpisodeCount == 1 ? "1 episode" : $"{EpisodeCount} episodes" :  $"{EpisodeCount} from {ShowName}";
+    public string EpisodeColumnSubtitle => string.IsNullOrWhiteSpace(ShowName)
+        ? EpisodeCount == 1 ? "1 episode" : $"{EpisodeCount} episodes"
+        : $"{EpisodeCount} from {ShowName}";
 
     public string FileColumnSubtitle => HasImportedFiles ? $"{ImportedFileCount} mkv" : "Drop mkv file(s) here";
     public string EpisodeHeaderText => EpisodeColumnSubtitle;
@@ -151,8 +152,7 @@ public class ContentSelectViewModel : ViewModelBase
 
     public string FooterStatusText => HasImportedFiles ? $"{ImportedFileCount} file(s) imported" :
         ShowErrorPanel ? "Fix the issue(s) above to continue" : $"{ImportedFileCount} file(s) imported";
-    
-    
+
     public string ErrorEyebrowText => HasPermissionDenied ? "Permission denied" : HasInvalidMkvIssues ? $"{IssueCount} of {ImportedFileCount + IssueCount} files couldn't be parsed" : string.Empty;
 
     public string ErrorTitle => HasPermissionDenied ? "Can't read these files" :
@@ -160,13 +160,13 @@ public class ContentSelectViewModel : ViewModelBase
 
     public string ErrorDescription => HasPermissionDenied
         ? GetPermissionDeniedDescription()
-            : HasInvalidMkvIssues
-                ? "Files imported either hae the wrong container or corrupted."
-                : "The folder you selected contains no .mkv files";
+        : HasInvalidMkvIssues
+            ? "Files imported either hae the wrong container or corrupted."
+            : "The folder you selected contains no .mkv files";
 
     public string PrimaryErrorActionText =>
         HasPermissionDenied ? GetPermissionDeniedDescription() : "Pick another folder";
-    
+
     public bool ShowPrimaryErrorButton => !(HasPermissionDenied && OperatingSystem.IsLinux());
 
     public string SecondaryErrorActionText => HasPermissionDenied ? "Try a different folder" :
@@ -177,427 +177,158 @@ public class ContentSelectViewModel : ViewModelBase
 
     public void BeginRailDrag(RailReorderDragData dragData)
     {
+        var maxCount = GetRailCount(dragData.ReorderSide, dragData.IsMoveLinked);
+        if (dragData.SourceIndex < 0 || dragData.SourceIndex >= maxCount)
+        {
+            return;
+        }
+
+        _activeDrag = dragData;
+        _dragCurrentIndex = dragData.SourceIndex;
         IsRailDragging = true;
-        _dragEpisodeSnapshot = Episodes.ToList();
-        _dragFileSnapshot = MkvFiles.ToList();
-        _dragPreviewInsertIndex = -1;
     }
 
-    public void PreviewDragReorder(RailReorderDragData dragData, int insertIndex)
+    public void PreviewDragReorder(RailReorderDragData dragData, int targetIndex)
     {
-        if (_dragEpisodeSnapshot == null)
+        if (_activeDrag is null || _dragCurrentIndex < 0)
         {
             return;
         }
 
-        if (!IsValidDragSourceIndex(dragData, _dragEpisodeSnapshot.Count, _dragFileSnapshot?.Count ?? 0))
+        var maxCount = GetRailCount(_activeDrag.ReorderSide, _activeDrag.IsMoveLinked);
+        if (maxCount <= 1)
         {
             return;
         }
-        
-        insertIndex = Math.Clamp(insertIndex, 0, Math.Max(EpisodeCount, ImportedFileCount));
-        if (insertIndex == _dragPreviewInsertIndex)
-        {
-            return;
-        }
-        
-        _dragPreviewInsertIndex = insertIndex;
-        _suppressSettle = true;
 
-        RestoreListFromSnapshot();
-        ApplyDragMove(dragData, insertIndex);
-        RefreshMatchState();
+        targetIndex = Math.Clamp(targetIndex, 0, maxCount - 1);
+        if (targetIndex == _dragCurrentIndex)
+        {
+            return;
+        }
+
+        MoveRail(_activeDrag.ReorderSide, _activeDrag.IsMoveLinked, _dragCurrentIndex, targetIndex);
+        _dragCurrentIndex = targetIndex;
     }
 
-    public void CommitRailDrag(RailReorderDragData dragData, int insertIndex)
+    public void CommitRailDrag()
     {
-        _suppressSettle = false;
-
-        if (_dragEpisodeSnapshot == null)
+        if (_activeDrag is { } drag && _dragCurrentIndex >= 0 && _dragCurrentIndex != drag.SourceIndex)
         {
-            ReorderFromDrag(dragData, insertIndex);
-            EndRailDrag();
-            return;
-        }
-        
-        if (!IsValidDragSourceIndex(dragData, _dragEpisodeSnapshot?.Count ?? 0, _dragFileSnapshot?.Count ?? 0))
-        {
-            ClearDragSnapshot();
-            IsRailDragging = false;
-            RefreshMatchState();
-            return;
-        }
-        
-        insertIndex = Math.Clamp(insertIndex, 0, Math.Max(EpisodeCount, ImportedFileCount));
-        if (insertIndex != _dragPreviewInsertIndex)
-        {
-            RestoreListFromSnapshot();
-            ApplyDragMove(dragData, insertIndex);
+            NotifyRowSettled(_dragCurrentIndex, Math.Sign(_dragCurrentIndex - drag.SourceIndex), drag.IsMoveLinked);
         }
 
-        var finalTo = FindDraggedItemFinalIndex(dragData);
-        if (finalTo != dragData.SourceIndex)
-        {
-            PrepareSettle(finalTo, dragData.SourceIndex, dragData.IsMoveLinked);
-        }
-
-        ClearDragSnapshot();
-        IsRailDragging = false;
-        RefreshMatchState();
-        ScheduleClearSettle();
-    }
-
-    private void ApplyDragMove(RailReorderDragData dragData, int insertIndex)
-    {
-        if (!IsValidDragSourceIndex(dragData, EpisodeCount, ImportedFileCount))
-        {
-            return;
-        }
-        
-        _deferMatchRefresh = true;
-
-        if (dragData.IsMoveLinked)
-        {
-            MoveItem(Episodes, dragData.SourceIndex, insertIndex);
-            if (dragData.SourceIndex < ImportedFileCount)
-            {
-                MoveItem(MkvFiles, dragData.SourceIndex, insertIndex);
-            }
-        } 
-        else if (dragData.ReorderSide == RailReorderSide.Episode)
-        {
-            MoveItem(Episodes, dragData.SourceIndex,insertIndex);
-        }
-        else
-        {
-            MoveItem(MkvFiles, dragData.SourceIndex, insertIndex);
-        }
-        
-        _deferMatchRefresh = false;
+        EndRailDrag();
     }
 
     public void CancelRailDrag()
     {
-        RestoreListFromSnapshot();
-        ClearDragSnapshot();
-        IsRailDragging = false;
-        _suppressSettle = false;
-        RefreshMatchState();
+        if (_activeDrag is { } drag && _dragCurrentIndex >= 0 && _dragCurrentIndex != drag.SourceIndex)
+        {
+            MoveRail(drag.ReorderSide, drag.IsMoveLinked, _dragCurrentIndex, drag.SourceIndex);
+        }
+
+        EndRailDrag();
     }
 
     public void EndRailDrag()
     {
-        ClearDragSnapshot();
+        _activeDrag = null;
+        _dragCurrentIndex = -1;
         IsRailDragging = false;
     }
 
-    public void ReorderFromDrag(RailReorderDragData dragData, int targetIndex)
+    private void MoveChevron(RailReorderSide side, int fromIndex, int delta)
     {
-        if (!IsValidDragSourceIndex(dragData, EpisodeCount, ImportedFileCount))
+        var linked = LinkRailReorder;
+        var count = GetRailCount(side, linked);
+        if (count <= 1 || fromIndex < 0 || fromIndex >= count)
         {
             return;
         }
-        
-        if (dragData.IsMoveLinked)
-        {
-            MoveLinkedWithSettle(dragData.SourceIndex, targetIndex);
-        }
-        else if (dragData.ReorderSide == RailReorderSide.Episode)
-        {
-            MoveItemWithSettle(Episodes, dragData.SourceIndex, targetIndex, isLinked: false);
-        }
-        else
-        {
-            MoveItemWithSettle(MkvFiles, dragData.SourceIndex, targetIndex, isLinked: false);
-        }
-    }
-    
-    public void ReorderEpisode(int fromIndex, int toIndex) => MoveItemWithSettle(Episodes, fromIndex, toIndex, isLinked: false);
-    public void ReorderMkvFile(int fromIndex, int toIndex) => MoveItemWithSettle(MkvFiles, fromIndex, toIndex, isLinked: false);
-    public void ReorderLinkedRow(int fromIndex, int toIndex) => MoveLinkedWithSettle(fromIndex, toIndex);
 
-    private void MoveLinkedWithSettle(int fromIndex, int toIndex)
-    {
-        var finalTo = TryComputeLinkedFinalIndex(fromIndex, toIndex,Episodes,MkvFiles);
-        if (finalTo == null)
-        {
-            return;
-        }
-        
-        PrepareSettle(finalTo.Value, fromIndex, isLinked: true);
-        _deferMatchRefresh = true;
-        MoveItem(Episodes, fromIndex, toIndex);
-        if (fromIndex < ImportedFileCount)
-        {
-            MoveItem(MkvFiles, fromIndex, toIndex);
-        }
-        _deferMatchRefresh = false;
-        RefreshMatchState();
-        ScheduleClearSettle();
-    }
-
-    private void MoveChevronUp<T>(ObservableCollection<T> rails, int fromIndex)
-    {
-        if (rails.Count <= 1)
-        {
-            return;
-        }
-        
-        var targetIndex = fromIndex <= 0 ? rails.Count - 1 : fromIndex - 1;
-        if (LinkRailReorder)
-        {
-            MoveLinkedChevronWithSettle(fromIndex, targetIndex);
-        }
-        else
-        {
-            MoveItemToTargetWithSettle(rails, fromIndex, targetIndex, isLinked: false);
-        }
-        
-    }
-    
-    private void MoveChevronDown<T>(ObservableCollection<T> rails, int fromIndex)
-    {
-        if (rails.Count <= 1)
-        {
-            return;
-        }
-        
-        var targetIndex = fromIndex >= rails.Count -1 ? 0: fromIndex + 1;
-        if (LinkRailReorder)
-        {
-            MoveLinkedChevronWithSettle(fromIndex, targetIndex);
-        }
-        else
-        {
-            MoveItemToTargetWithSettle(rails, fromIndex, targetIndex, isLinked: false);   
-        }
-    }
-
-    private void MoveLinkedChevronWithSettle(int fromIndex, int targetIndex)
-    {
-        PrepareSettle(targetIndex, fromIndex, isLinked: true);
-        _deferMatchRefresh = true;
-        if (fromIndex < EpisodeCount)
-        {
-            MoveItemToTarget(Episodes, fromIndex, targetIndex);
-        }
-        if (fromIndex < ImportedFileCount)
-        {
-            MoveItemToTarget(MkvFiles, fromIndex, targetIndex);
-        }
-        _deferMatchRefresh = false;
-        RefreshMatchState();
-        ScheduleClearSettle();
-    }
-
-    private void MoveItemToTargetWithSettle<T>(ObservableCollection<T> rails, int fromIndex, int targetIndex,
-        bool isLinked)
-    {
-        if (fromIndex < 0 || fromIndex >= rails.Count || fromIndex == targetIndex)
-        {
-            return;
-        }
-        
-        PrepareSettle(targetIndex, fromIndex, isLinked);
-        _deferMatchRefresh = true;
-        MoveItemToTarget(rails, fromIndex, targetIndex);
-        _deferMatchRefresh = false;
-        RefreshMatchState();
-        ScheduleClearSettle();
-    }
-    
-    private void MoveItemWithSettle<T>(ObservableCollection<T> rails, int fromIndex, int insertIndex,
-        bool isLinked)
-    {
-        var finalTo = TryComputeFinalIndex(rails, fromIndex, insertIndex);
-        if (finalTo == null)
-        {
-            return;
-        }
-        
-        PrepareSettle(finalTo.Value, fromIndex, isLinked);
-        _deferMatchRefresh = true;
-        MoveItemToTarget(rails, fromIndex, insertIndex);
-        _deferMatchRefresh = false;
-        RefreshMatchState();
-        ScheduleClearSettle();
-    }
-
-    private static void MoveItemToTarget<T>(ObservableCollection<T> rails, int fromIndex, int targetIndex)
-    {
-        if (fromIndex < 0 || fromIndex >= rails.Count)
-        {
-            return;
-        }
-        
-        targetIndex = Math.Clamp(targetIndex, 0, rails.Count - 1);
+        var targetIndex = (fromIndex + delta + count) % count;
         if (targetIndex == fromIndex)
         {
             return;
         }
-        
-        var rail  = rails[fromIndex];
-        rails.RemoveAt(fromIndex);
-        rails.Insert(targetIndex, rail);
+
+        MoveRail(side, linked, fromIndex, targetIndex);
+        NotifyRowSettled(targetIndex, Math.Sign(targetIndex - fromIndex), linked);
     }
 
-    private void PrepareSettle(int toIndex, int fromIndex, bool isLinked)
+    private void MoveRail(RailReorderSide side, bool linked, int fromIndex, int toIndex)
     {
-        if (_suppressSettle)
+        _deferMatchRefresh = true;
+        try
+        {
+            if (linked)
+            {
+                MoveCollectionItem(Episodes, fromIndex, toIndex);
+                MoveCollectionItem(MkvFiles, fromIndex, toIndex);
+            }
+            else if (side == RailReorderSide.Episode)
+            {
+                MoveCollectionItem(Episodes, fromIndex, toIndex);
+            }
+            else
+            {
+                MoveCollectionItem(MkvFiles, fromIndex, toIndex);
+            }
+        }
+        finally
+        {
+            _deferMatchRefresh = false;
+        }
+
+        // Only update the slice of MatchRows whose Episode or MkvFile index actually changed
+        var start = Math.Max(0, Math.Min(fromIndex, toIndex));
+        var end = Math.Min(MatchRows.Count - 1, Math.Max(fromIndex, toIndex));
+        for (var i = start; i <= end; i++)
+        {
+            var episode = i < EpisodeCount ? Episodes[i] : null;
+            var mkvFile = i < ImportedFileCount ? MkvFiles[i] : null;
+            MatchRows[i].Update(i + 1, episode, mkvFile, RailSettleType.None, 0);
+        }
+    }
+
+    private static void MoveCollectionItem<T>(ObservableCollection<T> list, int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex >= list.Count)
         {
             return;
         }
-        
-        var direction = Math.Sign(toIndex - fromIndex);
+
+        toIndex = Math.Clamp(toIndex, 0, list.Count - 1);
+        if (fromIndex != toIndex)
+        {
+            list.Move(fromIndex, toIndex);
+        }
+    }
+
+    private int GetRailCount(RailReorderSide side, bool linked)
+    {
+        if (linked)
+        {
+            return Math.Max(EpisodeCount, ImportedFileCount);
+        }
+
+        return side == RailReorderSide.Episode ? EpisodeCount : ImportedFileCount;
+    }
+
+    private void NotifyRowSettled(int targetIndex, int direction, bool isLinked)
+    {
         if (direction == 0)
         {
             return;
         }
-        
-        _lastSettle = new RailSettleHint(toIndex, direction, isLinked ? RailSettleType.Linked : RailSettleType.Independent);
+
         if (isLinked)
         {
             LinkAnimationVersion++;
         }
-    }
 
-    private void ScheduleClearSettle()
-    {
-        if (_settleClearTimer is null)
-        {
-            _settleClearTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(540) };
-            _settleClearTimer.Tick += (_, _) =>
-            {
-                _settleClearTimer.Stop();
-                _lastSettle = null;
-            };
-        }
-
-        _settleClearTimer.Stop();
-        _settleClearTimer.Start();
-    }
-
-    private int FindDraggedItemFinalIndex(RailReorderDragData dragData)
-    {
-        if (_dragEpisodeSnapshot == null)
-        {
-            return dragData.SourceIndex;
-        }
-
-        if (dragData.IsMoveLinked)
-        {
-            var rowCount = LinkedRowCount(_dragEpisodeSnapshot.Count, _dragEpisodeSnapshot.Count);
-            if (!IsRailInRange(dragData.SourceIndex, rowCount))
-            {
-                return dragData.SourceIndex;
-            }
-
-            if (IsRailInRange(dragData.SourceIndex, _dragEpisodeSnapshot.Count))
-            {
-                var episodeIndex = Episodes.IndexOf(_dragEpisodeSnapshot[dragData.SourceIndex]);
-                if (episodeIndex >= 0)
-                {
-                    return episodeIndex;
-                }
-            }
-            
-            if (_dragFileSnapshot is not null && IsRailInRange(dragData.SourceIndex, _dragFileSnapshot.Count))
-            {
-                var fileIndex = MkvFiles.IndexOf(_dragFileSnapshot[dragData.SourceIndex]);
-                if (fileIndex >= 0)
-                {
-                    return fileIndex;
-                }
-            }
-
-            return dragData.SourceIndex;
-        }
-
-        return dragData.ReorderSide switch
-        {
-            RailReorderSide.Episode when IsRailInRange(dragData.SourceIndex, _dragEpisodeSnapshot.Count)
-                => ResolveEpisodeFinalIndex(_dragEpisodeSnapshot[dragData.SourceIndex], dragData.SourceIndex),
-            RailReorderSide.File when _dragFileSnapshot is not null &&
-                                      IsRailInRange(dragData.SourceIndex, _dragFileSnapshot.Count) =>
-                ResolveFileFinalIndex(_dragFileSnapshot[dragData.SourceIndex], dragData.SourceIndex),
-            _ => dragData.SourceIndex
-        };
-    }
-
-    private static bool IsRailInRange(int index, int count) => index >= 0 && index < count;
-    private static int LinkedRowCount(int episodeCount, int mkvFileCount) => Math.Max(episodeCount, mkvFileCount);
-
-    private static bool IsValidDragSourceIndex(RailReorderDragData dragData, int episodeCount, int mkvFileCount)
-    {
-        if (dragData.IsMoveLinked)
-        {
-            return IsRailInRange(dragData.SourceIndex,LinkedRowCount(episodeCount, mkvFileCount));
-        }
-
-        return dragData.ReorderSide switch
-        {
-            RailReorderSide.Episode => IsRailInRange(dragData.SourceIndex, episodeCount),
-            RailReorderSide.File => IsRailInRange(dragData.SourceIndex, mkvFileCount),
-            _ => false
-        };
-    }
-    
-    private int ResolveEpisodeFinalIndex(Episode episode, int fallbackIndex)
-    {
-        var index = Episodes.IndexOf(episode);
-        return index >= 0  ? index : fallbackIndex;
-    }
-    
-    private int ResolveFileFinalIndex(MkvFile mkvFile, int fallbackIndex)
-    {
-        var index = MkvFiles.IndexOf(mkvFile);
-        return index >= 0  ? index : fallbackIndex;
-    }
-
-    private static int? TryComputeLinkedFinalIndex<TEpisode, TFile>(int fromIndex, int insertIndex,
-        IList<TEpisode> episodes, IList<TFile> files)
-    {
-        if (IsRailInRange(fromIndex, episodes.Count))
-        {
-            return TryComputeFinalIndex(episodes, fromIndex, insertIndex);
-        }
-
-        if (IsRailInRange(fromIndex, files.Count))
-        {
-            return TryComputeFinalIndex(files,fromIndex,insertIndex);
-        }
-        
-        return null;
-    }
-
-    private void RestoreListFromSnapshot()
-    {
-        if (_dragEpisodeSnapshot == null || _dragFileSnapshot == null)
-        {
-            return;
-        }
-
-        _deferMatchRefresh = true;
-        Episodes.Clear();
-        foreach (var episode in _dragEpisodeSnapshot)
-        {
-            Episodes.Add(episode);
-        }
-        
-        MkvFiles.Clear();
-        foreach (var file in _dragFileSnapshot)
-        {
-            MkvFiles.Add(file);
-        }
-        
-        _deferMatchRefresh = false;
-    }
-
-    private void ClearDragSnapshot()
-    {
-        _dragEpisodeSnapshot = null;
-        _dragFileSnapshot = null;
-        _dragPreviewInsertIndex = -1;
+        RowSettled?.Invoke(targetIndex, direction, isLinked ? RailSettleType.Linked : RailSettleType.Independent);
     }
 
     private void OnListChanged()
@@ -608,56 +339,6 @@ public class ContentSelectViewModel : ViewModelBase
         }
 
         RefreshMatchState();
-    }
-
-    private static int? TryComputeFinalIndex<T>(IList<T> list, int fromIndex, int insertIndex)
-    {
-        if (fromIndex < 0 || fromIndex >= list.Count)
-        {
-            return null;
-        }
-        
-        insertIndex = Math.Clamp(insertIndex, 0, list.Count);
-        if (fromIndex == insertIndex || (fromIndex + 1 == insertIndex && insertIndex < list.Count))
-        {
-            return null;
-        }
-        
-        var finalIndex = insertIndex;
-        if (insertIndex > fromIndex)
-        {
-            finalIndex--;
-        }
-
-        if (finalIndex == fromIndex)
-        {
-            return null;
-        }
-        
-        return Math.Clamp(finalIndex, 0, list.Count - 1);
-    }
-
-    private static void MoveItem<T>(ObservableCollection<T> list, int fromIndex,int toIndex)
-    {
-        if (fromIndex < 0 || fromIndex >= list.Count)
-        {
-            return;
-        }
-        
-        toIndex = Math.Clamp(toIndex, 0, list.Count);
-        if (fromIndex == toIndex || (fromIndex + 1 == toIndex && toIndex == list.Count))
-        {
-            return;
-        }
-        
-        var item = list[fromIndex];
-        list.RemoveAt(fromIndex);
-        if (toIndex > fromIndex)
-        {
-            toIndex--;
-        }
-        toIndex = Math.Clamp(toIndex, 0, list.Count);
-        list.Insert(toIndex, item);
     }
 
     private async Task ExecuteOpenFilesCommand()
@@ -679,9 +360,8 @@ public class ContentSelectViewModel : ViewModelBase
             return;
         }
         var result = await _mkvFinderService.OpenMkvFoldersAsync(topLevel);
-        ApplyImportResult(result, merge:true);
+        ApplyImportResult(result, merge: true);
     }
-    
 
     public void SetEpisodes(IReadOnlyList<Episode> episodes)
     {
@@ -775,7 +455,7 @@ public class ContentSelectViewModel : ViewModelBase
         {
             return null;
         }
-        
+
         return TopLevel.GetTopLevel(app.MainWindow);
     }
 
@@ -794,13 +474,10 @@ public class ContentSelectViewModel : ViewModelBase
 
     private async Task ExecutePrimaryErrorCommand()
     {
-        if (HasPermissionDenied)
+        if (HasPermissionDenied && !OperatingSystem.IsLinux())
         {
-            if (!OperatingSystem.IsLinux())
-            {
-                TryOpenPermissionsSetting();
-                return;
-            }
+            TryOpenPermissionsSetting();
+            return;
         }
 
         await ExecuteOpenFilesCommand();
@@ -820,22 +497,10 @@ public class ContentSelectViewModel : ViewModelBase
 
     private static Os ResolveCurrentOs()
     {
-        if (OperatingSystem.IsMacOS())
-        {
-            return Os.MacOs;
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-            return Os.Linux;
-        }
-        else if (OperatingSystem.IsWindows())
-        {
-            return Os.Windows;
-        }
-        else
-        {
-            return Os.Unkown;
-        }
+        if (OperatingSystem.IsMacOS()) return Os.MacOs;
+        if (OperatingSystem.IsLinux()) return Os.Linux;
+        if (OperatingSystem.IsWindows()) return Os.Windows;
+        return Os.Unkown;
     }
 
     private static string GetPermissionDeniedDescription()
@@ -846,20 +511,9 @@ public class ContentSelectViewModel : ViewModelBase
                 "Windows blocked access to the folder you picked.  Check the folder permissions, Controlled folder access, or copy the files to a location your user account can read.",
             Os.MacOs => $"macOS bocked access to the folder you picked.  Grant full disk Access to {Constants.Metadata.AppName}, or move the files somewhere readable.",
             Os.Linux => "Linux blocked access to the folder you picked.  Check the file ownership and permissions, or if you have installed via sandbox container grant access to that folder and try again.",
-            _ or Os.Unkown=> $"{Constants.Metadata.AppName} could not read the folder you picked.  Move the file somewhere readable or fox permissions on your user account."
+            _ => $"{Constants.Metadata.AppName} could not read the folder you picked.  Move the file somewhere readable or fox permissions on your user account."
         };
     }
-
-    private static string GetPermissionDeniedPrimaryActionTest()
-    {
-        return ResolveCurrentOs() switch
-        {
-            Os.Windows => "Open System Settings",
-            Os.MacOs => "Open Privacy & Security",
-            _ or Os.Linux or Os.Unkown => "Check your file permissions."
-        };
-    }
-    
 
     private void TryOpenPermissionsSetting()
     {
@@ -883,12 +537,11 @@ public class ContentSelectViewModel : ViewModelBase
                 });
             }
         }
-        catch(Exception exception)
+        catch (Exception exception)
         {
-            _logger.LogError(exception, $"Failed to open permissions for {CurrentOs:G}");
+            _logger.LogError(exception, "Failed to open permissions for {Os}", CurrentOs);
         }
     }
-    
 
     private void RefreshMatchState()
     {
@@ -900,16 +553,14 @@ public class ContentSelectViewModel : ViewModelBase
         {
             var episode = i < EpisodeCount ? Episodes[i] : null;
             var mkvFile = i < ImportedFileCount ? MkvFiles[i] : null;
-            ResolveSettleForRow(i, out var settleType, out var settleDirection);
-            MatchRows[i].Update(i + 1, episode, mkvFile, settleType, settleDirection);
+            MatchRows[i].Update(i + 1, episode, mkvFile, RailSettleType.None, 0);
         }
 
         for (var i = overlap; i < rowCount; i++)
         {
             var episode = i < EpisodeCount ? Episodes[i] : null;
             var mkvFile = i < ImportedFileCount ? MkvFiles[i] : null;
-            ResolveSettleForRow(i, out var settleType, out var settleDirection);
-            MatchRows.Add(new RailMatchRowViewModel(i + 1, episode, mkvFile, settleType, settleDirection));
+            MatchRows.Add(new RailMatchRowViewModel(i + 1, episode, mkvFile));
         }
 
         for (var i = existingCount - 1; i >= rowCount; i--)
@@ -920,33 +571,25 @@ public class ContentSelectViewModel : ViewModelBase
         RaiseImportStateProperties();
     }
 
-    private void ResolveSettleForRow(int rowIndex, out RailSettleType settleType, out int settleDirection)
-    {
-        if (_lastSettle is { } hint && hint.Targetindex == rowIndex)
-        {
-            settleType = hint.SettleType;
-            settleDirection = hint.Direction;
-            return;
-        }
-
-        settleType = RailSettleType.None;
-        settleDirection = 0;
-    }
-
     public void Reset()
     {
-        _settleClearTimer?.Stop();
-        _settleClearTimer = null;
-        _lastSettle = null;
-        _suppressSettle = false;
-        ClearDragSnapshot();
-        IsRailDragging = false;
-        
-        Episodes.Clear();
-        ShowName = string.Empty;
-        ShowPartialFailureDetails = false;
-        LinkRailReorder = false;
-        ClearImport();
+        EndRailDrag();
+
+        _deferMatchRefresh = true;
+        try
+        {
+            Episodes.Clear();
+            ShowName = string.Empty;
+            ShowPartialFailureDetails = false;
+            LinkRailReorder = false;
+            MkvFiles.Clear();
+            HasImportedAttempted = false;
+            ImportIssues.Clear();
+        }
+        finally
+        {
+            _deferMatchRefresh = false;
+        }
         RefreshMatchState();
     }
 
@@ -986,14 +629,4 @@ public class ContentSelectViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(PartialFailureTitle));
         this.RaisePropertyChanged(nameof(PartialFailureSummary));
     }
-    
-
-
-
-
-
-
-
-
 }
-
