@@ -12,6 +12,10 @@ namespace MkvRenameWizard.Views;
 
 internal static class RailSettleAnimator
 {
+    private static readonly BackEaseOut LinkedEasing = new();
+    private static readonly CubicEaseOut IndependentEasing = new();
+    private static readonly Color AccentColor = Color.FromRgb(0x48, 0xC8, 0xF6);
+
     public static void RunIfNeeded(Border row, RailSettleType railSettleType, int direction)
     {
         if (railSettleType == RailSettleType.None || direction == 0)
@@ -42,44 +46,50 @@ internal static class RailSettleAnimator
         {
             // Animation can be interrupted by refresh so we will ignore it.
         }
-        
     }
 
     private static async Task AnimateSettleAsync(Border row, double startY, bool isLinked)
     {
         var settleRail = row.FindControl<Border>(Constants.BorderNames.SettleRail);
-        var duration = isLinked ? TimeSpan.FromMilliseconds(520) : TimeSpan.FromMilliseconds(480);
-        Easing easing = isLinked ? new BackEaseOut() : new CubicEaseOut();
+        var durationMs = isLinked ? 520.0 : 480.0;
+        Easing easing = isLinked ? LinkedEasing : IndependentEasing;
 
-        row.RenderTransform = new TranslateTransform(0,startY);
-        settleRail?.Background = Brushes.Transparent;
+        var translate = new TranslateTransform(0, startY);
+        var rowBrush = new SolidColorBrush(AccentColor, 0.12);
+        var railBrush = settleRail is not null ? new SolidColorBrush(AccentColor, 1.0) : null;
+
+        row.RenderTransform = translate;
+        row.Background = rowBrush;
+        if (settleRail != null)
+        {
+            settleRail.Background = railBrush;
+        }
+
         const int steps = 24;
-        var stepDelay = duration.TotalMilliseconds / steps;
+        var stepDelay = (int)(durationMs / steps);
 
         for (var i = 0; i <= steps; i++)
         {
-            var t =  i / (double)steps;
+            var t = i / (double)steps;
             var eased = easing.Ease(t);
-            var y = startY * (1 - eased);
-            row.RenderTransform = new TranslateTransform(0, y);
-            
-            var tintAlpha = Math.Max(0.0,(1 - eased) * 0.12);
-            //Same colors as AccentBrush from App.axmal.
-            row.Background = new SolidColorBrush(Color.FromArgb((byte)(tintAlpha * 255), 0x48, 0xC8, 0xF6));
+            translate.Y = startY * (1 - eased);
+            rowBrush.Opacity = Math.Max(0.0, (1 - eased) * 0.12);
 
-            if (settleRail != null)
+            if (railBrush != null)
             {
-                var railAlpha = Math.Max(0.0,1 - eased);
-                //Same colors as AccentBrush from App.axmal.
-                settleRail.Background = new SolidColorBrush(Color.FromArgb((byte)(railAlpha * 255), 0x48, 0xC8, 0xF6));
+                railBrush.Opacity = Math.Max(0.0, 1 - eased);
             }
-            
-            await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Render);
-            await Task.Delay((int)stepDelay);
+
+            await Dispatcher.UIThread.InvokeAsync(static () => { }, DispatcherPriority.Render);
+            await Task.Delay(stepDelay);
         }
+
         row.RenderTransform = null;
         row.Background = Brushes.Transparent;
-        settleRail?.Background = Brushes.Transparent;
+        if (settleRail != null)
+        {
+            settleRail.Background = Brushes.Transparent;
+        }
     }
 
     private static async Task AnimateLinkConnectorAsync(Border row)
@@ -96,7 +106,18 @@ internal static class RailSettleAnimator
 
         var center = new RelativePoint(0.5, 0.5, RelativeUnit.Relative);
         dot.RenderTransformOrigin = center;
-        halo?.RenderTransformOrigin = center;
+        if (halo != null)
+        {
+            halo.RenderTransformOrigin = center;
+        }
+
+        var dotScale = new ScaleTransform(1, 1);
+        var haloScale = halo is not null ? new ScaleTransform(1, 1) : null;
+        dot.RenderTransform = dotScale;
+        if (halo != null)
+        {
+            halo.RenderTransform = haloScale;
+        }
 
         const int steps = 20;
         const int stepMs = 20;
@@ -104,34 +125,32 @@ internal static class RailSettleAnimator
         for (var i = 0; i <= steps; i++)
         {
             var t = i / (double)steps;
-            double scale;
-            if (t < 0.45)
-            {
-                scale = 1 + t / 0.45 * 0.6;
-            }
-            else
-            {
-                scale = 1.6 - (t - 0.45) / 0.55 * 0.6;
-            }
-            
-            dot.RenderTransform = new ScaleTransform(scale, scale);
+            var scale = t < 0.45
+                ? 1 + t / 0.45 * 0.6
+                : 1.6 - (t - 0.45) / 0.55 * 0.6;
 
-            if (halo != null)
+            dotScale.ScaleX = scale;
+            dotScale.ScaleY = scale;
+
+            if (halo != null && haloScale != null)
             {
-                var haloScale = 1 + t * 1.2;
-                halo.RenderTransform = new ScaleTransform(haloScale, haloScale);
+                var hs = 1 + t * 1.2;
+                haloScale.ScaleX = hs;
+                haloScale.ScaleY = hs;
                 halo.Opacity = 0.45 * (1 - t);
             }
 
             if (lineLeft != null && lineRight != null)
             {
                 var glow = t < 0.5 ? t * 2 : (1 - t) * 2;
-                lineLeft.Opacity = 0.5 + glow * 0.5;
-                lineRight.Opacity = 0.5 + glow * 0.5;
+                var opacity = 0.5 + glow * 0.5;
+                lineLeft.Opacity = opacity;
+                lineRight.Opacity = opacity;
             }
-            
+
             await Task.Delay(stepMs);
         }
+
         dot.RenderTransform = null;
         if (halo != null)
         {
@@ -145,6 +164,4 @@ internal static class RailSettleAnimator
             lineRight.Opacity = 0.75;
         }
     }
-    
-
 }

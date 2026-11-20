@@ -35,23 +35,23 @@
         </Style>
         
         <Style Selector="Button.primary-result">
-            <Setter Property="Background" Value="{DynamicResource AccentBrush}"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}"></Setter>
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentTextBrush}"></Setter>
             <Setter Property="FontWeight" Value="SemiBold"></Setter>
             <Setter Property="Padding" Value="18,9" ></Setter>
             <Setter Property="CornerRadius" Value="6"></Setter>
         </Style>
         <Style Selector="Button.secondary-result">
             <Setter Property="Background" Value="Transparent"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="Padding" Value="14,9" ></Setter>
             <Setter Property="CornerRadius" Value="6"></Setter>
         </Style>
         <Style Selector="Button.ghost-result">
             <Setter Property="Background" Value="Transparent"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"></Setter>
             <Setter Property="BorderThickness" Value="0"></Setter>
             <Setter Property="Padding" Value="10,7" ></Setter>
             <Setter Property="CornerRadius" Value="4"></Setter>
@@ -59,7 +59,7 @@
         </Style>
     </UserControl.Styles>
     
-    <Grid Background="{DynamicResource AppBackgroundBrush}">
+    <Grid Background="{StaticResource AppBackgroundBrush}">
         <Grid IsVisible="{Binding IsFullSuccess}"
               RowDefinitions="*,Auto,*">
             <StackPanel Grid.Row="1"
@@ -81,21 +81,21 @@
                 <TextBlock Text="{Binding SummaryHeadline}"
                            FontSize="28"
                            FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           Foreground="{StaticResource TextPrimaryBrush}"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,10">
                 </TextBlock>
                 <TextBlock Text="{Binding SummarySubtitle}"
                            FontSize="13"
-                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
                            TextWrapping="Wrap"
                            TextAlignment="Center"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,28">
                 </TextBlock>
                 
-                <Border Background="{DynamicResource SurfaceBackgroundBrush}"
-                        BorderBrush="{DynamicResource DividerBrush}"
+                <Border Background="{StaticResource SurfaceBackgroundBrush}"
+                        BorderBrush="{StaticResource DividerBrush}"
                         BorderThickness="1"
                         CornerRadius="6"
                         Padding="16,12"
@@ -105,14 +105,14 @@
                         <TextBlock Text="Rename To"
                                    FontSize="10"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    LetterSpacing="1">
                         </TextBlock>
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"></PathIcon>
+                            <PathIcon Data="{StaticResource OpenFolderRegular}" Width="13" Height="13" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"></PathIcon>
                             <TextBlock Text="{Binding TargetFolder}"
                                        FontSize="12"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
                                        TextWrapping="Wrap"
                                        VerticalAlignment="Center">
                             </TextBlock>
@@ -141,8 +141,8 @@
         <Grid IsVisible="{Binding !IsFullSuccess}"
               RowDefinitions="Auto,*,Auto">
             <Border Grid.Row="0"
-                    Background="{DynamicResource ChromeBackgroundBrush}"
-                    BorderBrush="{DynamicResource DividerBrush}"
+                    Background="{StaticResource ChromeBackgroundBrush}"
+                    BorderBrush="{StaticResource DividerBrush}"
                     BorderThickness="0,0,0,1"
                     Padding="20,14">
                 <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12">
@@ -157,12 +157,12 @@
                         <TextBlock Text="{Binding SummaryHeadline}"
                                    FontSize="15"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}">
+                                   Foreground="{StaticResource TextPrimaryBrush}">
                         </TextBlock>
                         <TextBlock Text="{Binding SummarySubtitle}"
                                    FontSize="15"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextSecondaryBrush}">
+                                   Foreground="{StaticResource TextSecondaryBrush}">
                         </TextBlock>
                         
                     </StackPanel>
@@ -191,8 +191,8 @@
             </Border>
             <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto">
                 <Border Grid.Row="0"
-                        Background="{DynamicResource SurfaceBackgroundBrush}"
-                        BorderBrush="{DynamicResource DividerBrush}"
+                        Background="{StaticResource SurfaceBackgroundBrush}"
+                        BorderBrush="{StaticResource DividerBrush}"
                         BorderThickness="0,0,0,1"
                         Padding="14,7">
                     <Grid ColumnDefinitions="40,*,28,*,90">
@@ -200,28 +200,28 @@
                                    Text="Number"
                                    FontSize="10"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    LetterSpacing="1">
                         </TextBlock>
                         <TextBlock Grid.Column="1"
                                    Text="Original filename"
                                    FontSize="10"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    LetterSpacing="1">
                         </TextBlock>
                         <TextBlock Grid.Column="3"
                                    Text="Renamed To"
                                    FontSize="10"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    LetterSpacing="1">
                         </TextBlock>
                         <TextBlock Grid.Column="4"
                                    Text="Status"
                                    FontSize="10"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    LetterSpacing="1" HorizontalAlignment="Center">
                         </TextBlock>
                     </Grid>
@@ -229,8 +229,8 @@
                 
                 <Grid Grid.Row="1" RowDefinitions="Auto,*">
                     <Border Grid.Row="0"
-                            Background="{DynamicResource SurfaceBackgroundBrush}"
-                            BorderBrush="{DynamicResource DividerBrush}"
+                            Background="{StaticResource SurfaceBackgroundBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="0,0,0,1"
                             Padding="14,7">
                         <Grid ColumnDefinitions="49,*,28,*,90">
@@ -238,130 +238,138 @@
                                        Text="Number"
                                        FontSize="10"
                                        FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Foreground="{StaticResource TextMutedBrush}"
                                        LetterSpacing="1">
                             </TextBlock>
                             <TextBlock Grid.Column="1"
                                        Text="Original Filename"
                                        FontSize="10"
                                        FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Foreground="{StaticResource TextMutedBrush}"
                                        LetterSpacing="1">
                             </TextBlock>
                             <TextBlock Grid.Column="3"
                                        Text="Renamed To"
                                        FontSize="10"
                                        FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Foreground="{StaticResource TextMutedBrush}"
                                        LetterSpacing="1">
                             </TextBlock>
                             <TextBlock Grid.Column="4"
                                        Text="Status"
                                        FontSize="10"
                                        FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Foreground="{StaticResource TextMutedBrush}"
                                        LetterSpacing="1"
                                        HorizontalAlignment="Center">
                             </TextBlock>
                         </Grid>
                     </Border>
                     
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding OperationResults}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <DataTemplate.DataType>
-                                        <x:Type TypeName="model:RenameOperationResult" x:TypeArguments="model:RenameFileOperation" />
-                                    </DataTemplate.DataType>
-                                    <Border BorderBrush="{DynamicResource DividerBrush}"
-                                            BorderThickness="0,0,0,1"
-                                            Padding="14,0">
-                                        <Grid ColumnDefinitions="40,*,28,*,90"
-                                              MinHeight="40">
-                                            <Border Grid.Column="0"
-                                                    Background="{DynamicResource ChipBackgroundBrush}"
-                                                    CornerRadius="4" Padding="5,2"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding RenameOperation.OperationId}"
-                                                           FontSize="11"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource TextMutedBrush}">
-                                                </TextBlock>
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding OperationResults}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="0"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DataTemplate.DataType>
+                                    <x:Type TypeName="model:RenameOperationResult" x:TypeArguments="model:RenameFileOperation" />
+                                </DataTemplate.DataType>
+                                <Border BorderBrush="{StaticResource DividerBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="14,0">
+                                    <Grid ColumnDefinitions="40,*,28,*,90"
+                                          MinHeight="40">
+                                        <Border Grid.Column="0"
+                                                Background="{StaticResource ChipBackgroundBrush}"
+                                                CornerRadius="4" Padding="5,2"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding RenameOperation.OperationId}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextMutedBrush}">
+                                            </TextBlock>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Spacing="2">
+                                            <TextBlock Text="{Binding RenameOperation.SourcePath}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                       TextDecorations="Strikethrough"
+                                                       IsVisible="{Binding IsSuccessful}">
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding RenameOperation.SourcePath}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       IsVisible="{Binding !IsSuccessful}">
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <PathIcon Grid.Column="2"
+                                                  FontSize="12"
+                                                  Foreground="{StaticResource TextMutedBrush}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Data="{StaticResource RightArrowFilled}">
+                                        </PathIcon>
+
+                                        <StackPanel Grid.Column="3"
+                                                    VerticalAlignment="Center"
+                                                    Spacing="2">
+                                            <TextBlock Text="{Binding RenameOperation.TargetPath}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       IsVisible="{Binding IsSuccessful}">
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding RenameOperation.TargetPath}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                       IsVisible="{Binding !IsSuccessful}">
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding ErrorMessage}"
+                                                       FontSize="11"
+                                                       Foreground="#E09000"
+                                                       TextWrapping="Wrap"
+                                                       IsVisible="{Binding !IsSuccessful}">
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <Panel Grid.Column="4"
+                                               VerticalAlignment="Center">
+                                            <Border Classes="badge-success" IsVisible="{Binding IsSuccessful}">
+                                                <TextBlock Classes="badge-text-success" Text="Renamed"></TextBlock>
                                             </Border>
-                                            
-                                            <StackPanel Grid.Column="1"
-                                                        VerticalAlignment="Center"
-                                                        Spacing="2">
-                                                <TextBlock Text="{Binding RenameOperation.SourcePath}"
-                                                           FontSize="12"
-                                                           Foreground="{DynamicResource TextMutedBrush}"
-                                                           TextTrimming="Strikethrough"
-                                                           IsVisible="{Binding IsSuccessful}">
-                                                </TextBlock>
-                                                <TextBlock Text="{Binding RenameOperation.SourcePath}"
-                                                           FontSize="12"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                                           IsVisible="{Binding !IsSuccessful}">
-                                                </TextBlock>
-                                            </StackPanel>
-                                            
-                                            <PathIcon Grid.Column="2"
-                                                      FontSize="12"
-                                                      Foreground="{DynamicResource TextMutedBrush}"
-                                                      HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"
-                                                      Data="{StaticResource RightArrowFilled}">
-                                            </PathIcon>
-                                            
-                                            <StackPanel Grid.Column="3"
-                                                        VerticalAlignment="Center"
-                                                        Spacing="2">
-                                                <TextBlock Text="{Binding RenameOperation.TargetPath}"
-                                                           FontSize="12"
-                                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                                           IsVisible="{Binding IsSuccessful}">
-                                                </TextBlock>
-                                                <TextBlock Text="{Binding RenameOperation.TargetPath}"
-                                                           FontSize="12"
-                                                           Foreground="{DynamicResource TextMutedBrush}"
-                                                           IsVisible="{Binding !IsSuccessful}">
-                                                </TextBlock>
-                                                <TextBlock Text="{Binding ErrorMessage}"
-                                                           FontSize="11"
-                                                           Foreground="#E09000"
-                                                           TextWrapping="Wrap"
-                                                           IsVisible="{Binding !IsSuccessful}">
-                                                </TextBlock>
-                                            </StackPanel>
-                                            
-                                            <Panel Grid.Column="4"
-                                                   VerticalAlignment="Center">
-                                                <Border Classes="badge-success" IsVisible="{Binding IsSuccessful}">
-                                                    <TextBlock Classes="badge-text-success" Text="Renamed"></TextBlock>
-                                                </Border>
-                                                <Border Classes="badge-failed" IsVisible="{Binding !IsSuccessful}">
-                                                    <TextBlock Classes="badge-text-failed" Text="Failed"></TextBlock>
-                                                </Border>
-                                            </Panel>
-                                            
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                            <Border Classes="badge-failed" IsVisible="{Binding !IsSuccessful}">
+                                                <TextBlock Classes="badge-text-failed" Text="Failed"></TextBlock>
+                                            </Border>
+                                        </Panel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </Grid>
                 
                 <Border Grid.Row="2"
-                        Background="{DynamicResource FooterBackgroundBrush}"
-                        BorderBrush="{DynamicResource DividerBrush}"
+                        Background="{StaticResource FooterBackgroundBrush}"
+                        BorderBrush="{StaticResource DividerBrush}"
                         BorderThickness="0,1,0,0"
                         Padding="19,8">
                     <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                         <TextBlock Grid.Column="0"
                                    FontSize="12"
-                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    VerticalAlignment="Center">
                             <TextBlock.Text>
                                 <MultiBinding StringFormat="{}{0} Renamed  |  {1} Failed">

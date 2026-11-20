@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Avalonia.Media.Imaging;
@@ -6,7 +7,7 @@ using ReactiveUI;
 
 namespace MkvRenameWizard.ViewModels;
 
-public class ShowSearchResultViewModel : ViewModelBase
+public sealed class ShowSearchResultViewModel : ViewModelBase, IDisposable
 {
     public ShowSearchResultViewModel(ShowSearchResult showSearchResult)
     {
@@ -16,12 +17,12 @@ public class ShowSearchResultViewModel : ViewModelBase
         Genres = showSearchResult.Show.Genres.ToImmutableList();
         YearRange = showSearchResult.Show.YearRange;
         RatingAverage = showSearchResult.Show.RatingAverage;
-        AirNetworkLabel =  showSearchResult.Show.AirNetworkLabel;
-        MediumImageUrl =  showSearchResult.Show.MediumImageUrl;
-        OriginalImageUrl =  showSearchResult.Show.OriginalImageUrl;
+        AirNetworkLabel = showSearchResult.Show.AirNetworkLabel;
+        MediumImageUrl = showSearchResult.Show.MediumImageUrl;
+        OriginalImageUrl = showSearchResult.Show.OriginalImageUrl;
         PlanSummary = showSearchResult.Show.PlainSummary;
     }
-    
+
     public double Score { get; }
     public long Id { get; }
     public string Name { get; }
@@ -32,6 +33,23 @@ public class ShowSearchResultViewModel : ViewModelBase
     public string MediumImageUrl { get; }
     public string OriginalImageUrl { get; }
     public string PlanSummary { get; }
-    
-    public Bitmap? Thumbnail { get; set => this.RaiseAndSetIfChanged(ref field, value); }
+
+    public Bitmap? Thumbnail
+    {
+        get;
+        set
+        {
+            if (ReferenceEquals(field, value)) return;
+            var old = field;
+            this.RaiseAndSetIfChanged(ref field, value);
+            old?.Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        var bmp = Thumbnail;
+        Thumbnail = null;
+        bmp?.Dispose();
+    }
 }

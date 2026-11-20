@@ -463,15 +463,18 @@ public class ContentSelectViewModel : ViewModelBase
 
     private void ScheduleClearSettle()
     {
-        _settleClearTimer?.Stop();
-        _settleClearTimer = new DispatcherTimer {Interval = TimeSpan.FromMilliseconds(540)};
-        _settleClearTimer?.Tick += (_, _) =>
+        if (_settleClearTimer is null)
         {
-            _settleClearTimer?.Stop();
-            _lastSettle = null;
-        };
-        
-        _settleClearTimer?.Start();
+            _settleClearTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(540) };
+            _settleClearTimer.Tick += (_, _) =>
+            {
+                _settleClearTimer.Stop();
+                _lastSettle = null;
+            };
+        }
+
+        _settleClearTimer.Stop();
+        _settleClearTimer.Start();
     }
 
     private int FindDraggedItemFinalIndex(RailReorderDragData dragData)
@@ -680,6 +683,41 @@ public class ContentSelectViewModel : ViewModelBase
     }
     
 
+    public void SetEpisodes(IReadOnlyList<Episode> episodes)
+    {
+        _deferMatchRefresh = true;
+        try
+        {
+            Episodes.Clear();
+            for (var i = 0; i < episodes.Count; i++)
+            {
+                Episodes.Add(episodes[i]);
+            }
+        }
+        finally
+        {
+            _deferMatchRefresh = false;
+        }
+        RefreshMatchState();
+    }
+
+    public void AddMkvFiles(IReadOnlyList<MkvFile> files)
+    {
+        _deferMatchRefresh = true;
+        try
+        {
+            for (var i = 0; i < files.Count; i++)
+            {
+                MkvFiles.Add(files[i]);
+            }
+        }
+        finally
+        {
+            _deferMatchRefresh = false;
+        }
+        RefreshMatchState();
+    }
+
     internal async Task ImportFromPathsAsync(IReadOnlyList<string> paths)
     {
         var result = await _mkvFinderService.ImportFromPathsAsync(paths);
@@ -691,32 +729,43 @@ public class ContentSelectViewModel : ViewModelBase
         HasImportedAttempted = HasImportedAttempted || result.IsEmpty;
         ShowPartialFailureDetails = false;
 
-        if (!merge)
+        _deferMatchRefresh = true;
+        try
         {
-            MkvFiles.Clear();
-            ImportIssues.Clear();
-        }
-
-        var existingPaths = merge
-            ? new HashSet<string>(MkvFiles.Select(f => f.FullPath), StringComparer.OrdinalIgnoreCase)
-            : null;
-        foreach (var mkvFile in result.ImportedFiles)
-        {
-            if (merge && existingPaths != null && existingPaths.Contains(mkvFile.FullPath))
+            if (!merge)
             {
-                continue;
+                MkvFiles.Clear();
+                ImportIssues.Clear();
             }
-            
-            MkvFiles.Add(mkvFile);
-            existingPaths?.Add(mkvFile.FullPath);
-        }
 
-        foreach (var fileImportIssue in result.FileImportIssues)
+            var existingPaths = merge
+                ? new HashSet<string>(MkvFiles.Where(f => f.FullPath is not null).Select(f => f.FullPath!), StringComparer.OrdinalIgnoreCase)
+                : null;
+            foreach (var mkvFile in result.ImportedFiles)
+            {
+                if (merge && existingPaths != null && mkvFile.FullPath is not null && existingPaths.Contains(mkvFile.FullPath))
+                {
+                    continue;
+                }
+
+                MkvFiles.Add(mkvFile);
+                if (mkvFile.FullPath is not null)
+                {
+                    existingPaths?.Add(mkvFile.FullPath);
+                }
+            }
+
+            foreach (var fileImportIssue in result.FileImportIssues)
+            {
+                ImportIssues.Add(new FileImportIssueViewModel(fileImportIssue));
+            }
+        }
+        finally
         {
-            ImportIssues.Add(new FileImportIssueViewModel(fileImportIssue));
+            _deferMatchRefresh = false;
         }
 
-        RaiseImportStateProperties();
+        RefreshMatchState();
     }
 
     private static TopLevel? GetTopLevel()
@@ -843,25 +892,45 @@ public class ContentSelectViewModel : ViewModelBase
 
     private void RefreshMatchState()
     {
-        MatchRows.Clear();
         var rowCount = Math.Max(EpisodeCount, ImportedFileCount);
-        for (var i = 0; i < rowCount; i++)
+        var existingCount = MatchRows.Count;
+        var overlap = Math.Min(existingCount, rowCount);
+
+        for (var i = 0; i < overlap; i++)
         {
             var episode = i < EpisodeCount ? Episodes[i] : null;
             var mkvFile = i < ImportedFileCount ? MkvFiles[i] : null;
-            
-            var settleType = RailSettleType.None;
-            var settleDirection = 0;
-            if (_lastSettle is { } hint && hint.Targetindex == i )
-            {
-                settleType = hint.SettleType;
-                settleDirection = hint.Direction;
-            }
-            
+            ResolveSettleForRow(i, out var settleType, out var settleDirection);
+            MatchRows[i].Update(i + 1, episode, mkvFile, settleType, settleDirection);
+        }
+
+        for (var i = overlap; i < rowCount; i++)
+        {
+            var episode = i < EpisodeCount ? Episodes[i] : null;
+            var mkvFile = i < ImportedFileCount ? MkvFiles[i] : null;
+            ResolveSettleForRow(i, out var settleType, out var settleDirection);
             MatchRows.Add(new RailMatchRowViewModel(i + 1, episode, mkvFile, settleType, settleDirection));
         }
 
+        for (var i = existingCount - 1; i >= rowCount; i--)
+        {
+            MatchRows.RemoveAt(i);
+        }
+
         RaiseImportStateProperties();
+    }
+
+    private void ResolveSettleForRow(int rowIndex, out RailSettleType settleType, out int settleDirection)
+    {
+        if (_lastSettle is { } hint && hint.Targetindex == rowIndex)
+        {
+            settleType = hint.SettleType;
+            settleDirection = hint.Direction;
+            return;
+        }
+
+        settleType = RailSettleType.None;
+        settleDirection = 0;
     }
 
     public void Reset()

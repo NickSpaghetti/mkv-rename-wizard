@@ -5,6 +5,7 @@
              xmlns:viewModels="clr-namespace:MkvRenameWizard.ViewModels"
              xmlns:views="clr-namespace:MkvRenameWizard.Views"
              xmlns:models="clr-namespace:MkvRenameWizard.Models.Rail"
+             xmlns:tvMaze="clr-namespace:MkvRenameWizard.Models.TvMaze"
              xmlns:app="using:MkvRenameWizard"
              mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
              x:Class="MkvRenameWizard.Views.ContentSelectView"
@@ -16,7 +17,7 @@
         <Style Selector="TextBlock.eyebrow">
             <Setter Property="FontSize" Value="10"></Setter>
             <Setter Property="FontWeight" Value="Bold"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
         </Style>
 
         <Style Selector="Border.statusChip">
@@ -40,22 +41,21 @@
             <Setter Property="Height" Value="26"></Setter>
             <Setter Property="CornerRadius" Value="6"></Setter>
             <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
         </Style>
 
         <Style Selector="Border.indexBadge > TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"></Setter>
         </Style>
 
         <Style Selector="Border.indexBadge.active">
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"></Setter>
             <Setter Property="Background" Value="#182C33"></Setter>
-            <Setter Property="BoxShadow" Value="0 0 10 2 #3348C8F6"></Setter>
         </Style>
 
         <Style Selector="Border.indexBadge.active > TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
 
         <Style Selector="Border.indexBadge.warning">
@@ -64,12 +64,12 @@
         </Style>
 
         <Style Selector="Border.railPanelHeader">
-            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"></Setter>
+            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"></Setter>
             <Setter Property="Padding" Value="14,10"></Setter>
         </Style>
 
         <Style Selector="Border.railPanelCell">
-            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}"></Setter>
+            <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}"></Setter>
             <Setter Property="Padding" Value="14,8"></Setter>
             <Setter Property="BorderBrush" Value="#252A2E"></Setter>
             <Setter Property="BorderThickness" Value="0,0,0,1"></Setter>
@@ -103,14 +103,14 @@
             <Setter Property="CornerRadius" Value="6"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="Background" Value="#252A2E"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"></Setter>
         </Style>
 
         <Style Selector="Border.dragInsertLine">
             <Setter Property="Height" Value="2"></Setter>
             <Setter Property="Opacity" Value="0.92"></Setter>
             <Setter Property="CornerRadius" Value="1"></Setter>
-            <Setter Property="Background" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
 
         <Style Selector="Border.placeHolderCell">
@@ -125,7 +125,7 @@
             <Setter Property="Width" Value="16"></Setter>
             <Setter Property="Height" Value="16"></Setter>
             <Setter Property="Fill" Value="Transparent"></Setter>
-            <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Stroke" Value="{StaticResource AccentBrush}"></Setter>
             <Setter Property="StrokeThickness" Value="1"></Setter>
             <Setter Property="Opacity" Value="0"></Setter>
             <Setter Property="IsHitTestVisible" Value="False"></Setter>
@@ -134,11 +134,11 @@
         <Style Selector="Ellipse.linkNode">
             <Setter Property="Width" Value="8"></Setter>
             <Setter Property="Height" Value="8"></Setter>
-            <Setter Property="Fill" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="Fill" Value="{StaticResource DividerBrush}"></Setter>
         </Style>
 
         <Style Selector="Ellipse.linkNode.paired">
-            <Setter Property="Fill" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Fill" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
 
         <Style Selector="Button.toolbar">
@@ -150,12 +150,12 @@
             <Setter Property="Background" Value="Transparent"></Setter>
             <Setter Property="BorderThickness" Value="0"></Setter>
             <Setter Property="Padding" Value="0"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"></Setter>
         </Style>
 
         <Style Selector="Button.disabled">
             <Setter Property="Opacity" Value="0.55"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
         </Style>
 
         <Style Selector="Button.railIcon">
@@ -163,11 +163,11 @@
             <Setter Property="BorderThickness" Value="0"></Setter>
             <Setter Property="Width" Value="28"></Setter>
             <Setter Property="Height" Value="28"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
         </Style>
 
         <Style Selector="Button.railIcon:pointerover">
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
 
         <Style Selector="Button.railReorder">
@@ -176,17 +176,17 @@
 
         <Style Selector="Button.segment">
             <Setter Property="Background" Value="Transparent"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}"></Setter>
             <Setter Property="BorderThickness" Value="0"></Setter>
             <Setter Property="Padding" Value="12,8"></Setter>
             <Setter Property="HorizontalContentAlignment" Value="Left"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"></Setter>
         </Style>
 
         <Style Selector="Button.segment.selected">
             <Setter Property="Background" Value="#182C33"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"></Setter>
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"></Setter>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"></Setter>
         </Style>
 
         <Style Selector="Border.railPanelCell:pointerover Button.railReorder">
@@ -204,7 +204,7 @@
         </Style>
 
         <Style Selector="PathIcon.gripIcon">
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
             <Setter Property="Width" Value="12"></Setter>
             <Setter Property="Height" Value="16"></Setter>
             <Setter Property="Opacity" Value="0.5"></Setter>
@@ -212,7 +212,7 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,Auto,*"
-          Background="{DynamicResource AppBackgroundBrush}">
+          Background="{StaticResource AppBackgroundBrush}">
         <!-- Row 0 is ToolBar -->
         <Grid Grid.Row="0"
               Margin="16,12,16,10"
@@ -229,7 +229,7 @@
                             <TextBlock Text="{Binding PairedChipText}"
                                        FontSize="12"
                                        FontWeight="Bold"
-                                       Foreground="{DynamicResource AccentBrush}">
+                                       Foreground="{StaticResource AccentBrush}">
                             </TextBlock>
                         </StackPanel>
                     </Border>
@@ -243,7 +243,7 @@
 
                     <Border
                         CornerRadius="20"
-                        BorderBrush="{DynamicResource DividerBrush}"
+                        BorderBrush="{StaticResource DividerBrush}"
                         BorderThickness="1"
                         Background="Transparent"
                         ClipToBounds="True"
@@ -261,13 +261,13 @@
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="Independent" FontWeight="SemiBold"></TextBlock>
                                         <TextBlock Text="Move sides separately" FontSize="11"
-                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                                   Foreground="{StaticResource TextMutedBrush}">
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
                             </Button>
                             <Border Width="1"
-                                    Background="{DynamicResource DividerBrush}"
+                                    Background="{StaticResource DividerBrush}"
                                     VerticalAlignment="Stretch">
 
                             </Border>
@@ -280,7 +280,7 @@
                                     <StackPanel Spacing="2">
                                         <TextBlock Text="Linked" FontWeight="SemiBold"></TextBlock>
                                         <TextBlock Text="Move pairs together" FontSize="11"
-                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                                   Foreground="{StaticResource TextMutedBrush}">
                                         </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
@@ -289,7 +289,7 @@
                     </Border>
                 </StackPanel>
                 <TextBlock Text="Hold Shift to move pairs together" FontSize="11"
-                           Foreground="{DynamicResource TextMutedBrush}"
+                           Foreground="{StaticResource TextMutedBrush}"
                            IsVisible="{Binding IsShiftLinkHintVisible}">
                 </TextBlock>
             </StackPanel>
@@ -327,7 +327,7 @@
                 <StackPanel Grid.Column="1">
                     <TextBlock Text="{Binding PartialFailureTitle}"
                                FontWeight="Bold"
-                               Foreground="{DynamicResource TextPrimaryBrush}">
+                               Foreground="{StaticResource TextPrimaryBrush}">
                     </TextBlock>
                     <TextBlock Text="{Binding PartialFailureSummary}"
                                FontSize="12"
@@ -349,8 +349,8 @@
 
         <!-- Row 2 is Expandable Issue Details -->
         <Border Grid.Row="2"
-                Background="{DynamicResource CardBackgroundBrush}"
-                BorderBrush="{DynamicResource DividerBrush}"
+                Background="{StaticResource CardBackgroundBrush}"
+                BorderBrush="{StaticResource DividerBrush}"
                 BorderThickness="1"
                 CornerRadius="5"
                 Margin="16,0,16,8"
@@ -368,7 +368,7 @@
                     <ItemsControl ItemsSource="{Binding ImportIssues}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{DynamicResource DividerBrush}"
+                                <Border BorderBrush="{StaticResource DividerBrush}"
                                         BorderThickness="0,1,0,0"
                                         Padding="12,8">
                                     <TextBlock Text="{Binding Detail}"
@@ -392,7 +392,7 @@
                     <StackPanel>
                         <TextBlock Classes="eyebrow" Text="EPISODES"></TextBlock>
                         <TextBlock Text="{Binding EpisodeColumnSubtitle}" FontSize="12"
-                                   Foreground="{DynamicResource TextSecondaryBrush}">
+                                   Foreground="{StaticResource TextSecondaryBrush}">
                         </TextBlock>
                     </StackPanel>
                 </Border>
@@ -402,13 +402,13 @@
                           Height="14"
                           HorizontalAlignment="Center"
                           VerticalAlignment="Center"
-                          Foreground="{DynamicResource TextMutedBrush}">
+                          Foreground="{StaticResource TextMutedBrush}">
                 </PathIcon>
                 <Border Grid.Column="2" Classes="railPanelHeader">
                     <StackPanel>
                         <TextBlock Classes="eyebrow" Text="MKV FILES"></TextBlock>
                         <TextBlock Text="{Binding FileColumnSubtitle}"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="12">
                         </TextBlock>
                     </StackPanel>
@@ -417,19 +417,35 @@
             <!-- Match Rails and Import Panel -->
             <Grid Grid.Row="1" Margin="0,8,0,0">
                 <!-- Active match rails (files imported) -->
-                <ScrollViewer x:Name="MatchRailsScroll"
-                              VerticalScrollBarVisibility="Auto"
-                              IsVisible="{Binding ShowMatchRails}">
-                    <Grid>
-                        <Border Width="1"
-                                Background="#2A2A2A"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Stretch">
-                        </Border>
+                <Grid IsVisible="{Binding ShowMatchRails}">
+                    <Border Width="1"
+                            Background="#2A2A2A"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Stretch"
+                            IsHitTestVisible="False">
+                    </Border>
 
-                        <ItemsControl ItemsSource="{Binding MatchRows}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="viewModels:RailMatchRowViewModel">
+                    <ListBox x:Name="MatchRailsList"
+                             ItemsSource="{Binding MatchRows}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="0"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:RailMatchRowViewModel">
                                     <Border Classes="matchRow" DragDrop.AllowDrop="True" Loaded="OnMatchRowLoaded">
                                         <Grid>
                                             <Border Classes="settleRail"
@@ -459,7 +475,7 @@
                                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                                 <TextBlock Text="{Binding EpisodeCode}"
-                                                                           Foreground="{DynamicResource AccentBrush}"
+                                                                           Foreground="{StaticResource AccentBrush}"
                                                                            FontWeight="SemiBold"
                                                                            FontSize="12">
                                                                 </TextBlock>
@@ -472,10 +488,10 @@
                                                                         IsVisible="{Binding HasEpisodeRunTime}">
                                                                 <PathIcon Data="{StaticResource PlayRegular}"
                                                                           Width="10" Height="10"
-                                                                          Foreground="{DynamicResource TextMutedBrush}">
+                                                                          Foreground="{StaticResource TextMutedBrush}">
                                                                 </PathIcon>
                                                                 <TextBlock Text="{Binding EpisodeRunTimeLabel}"
-                                                                           Foreground="{DynamicResource TextMutedBrush}"
+                                                                           Foreground="{StaticResource TextMutedBrush}"
                                                                            FontSize="11">
                                                                 </TextBlock>
                                                             </StackPanel>
@@ -512,14 +528,14 @@
                                                                        HorizontalAlignment="Center"
                                                                        VerticalAlignment="Center"
                                                                        FontStyle="Italic"
-                                                                       Foreground="{DynamicResource TextMutedBrush}">
+                                                                       Foreground="{StaticResource TextMutedBrush}">
                                                             </TextBlock>
                                                         </Border>
                                                         <TextBlock Grid.Column="1"
                                                                    Text="{Binding EpisodeDisplayName}"
                                                                    VerticalAlignment="Center"
                                                                    FontStyle="Italic"
-                                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                                                   Foreground="{StaticResource TextMutedBrush}">
                                                         </TextBlock>
                                                     </Grid>
                                                 </Border>
@@ -532,7 +548,7 @@
                                                     <Border x:Name="{x:Static app:Constants+BorderNames.LinkLineLeft}"
                                                             Height="1"
                                                             VerticalAlignment="Center"
-                                                            Background="{DynamicResource AccentBrush}"
+                                                            Background="{StaticResource AccentBrush}"
                                                             Opacity="0.75">
                                                     </Border>
                                                     <Grid Grid.Column="1" Width="16" Height="16">
@@ -554,7 +570,7 @@
                                                             Grid.Column="2"
                                                             Height="1"
                                                             VerticalAlignment="Center"
-                                                            Background="{DynamicResource AccentBrush}"
+                                                            Background="{StaticResource AccentBrush}"
                                                             Opacity="0.75">
                                                     </Border>
                                                 </Grid>
@@ -589,7 +605,7 @@
                                                                   Data="{StaticResource DocumentRegular}"
                                                                   Width="14"
                                                                   Height="14"
-                                                                  Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                  Foreground="{StaticResource TextSecondaryBrush}"
                                                                   VerticalAlignment="Center">
                                                         </PathIcon>
                                                         <StackPanel Grid.Column="3" VerticalAlignment="Center">
@@ -599,7 +615,7 @@
                                                             </TextBlock>
                                                             <TextBlock Text="{Binding FileSizeLabel}"
                                                                        FontWeight="SemiBold"
-                                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                                       Foreground="{StaticResource TextMutedBrush}"
                                                                        FontSize="11"
                                                                        IsVisible="{Binding HasFileSizeLabel}">
                                                             </TextBlock>
@@ -642,21 +658,21 @@
                                                                    Text="{Binding FileDisplayName}"
                                                                    VerticalAlignment="Center"
                                                                    FontStyle="Italic"
-                                                                   Foreground="{DynamicResource TextMutedBrush}">
+                                                                   Foreground="{StaticResource TextMutedBrush}">
                                                         </TextBlock>
                                                     </Grid>
                                                 </Border>
                                             </Grid>
                                         </Grid>
                                     </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
-                        <Canvas x:Name="RailDragOverlay"
-                                IsHitTestVisible="False"
-                                IsVisible="{Binding IsRailDragging}"
-                                ZIndex="100">
+                    <Canvas x:Name="RailDragOverlay"
+                            IsHitTestVisible="False"
+                            IsVisible="{Binding IsRailDragging}"
+                            ZIndex="100">
                             <Border x:Name="DragInsertLine"
                                     Classes="dragInsertLine"
                                     IsVisible="False"
@@ -690,42 +706,49 @@
                                             TextTrimming="CharacterEllipsis"
                                             MaxWidth="300"
                                             FontSize="11"
-                                            Foreground="{DynamicResource TextMutedBrush}">
+                                            Foreground="{StaticResource TextMutedBrush}">
                                         </TextBlock>
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                        </Canvas>
-                    </Grid>
-                </ScrollViewer>
+                    </Canvas>
+                </Grid>
 
                 <!-- Import Panel -->
                 <Grid ColumnDefinitions="*,48,*" IsVisible="{Binding ShowImportPanel}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding MatchRows}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="viewModels:RailMatchRowViewModel">
-                                    <Border Classes="railPanelCell">
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                            <Border Classes="indexBadge">
-                                                <TextBlock Text="{Binding IndexLabel}"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"
-                                                           FontWeight="Bold">
-                                                </TextBlock>
-                                            </Border>
-                                            <TextBlock Grid.Column="1"
-                                                       Text="{Binding EpisodeDisplayName}"
+                    <ListBox ItemsSource="{Binding Episodes}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="0"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="tvMaze:Episode">
+                                <Border Classes="railPanelCell">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Border Classes="indexBadge">
+                                            <TextBlock Text="{Binding EpisodeNumber, StringFormat='{}{0:D2}'}"
+                                                       HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
-                                                       FontWeight="SemiBold"
-                                                       TextTrimming="CharacterEllipsis">
+                                                       FontWeight="Bold">
                                             </TextBlock>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                                        </Border>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Name}"
+                                                   VerticalAlignment="Center"
+                                                   FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis">
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
                     <Border Grid.Column="1"
                             Background="#2A2A2A"
@@ -738,7 +761,7 @@
                           DragDrop.DragOver="OnDropZoneDragOver"
                           DragDrop.Drop="OnDropZoneDrop">
                         <Border Classes="railPanelHeader"
-                                BorderBrush="{DynamicResource DividerBrush}"
+                                BorderBrush="{StaticResource DividerBrush}"
                                 BorderThickness="2"
                                 CornerRadius="4"
                                 Padding="32"
@@ -750,13 +773,13 @@
                                         MaxWidth="420"
                                         Spacing="12">
                                 <Border Width="62" Height="62" CornerRadius="16" BorderThickness="1"
-                                        BorderBrush="{DynamicResource AccentBrush}"
+                                        BorderBrush="{StaticResource AccentBrush}"
                                         Background="#182C33">
                                     <TextBlock Text="+"
                                                FontSize="32"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
-                                               Foreground="{DynamicResource AccentBrush}">
+                                               Foreground="{StaticResource AccentBrush}">
                                     </TextBlock>
                                 </Border>
                                 <TextBlock Text="Drop MKV files here"
@@ -766,7 +789,7 @@
                                 </TextBlock>
                                 <TextBlock
                                     Text="Files will link to episodes in the order they appear. You can reorder either side before renaming them in the next page."
-                                    Foreground="{DynamicResource TextSecondaryBrush}"
+                                    Foreground="{StaticResource TextSecondaryBrush}"
                                     TextWrapping="Wrap"
                                     TextAlignment="Center">
                                 </TextBlock>
@@ -776,12 +799,12 @@
                                     <Button Content="Chose file(s)..." Command="{Binding OpenFilesCommand}"></Button>
                                     <Button Content="Brows folder" Command="{Binding OpenFolderCommand}"></Button>
                                 </StackPanel>
-                                <Border Background="{DynamicResource CardBackgroundBrush}"
+                                <Border Background="{StaticResource CardBackgroundBrush}"
                                         CornerRadius="4"
                                         Padding="10,5">
                                     <TextBlock Text="Recommended file name format of title_t00.mkv"
                                                FontSize="12"
-                                               Foreground="{DynamicResource TextMutedBrush}">
+                                               Foreground="{StaticResource TextMutedBrush}">
                                     </TextBlock>
                                 </Border>
                             </StackPanel>
@@ -814,13 +837,13 @@
                                        HorizontalAlignment="Center">
                             </TextBlock>
                             <TextBlock Text="{Binding ErrorDescription}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
                                        TextAlignment="Center"
                                        TextWrapping="Wrap"
                                        LineHeight="20">
                             </TextBlock>
-                            <Border Background="{DynamicResource CardBackgroundBrush}"
-                                    BorderBrush="{DynamicResource DividerBrush}"
+                            <Border Background="{StaticResource CardBackgroundBrush}"
+                                    BorderBrush="{StaticResource DividerBrush}"
                                     BorderThickness="1"
                                     CornerRadius="5">
                                 <Grid RowDefinitions="Auto,*">
@@ -835,7 +858,7 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Border BorderThickness="0,1,0,0"
-                                                        BorderBrush="{DynamicResource DividerBrush}"
+                                                        BorderBrush="{StaticResource DividerBrush}"
                                                         Padding="12,8">
                                                     <TextBlock Text="{Binding Detail}"
                                                                FontFamily="Consolas"

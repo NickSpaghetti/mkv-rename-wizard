@@ -69,12 +69,10 @@ public class RenameResultViewModel : ViewModelBase
     public event Action? RetryFailedRequested;
     public event Action? GoBackRequested;
     
-    public ReactiveCommand<Unit, Unit> RenameAnotherCommand => ReactiveCommand.Create(() => ResetRequested?.Invoke());
-    public ReactiveCommand<Unit, Unit> DoneCommand => ReactiveCommand.Create(() => ResetRequested?.Invoke());
-    public ReactiveCommand<Unit, Unit> RetryFailedCommand => ReactiveCommand.Create(() => RetryFailedRequested?.Invoke());
-    public ReactiveCommand<Unit, Unit> GoBackCommand => ReactiveCommand.Create(() => GoBackRequested?.Invoke());
-    
-    
+    public ReactiveCommand<Unit, Unit> RenameAnotherCommand { get; }
+    public ReactiveCommand<Unit, Unit> DoneCommand { get; }
+    public ReactiveCommand<Unit, Unit> RetryFailedCommand { get; }
+    public ReactiveCommand<Unit, Unit> GoBackCommand { get; }
 
     private readonly IClipboardService _clipboardService;
     private readonly IFileLoggerService _fileLoggerService;
@@ -87,6 +85,10 @@ public class RenameResultViewModel : ViewModelBase
         CopyErrorDetailsCommand = ReactiveCommand.CreateFromTask(CopyErrorDetails);
         OpenFolderCommand = ReactiveCommand.Create(OpenFolder);
         OpenLogFolderCommand = ReactiveCommand.Create(() => _fileLoggerService.OpenLogDirectory());
+        RenameAnotherCommand = ReactiveCommand.Create(() => ResetRequested?.Invoke());
+        DoneCommand = ReactiveCommand.Create(() => ResetRequested?.Invoke());
+        RetryFailedCommand = ReactiveCommand.Create(() => RetryFailedRequested?.Invoke());
+        GoBackCommand = ReactiveCommand.Create(() => GoBackRequested?.Invoke());
     }
 
     private Task CopyErrorDetails()

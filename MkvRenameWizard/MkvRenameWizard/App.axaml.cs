@@ -4,13 +4,11 @@ using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using FileTypeChecker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MkvRenameWizard.Models.Mkv;
 using MkvRenameWizard.DataAccess;
-using MkvRenameWizard.FileTypes;
 using MkvRenameWizard.Helpers;
 using MkvRenameWizard.Services;
 using MkvRenameWizard.ViewModels;
@@ -93,8 +91,6 @@ public partial class App : Application
         services.TryAddSingleton<RenameResultViewModel>();
         services.TryAddSingleton<WizardViewModel>();
         services.TryAddSingleton<MainWindowViewModel>();
-
-        FileTypeValidator.RegisterCustomTypes(typeof(MatroskaVideo).Assembly);
 
         return services.BuildServiceProvider();
     }

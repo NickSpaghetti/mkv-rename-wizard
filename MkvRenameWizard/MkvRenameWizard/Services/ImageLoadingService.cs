@@ -1,35 +1,36 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Frozen;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
-using FileTypeChecker;
-using FileTypeChecker.Abstracts;
-using FileTypeChecker.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace MkvRenameWizard.Services;
 
 public class ImageLoadingService : IImageLoadingService
 {
+    private const int DefaultDecodeWidthPx = 240;
+    private const long MaxImageBytes = 10 * 1024 * 1024;
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ImageLoadingService> _logger;
-    public ImageLoadingService(IHttpClientFactory httpClient,  ILogger<ImageLoadingService> logger)
+
+    public ImageLoadingService(IHttpClientFactory httpClient, ILogger<ImageLoadingService> logger)
     {
         _httpClientFactory = httpClient;
         _logger = logger;
     }
-    
-    private static readonly HashSet<string> AllowedImageHosts = new(StringComparer.OrdinalIgnoreCase)
+
+    private static readonly FrozenSet<string> AllowedImageHosts = new[]
     {
         "tvmaze.com",
         "www.tvmaze.com",
         "static.tvmaze.com",
         "www.static.tvmaze.com",
-    };
-    
+    }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
     public async Task<Bitmap?> LoadBitMapAsync(string imageUrl, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(imageUrl) || !Uri.TryCreate(imageUrl, UriKind.Absolute, out var imageUri))
@@ -41,15 +42,13 @@ public class ImageLoadingService : IImageLoadingService
         if (!IsTrustedImageDomain(imageUri))
         {
             var trustedDomainsLabel = string.Join(", ", AllowedImageHosts);
-            
             _logger.LogWarning(
                 "Blocked unsafe or untrusted image download attempt to host: '{Host}' (URL: {Url}). \n" +
-                "Trusted domains are restricted to: [{TrustedDomains}]", 
+                "Trusted domains are restricted to: [{TrustedDomains}]",
                 imageUri.Host, imageUrl, trustedDomainsLabel);
-                
             return null;
         }
-        
+
         try
         {
             _logger.LogInformation("Downloading show artwork from trusted host: {Host}", imageUri.Host);
@@ -65,32 +64,26 @@ public class ImageLoadingService : IImageLoadingService
                 return null;
             }
 
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream, cancellationToken);
-            memoryStream.Position = 0;
-            
-            if (await FileTypeValidator.IsTypeRecognizableAsync(memoryStream, cancellationToken))
+            var contentLength = response.Content.Headers.ContentLength;
+            if (contentLength > MaxImageBytes)
             {
-                memoryStream.Position = 0;
-                if (!await memoryStream.IsImageAsync(cancellationToken))
-                {
-                    memoryStream.Position = 0;
-                    var actualType = await FileTypeValidator.GetFileTypeAsync(memoryStream, cancellationToken);
-                    _logger.LogWarning("Security Alert: File disguised as image! Actual type: {Name} ({Extension})", 
-                        actualType.Name, actualType.Extension);
-                    return null;
-                }
-            }
-            else
-            {
-                _logger.LogWarning("Aborted image processing: File content structure could not be verified as a valid file type.");
+                _logger.LogWarning("Aborted image processing: Image size {Size} exceeds limit", contentLength);
                 return null;
             }
-            
-            memoryStream.Position = 0; 
 
-            return new Bitmap(memoryStream);
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            var initialCapacity = contentLength is > 0 and <= MaxImageBytes ? (int)contentLength.Value : 32 * 1024;
+            using var memoryStream = new MemoryStream(initialCapacity);
+            await stream.CopyToAsync(memoryStream, cancellationToken);
+
+            if (!memoryStream.TryGetBuffer(out var buffer) || !HasValidImageHeader(buffer.AsSpan()))
+            {
+                _logger.LogWarning("Aborted image processing: File header could not be verified as a valid image.");
+                return null;
+            }
+
+            memoryStream.Position = 0;
+            return Bitmap.DecodeToWidth(memoryStream, DefaultDecodeWidthPx);
         }
         catch (OperationCanceledException)
         {
@@ -104,13 +97,46 @@ public class ImageLoadingService : IImageLoadingService
         }
     }
 
-    private bool IsTrustedImageDomain(Uri uri)
+    private static bool HasValidImageHeader(ReadOnlySpan<byte> header)
+    {
+        if (header.Length < 4) return false;
+
+        // JPEG: FF D8 FF
+        if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF)
+            return true;
+
+        // PNG: 89 50 4E 47 0D 0A 1A 0A
+        if (header.Length >= 8 &&
+            header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 &&
+            header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A)
+            return true;
+
+        // WebP: RIFF....WEBP
+        if (header.Length >= 12 &&
+            header[0] == (byte)'R' && header[1] == (byte)'I' && header[2] == (byte)'F' && header[3] == (byte)'F' &&
+            header[8] == (byte)'W' && header[9] == (byte)'E' && header[10] == (byte)'B' && header[11] == (byte)'P')
+            return true;
+
+        // GIF: GIF87a / GIF89a
+        if (header.Length >= 6 &&
+            header[0] == (byte)'G' && header[1] == (byte)'I' && header[2] == (byte)'F' && header[3] == (byte)'8' &&
+            (header[4] == (byte)'7' || header[4] == (byte)'9') && header[5] == (byte)'a')
+            return true;
+
+        // BMP: BM
+        if (header[0] == (byte)'B' && header[1] == (byte)'M')
+            return true;
+
+        return false;
+    }
+
+    private static bool IsTrustedImageDomain(Uri uri)
     {
         if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
         {
             return false;
         }
-        
+
         return AllowedImageHosts.Contains(uri.Host);
     }
 }

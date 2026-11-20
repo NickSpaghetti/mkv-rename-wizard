@@ -12,17 +12,17 @@
             <Style Selector="TextBlock.section-heading">
                 <Setter Property="FontSize" Value ="12"></Setter>
                 <Setter Property="FontWeight" Value="SemiBold"></Setter>
-                <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"></Setter>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"></Setter>
             </Style>
             
             <Style Selector="Border.panel">
-                <Setter Property="Background" Value ="{DynamicResource PanelBackgroundBrush}"></Setter>
-                <Setter Property="BorderBrush" Value ="{DynamicResource DividerBrush}"></Setter>
+                <Setter Property="Background" Value ="{StaticResource PanelBackgroundBrush}"></Setter>
+                <Setter Property="BorderBrush" Value ="{StaticResource DividerBrush}"></Setter>
                 <Setter Property="BorderThickness" Value="0,0,1,0"></Setter>
             </Style>
             
             <Style Selector="Border.chip">
-                <Setter Property="Background" Value ="{DynamicResource ChipBackgroundBrush}"></Setter>
+                <Setter Property="Background" Value ="{StaticResource ChipBackgroundBrush}"></Setter>
                 <Setter Property="CornerRadius" Value ="7"></Setter>
                 <Setter Property="Padding" Value="8,3"></Setter>
                 <Setter Property="BorderThickness" Value="0,0,6,6"></Setter>
@@ -39,21 +39,21 @@
             </Style>
             
             <Style Selector="Border.season-pill-shell.selected">
-                <Setter Property="Background" Value ="{DynamicResource AccentBrush}"></Setter>
+                <Setter Property="Background" Value ="{StaticResource AccentBrush}"></Setter>
             </Style>
             
             <Style Selector="Border.season-pill-shell.unselected">
-                <Setter Property="Background" Value ="{DynamicResource ChipBackgroundBrush}"></Setter>
+                <Setter Property="Background" Value ="{StaticResource ChipBackgroundBrush}"></Setter>
                 <Setter Property="Opacity" Value="0.82"></Setter>
             </Style>
             
             <Style Selector="TextBlock.season-pill-text">
-                <Setter Property="Foreground" Value ="{DynamicResource TextMutedBrush}"></Setter>
+                <Setter Property="Foreground" Value ="{StaticResource TextMutedBrush}"></Setter>
                 <Setter Property="FontWeight" Value="SemiBold"></Setter>
             </Style>
 
             <Style Selector="TextBlock.season-pill-text.selected">
-                <Setter Property="Foreground" Value ="{DynamicResource AccentTextBrush}"></Setter> 
+                <Setter Property="Foreground" Value ="{StaticResource AccentTextBrush}"></Setter> 
             </Style>
             
             <Style Selector="Border.season-check-box">
@@ -83,22 +83,22 @@
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="Padding" Value="0" />
-                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
             </Style>
             
             <Style Selector="Button.link:pointerover">
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
                 <Setter Property="Opacity" Value="0.8" />
             </Style>
             
             <Style Selector="Button.link:disabled">
-                <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
                 <Setter Property="Opacity" Value="0.55" />
             </Style>
     </UserControl.Styles>
     
-    <Grid Background="{DynamicResource AppBackgroundBrush}">
+    <Grid Background="{StaticResource AppBackgroundBrush}">
         <Grid ColumnDefinitions="300,*,340">
             <Border Grid.Column="0" Classes="panel" Padding="12">
                 <Grid RowDefinitions="Auto,Auto,*">
@@ -139,20 +139,20 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:ShowSearchResultViewModel">
                                 <Border
-                                    Background="{DynamicResource CardBackgroundBrush}"
-                                    BorderBrush="{DynamicResource DividerBrush}"
+                                    Background="{StaticResource CardBackgroundBrush}"
+                                    BorderBrush="{StaticResource DividerBrush}"
                                     BorderThickness="1"
                                     CornerRadius="4"
                                     Padding="8">
                                     <Grid ColumnDefinitions="36,*" ColumnSpacing="8">
-                                        <Border Background="{DynamicResource PosterFallbackBrush}"
+                                        <Border Background="{StaticResource PosterFallbackBrush}"
                                                 CornerRadius="3"
                                                 Height="50"
                                                 Width="36"
                                                 ClipToBounds="True">
                                             <Grid>
                                                 <TextBlock Text="No&#10;Image"
-                                                           Foreground="{DynamicResource PosterFallbackBrush}"
+                                                           Foreground="{StaticResource PosterFallbackBrush}"
                                                            FontSize="7"
                                                            FontWeight="SemiBold"
                                                            TextAlignment="Center"
@@ -169,7 +169,7 @@
                                                        TextTrimming="CharacterEllipsis">
                                             </TextBlock>
                                             <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,3,0,0">
-                                                <TextBlock Foreground="{DynamicResource TextMutedBrush}"
+                                                <TextBlock Foreground="{StaticResource TextMutedBrush}"
                                                            FontSize="11"
                                                            TextTrimming="CharacterEllipsis">
                                                     <Run Text="{Binding YearRange}"></Run>
@@ -177,7 +177,7 @@
                                                     <Run Text="{Binding AirNetworkLabel}"></Run>
                                                 </TextBlock>
                                                 <TextBlock Grid.Column="1"
-                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           Foreground="{StaticResource AccentBrush}"
                                                            FontSize="11"
                                                            FontWeight="SemiBold"
                                                            Text="{Binding RatingAverage, StringFormat='* {0:0.0}'}">
@@ -199,7 +199,7 @@
                                 MaxWidth="300"
                                 Spacing="14">
                         <Grid Width="138" Height="118" HorizontalAlignment="Center">
-                            <Border Background="{DynamicResource ChipBackgroundBrush}"
+                            <Border Background="{StaticResource ChipBackgroundBrush}"
                                     CornerRadius="10"
                                     Width="56"
                                     Height="78"
@@ -211,7 +211,7 @@
                                     <RotateTransform Angle="-10"></RotateTransform>
                                 </Border.RenderTransform>
                             </Border>
-                            <Border Background="{DynamicResource SurfaceBackgroundBrush}"
+                            <Border Background="{StaticResource SurfaceBackgroundBrush}"
                                     CornerRadius="10"
                                     Width="56"
                                     Height="78"
@@ -223,8 +223,8 @@
                                     <RotateTransform Angle="10"></RotateTransform>
                                 </Border.RenderTransform>
                             </Border>
-                            <Border Background="{DynamicResource CardBackgroundBrush}"
-                                    BorderBrush="{DynamicResource DividerBrush}"
+                            <Border Background="{StaticResource CardBackgroundBrush}"
+                                    BorderBrush="{StaticResource DividerBrush}"
                                     BorderThickness="1"
                                     CornerRadius="10"
                                     Width="62"
@@ -233,7 +233,7 @@
                                 <PathIcon Data="{StaticResource SearchRegular}"
                                           Width="24"
                                           Height="24"
-                                          Foreground="{DynamicResource AccentBrush}"
+                                          Foreground="{StaticResource AccentBrush}"
                                           HorizontalAlignment="Center"
                                           VerticalAlignment="Center">
                                 </PathIcon>
@@ -247,7 +247,7 @@
                             HorizontalAlignment="Center">
                         </TextBlock>
                         <TextBlock Text="Search for the show, then chose the seasons you want to rename."
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="14"
                                    TextWrapping="Wrap"
                                    TextAlignment="Center"
@@ -255,7 +255,7 @@
                                    LineHeight="20">
                         </TextBlock>
                         <TextBlock Text="We'll match your title_00.mkv files in the next step"
-                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    FontSize="12"
                                    TextWrapping="Wrap"
                                    TextAlignment="Center">
@@ -270,7 +270,7 @@
                         <PathIcon Data="{StaticResource SearchRegular}"
                                   Width="40"
                                   Height="40"
-                                  Foreground="{DynamicResource TextMutedBrush}"
+                                  Foreground="{StaticResource TextMutedBrush}"
                                   HorizontalAlignment="Center">
                         </PathIcon>
                         <TextBlock Text="No shows matching the search."
@@ -280,7 +280,7 @@
                                    HorizontalAlignment="Center">
                         </TextBlock>
                         <TextBlock Text="Try a different title, spelling, or search phrase."
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="14"
                                    TextWrapping="Wrap"
                                    TextAlignment="Center"
@@ -292,13 +292,13 @@
                                   VerticalScrollBarVisibility="Auto">
                         <StackPanel MaxWidth="560" HorizontalAlignment="Center">
                             <Grid ColumnDefinitions="96,*" ColumnSpacing="18">
-                                <Border Background="{DynamicResource PosterFallbackBrush}"
+                                <Border Background="{StaticResource PosterFallbackBrush}"
                                         CornerRadius="6"
                                         Width="96"
                                         Height="140">
                                     <Grid>
                                         <TextBlock Text="No Image&#10;Found"
-                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   Foreground="{StaticResource TextMutedBrush}"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    TextAlignment="Center"
@@ -311,19 +311,19 @@
                                 
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding SelectedShow?.AirNetworkLabel}"
-                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Foreground="{StaticResource TextMutedBrush}"
                                                FontSize="12"
                                                FontWeight="SemiBold">
                                     </TextBlock>
                                     <TextBlock Text="{Binding SelectedShow?.Name}"
-                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Foreground="{StaticResource TextMutedBrush}"
                                                FontSize="24"
                                                FontWeight="Bold"
                                                TextWrapping="Wrap"
                                                Margin="0,2,0,8">
                                     </TextBlock>
                                     <TextBlock Text="{Binding SelectedShowMeta}"
-                                               Foreground="{DynamicResource TextMutedBrush}"
+                                               Foreground="{StaticResource TextMutedBrush}"
                                                FontSize="12"
                                                Margin="0,2,0,8">
                                     </TextBlock>
@@ -338,7 +338,7 @@
                                                 <Border Classes="chip">
                                                     <TextBlock Text="{Binding}"
                                                                FontSize="11"
-                                                               Foreground="{DynamicResource TextPrimaryBrush}">
+                                                               Foreground="{StaticResource TextPrimaryBrush}">
                                                     </TextBlock>
                                                 </Border>
                                             </DataTemplate>
@@ -348,7 +348,7 @@
                             </Grid>
                             
                             <TextBlock Text="{Binding SelectedShow?.PlanSummary}"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
                                        TextWrapping="Wrap"
                                        LineHeight="20"
                                        Margin="0,22,0,0">
@@ -358,7 +358,7 @@
                 </Grid>
             </Border>
             
-            <Border Grid.Column="2" Background="{DynamicResource SurfaceBackgroundBrush}" Padding="18,24">
+            <Border Grid.Column="2" Background="{StaticResource SurfaceBackgroundBrush}" Padding="18,24">
                 <Grid RowDefinitions="Auto,Auto,Auto,*">
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
                         <TextBlock Text="Seasons"
@@ -398,7 +398,7 @@
                                             <Border Classes="season-check-box selected">
                                                 <!-- check mark -->
                                                 <TextBlock Text="&#x2713;" 
-                                                           Foreground="{DynamicResource AccentTextBrush}"
+                                                           Foreground="{StaticResource AccentTextBrush}"
                                                            FontSize="10"
                                                            FontWeight="Bold"
                                                            HorizontalAlignment="Center"
@@ -433,7 +433,7 @@
                                                        Classes="season-pill-text"
                                                        VerticalAlignment="Center"
                                                        Text="{Binding Value.TotalEpisodeCount}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
                                                        HorizontalAlignment="Right">
                                             </TextBlock>
                                         </Grid>
@@ -452,19 +452,19 @@
                     <TextBlock Grid.Row="1"
                                IsVisible="{Binding HasNoSelectedShow}"
                                Text="Select a show to load seasons."
-                               Foreground="{DynamicResource TextMutedBrush}"
+                               Foreground="{StaticResource TextMutedBrush}"
                                Margin="0,18,0,8">
                     </TextBlock>
                     <Border Grid.Row="2"
-                            Background="{DynamicResource CardBackgroundBrush}"
-                            BorderBrush="{DynamicResource DividerBrush}"
+                            Background="{StaticResource CardBackgroundBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
                             BorderThickness="1"
                             CornerRadius="3"
                             Padding="12,8">
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock Text="{Binding SelectionSummary}"
                                        IsVisible="{Binding HasSelectedShow}"
-                                       Foreground="{DynamicResource TextMutedBrush}">
+                                       Foreground="{StaticResource TextMutedBrush}">
                             </TextBlock>
                             <TextBlock Grid.Column="1"
                                        Text="{Binding EpisodeSummary}"

@@ -37,7 +37,7 @@ public partial class ContentSelectView : UserControl
         AddHandler(DragDrop.DragLeaveEvent, OnRootDragLeave, RoutingStrategies.Bubble);
     }
 
-    private ScrollViewer? MatchRailsScrollViewer => MatchRailsScroll;
+    private ScrollViewer? MatchRailsScrollViewer => MatchRailsList?.FindDescendantOfType<ScrollViewer>();
     private Canvas? DragOverlay => RailDragOverlay;
 
     private void OnMatchRowLoaded(object? sender, RoutedEventArgs e)
