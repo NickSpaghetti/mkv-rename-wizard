@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=MKV Rename Wizard
+Comment=Batch rename MKV TV episode files using TVMaze metadata
+Exec=MkvRenameWizard
+Icon=mkv-rename-wizard
+Terminal=false
+Categories=AudioVideo;Video;Utility;
+StartupWMClass=MkvRenameWizard

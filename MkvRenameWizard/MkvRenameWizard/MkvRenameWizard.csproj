@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Assets/mkv-rename-wizard.ico</ApplicationIcon>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <IsAotCompatible>true</IsAotCompatible>
         <StripSymbols>true</StripSymbols>

@@ -86,15 +86,43 @@ jobs:
         shell: bash
         run: rm -f publish/${{ matrix.rid }}/*.dbg publish/${{ matrix.rid }}/*.pdb
 
-      - name: Package archive (tar.gz)
-        if: matrix.archive_ext == 'tar.gz'
+      - name: Package macOS .app bundle (tar.gz)
+        if: runner.os == 'macOS'
         shell: bash
+        env:
+          SEMVER: ${{ needs.validate.outputs.semver }}
+          VERSION_TAG: ${{ inputs.version }}
+          RID: ${{ matrix.rid }}
         run: |
-          mkdir -p dist
-          tar -czf dist/MkvRenameWizard-${{ inputs.version }}-${{ matrix.rid }}.tar.gz -C publish/${{ matrix.rid }} .
+          APP_DIR="stage/MkvRenameWizard.app"
+          mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources" dist
+          cp -R "publish/${RID}/." "$APP_DIR/Contents/MacOS/"
+          chmod +x "$APP_DIR/Contents/MacOS/MkvRenameWizard"
+          cp Packaging/Icons/mkv-rename-wizard.icns "$APP_DIR/Contents/Resources/mkv-rename-wizard.icns"
+          sed "s/__VERSION__/${SEMVER}/g" Packaging/macos/Info.plist > "$APP_DIR/Contents/Info.plist"
+          tar -czf "dist/MkvRenameWizard-${VERSION_TAG}-${RID}.tar.gz" -C stage MkvRenameWizard.app
 
-      - name: Package archive (zip)
-        if: matrix.archive_ext == 'zip'
+      - name: Package Linux archive (tar.gz)
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          VERSION_TAG: ${{ inputs.version }}
+          RID: ${{ matrix.rid }}
+        run: |
+          STAGE_DIR="stage/linux"
+          mkdir -p "$STAGE_DIR" dist
+          cp -R "publish/${RID}/." "$STAGE_DIR/"
+          chmod +x "$STAGE_DIR/MkvRenameWizard"
+          cp Packaging/linux/mkv-rename-wizard.desktop "$STAGE_DIR/mkv-rename-wizard.desktop"
+          for size in 16 22 24 32 48 64 128 256 512 1024; do
+            ICON_DIR="$STAGE_DIR/share/icons/hicolor/${size}x${size}/apps"
+            mkdir -p "$ICON_DIR"
+            cp "Packaging/Icons/linux/icon-${size}.png" "$ICON_DIR/mkv-rename-wizard.png"
+          done
+          tar -czf "dist/MkvRenameWizard-${VERSION_TAG}-${RID}.tar.gz" -C "$STAGE_DIR" .
+
+      - name: Package Windows archive (zip)
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
