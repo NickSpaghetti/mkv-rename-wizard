@@ -16,6 +16,18 @@ namespace MkvRenameWizard.ViewModels;
 public class RenameResultViewModel : ViewModelBase
 {
     public bool IsFullSuccess { get; set => SetProperty(ref field, value); }
+    public bool IsUndone { get; set => SetProperty(ref field, value); }
+    public bool CanUndo
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                UndoCommand?.NotifyCanExecuteChanged();
+            }
+        }
+    }
     public int SuccessCount { get; set => SetProperty(ref field, value); }
     public int FailureCount { get; set => SetProperty(ref field, value); }
     public int TotalCount => SuccessCount + FailureCount;
@@ -24,15 +36,23 @@ public class RenameResultViewModel : ViewModelBase
 
     public ObservableCollection<RenameOperationResult<RenameFileOperation>> OperationResults { get; } = [];
 
-    public string SummaryHeadline => IsFullSuccess
-        ? "file(s) renamed"
-        : $"Renamed {SuccessCount} file(s) to {TargetFolder} of {TotalCount} files";
+    public string SummaryHeadline => IsUndone
+        ? IsFullSuccess
+            ? "file(s) restored"
+            : $"Restored {SuccessCount} of {TotalCount} file(s)"
+        : IsFullSuccess
+            ? "file(s) renamed"
+            : $"Renamed {SuccessCount} file(s) to {TargetFolder} of {TotalCount} files";
 
-    public string SummarySubtitle => IsFullSuccess
-        ? $"All {SuccessCount} episodes of {ShowSeasonLabel} are now named in your preferred format"
-        : FailureCount == TotalCount
-            ? "All files failed to rename.  Check permission or whether files are open in another app."
-            : $"{FailureCount} file(s) could not be renamed.";
+    public string SummarySubtitle => IsUndone
+        ? IsFullSuccess
+            ? $"All {SuccessCount} file(s) have been restored to their original names."
+            : $"{FailureCount} file(s) could not be restored."
+        : IsFullSuccess
+            ? $"All {SuccessCount} episodes of {ShowSeasonLabel} are now named in your preferred format"
+            : FailureCount == TotalCount
+                ? "All files failed to rename.  Check permission or whether files are open in another app."
+                : $"{FailureCount} file(s) could not be renamed.";
 
     public string RetryButtonLabel => $"Retry {FailureCount} failed file(s)";
     public string StatsBarLabel => $"{SuccessCount} renamed  |  {FailureCount} failed";
@@ -65,11 +85,13 @@ public class RenameResultViewModel : ViewModelBase
     public event Action? ResetRequested;
     public event Action? RetryFailedRequested;
     public event Action? GoBackRequested;
+    public event Action? UndoRequested;
 
     public IRelayCommand RenameAnotherCommand { get; }
     public IRelayCommand DoneCommand { get; }
     public IRelayCommand RetryFailedCommand { get; }
     public IRelayCommand GoBackCommand { get; }
+    public IRelayCommand UndoCommand { get; }
 
     private readonly IClipboardService _clipboardService;
     private readonly IFileLoggerService _fileLoggerService;
@@ -87,6 +109,7 @@ public class RenameResultViewModel : ViewModelBase
         DoneCommand = new RelayCommand(() => ResetRequested?.Invoke());
         RetryFailedCommand = new RelayCommand(() => RetryFailedRequested?.Invoke());
         GoBackCommand = new RelayCommand(() => GoBackRequested?.Invoke());
+        UndoCommand = new RelayCommand(() => UndoRequested?.Invoke(), () => CanUndo);
     }
 
     private Task CopyErrorDetails() => _clipboardService.SetTextAsync(ErrorDetailedText);
@@ -112,7 +135,8 @@ public class RenameResultViewModel : ViewModelBase
     public void RePopulateViewModel(
         IEnumerable<RenameOperationResult<RenameFileOperation>> operationResults,
         string showSeasonLabel,
-        string targetFolder)
+        string targetFolder,
+        bool isUndoResult = false)
     {
         OperationResults.Clear();
         foreach (var operationResult in operationResults)
@@ -124,6 +148,8 @@ public class RenameResultViewModel : ViewModelBase
         FailureCount = OperationResults.Count(r => !r.IsSuccessful);
         ShowSeasonLabel = showSeasonLabel;
         TargetFolder = targetFolder;
+        IsUndone = isUndoResult;
+        CanUndo = !isUndoResult && SuccessCount > 0;
         IsFullSuccess = FailureCount == 0 && SuccessCount > 0;
 
         OnPropertyChanged(nameof(TotalCount));

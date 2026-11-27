@@ -1,0 +1,14 @@
+.git
+.idea
+.vs
+.vscode
+**/bin/
+**/obj/
+**/target/
+Tests/Integration/TestMedia/
+*.mkv
+*.nettrace
+*.gcdump
+ARCHITECTURE.local.md
+MakeRenameWizzardShowCase.gif
+Packaging/

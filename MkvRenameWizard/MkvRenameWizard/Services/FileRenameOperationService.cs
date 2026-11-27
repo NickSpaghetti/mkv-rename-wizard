@@ -1,55 +1,62 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using Microsoft.Extensions.Logging;
+using MkvRenameWizard.Core.Services.Aggregations;
 using MkvRenameWizard.Models.Renaming;
+using CoreRenameFileOperation = MkvRenameWizard.Core.Models.Renaming.RenameFileOperation;
+using CoreRenameOperationResult = MkvRenameWizard.Core.Models.Renaming.RenameOperationResult;
 
 namespace MkvRenameWizard.Services;
 
-public class FileRenameOperationService(ILogger<FileRenameOperationService> logger) : IFileRenameOperationService
+public class FileRenameOperationService(IMkvRenameWizardService coreService) : IFileRenameOperationService
 {
     public List<RenameOperationResult<RenameFileOperation>> Execute(IReadOnlyList<RenameFileOperation> operations)
     {
-        var results = new List<RenameOperationResult<RenameFileOperation>>(operations.Count);
-        string? lastCreatedDir = null;
-        HashSet<string>? createdDirs = null;
-
+        var coreOps = new CoreRenameFileOperation[operations.Count];
         for (var i = 0; i < operations.Count; i++)
         {
-            var operation = operations[i];
-            try
-            {
-                if (string.IsNullOrEmpty(operation.TargetPath))
-                {
-                    results.Add(new RenameOperationResult<RenameFileOperation>(
-                        operation, IsSuccessful: false, "Target path is empty."));
-                    continue;
-                }
+            coreOps[i] = new CoreRenameFileOperation(
+                operations[i].OperationId,
+                operations[i].SourcePath,
+                operations[i].TargetPath);
+        }
 
-                var targetDir = Path.GetDirectoryName(operation.TargetPath);
-                if (!string.IsNullOrEmpty(targetDir) &&
-                    !string.Equals(targetDir, lastCreatedDir, StringComparison.Ordinal))
-                {
-                    createdDirs ??= new HashSet<string>(StringComparer.Ordinal);
-                    if (createdDirs.Add(targetDir))
-                    {
-                        Directory.CreateDirectory(targetDir);
-                    }
-                    lastCreatedDir = targetDir;
-                }
+        var coreResults = coreService.ExecuteRenameOperations(coreOps);
+        var results = new List<RenameOperationResult<RenameFileOperation>>(coreResults.Count);
+        for (var i = 0; i < coreResults.Count; i++)
+        {
+            var r = coreResults[i];
+            results.Add(new RenameOperationResult<RenameFileOperation>(
+                operations[i],
+                r.IsSuccessful,
+                r.ErrorMessage));
+        }
 
-                File.Move(operation.SourcePath, operation.TargetPath, overwrite: false);
+        return results;
+    }
 
-                results.Add(new RenameOperationResult<RenameFileOperation>(
-                    operation, IsSuccessful: true, string.Empty));
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to rename {SourcePath} to {TargetPath}",
-                    operation.SourcePath, operation.TargetPath);
-                results.Add(new RenameOperationResult<RenameFileOperation>(
-                    operation, IsSuccessful: false, ex.Message));
-            }
+    public List<RenameOperationResult<RenameFileOperation>> Undo(
+        IReadOnlyList<RenameOperationResult<RenameFileOperation>> previousResults)
+    {
+        var corePrevious = new CoreRenameOperationResult[previousResults.Count];
+        for (var i = 0; i < previousResults.Count; i++)
+        {
+            var r = previousResults[i];
+            corePrevious[i] = new CoreRenameOperationResult(
+                r.RenameOperation.OperationId,
+                r.RenameOperation.SourcePath,
+                r.RenameOperation.TargetPath,
+                r.IsSuccessful,
+                r.ErrorMessage);
+        }
+
+        var coreUndoResults = coreService.UndoRenameOperations(corePrevious);
+        var results = new List<RenameOperationResult<RenameFileOperation>>(coreUndoResults.Count);
+        for (var i = 0; i < coreUndoResults.Count; i++)
+        {
+            var r = coreUndoResults[i];
+            results.Add(new RenameOperationResult<RenameFileOperation>(
+                new RenameFileOperation(r.OperationId, r.SourcePath, r.TargetPath),
+                r.IsSuccessful,
+                r.ErrorMessage));
         }
 
         return results;

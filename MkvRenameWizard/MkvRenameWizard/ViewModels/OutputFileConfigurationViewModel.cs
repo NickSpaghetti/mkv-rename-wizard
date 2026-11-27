@@ -7,16 +7,19 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using MkvRenameWizard.Helpers;
+using MkvRenameWizard.Core.Services.Aggregations;
 using MkvRenameWizard.Models.Renaming;
+using CoreCaseStyle = MkvRenameWizard.Core.Models.Renaming.CaseStyle;
+using CoreRenameCandidate = MkvRenameWizard.Core.Models.Renaming.RenameCandidate;
+using CoreRenamePlanRequest = MkvRenameWizard.Core.Models.Renaming.RenamePlanRequest;
+using CoreTokenNames = MkvRenameWizard.Core.Models.Renaming.TokenNames;
 using Path = System.IO.Path;
 
 namespace MkvRenameWizard.ViewModels;
 
 public class OutputFileConfigurationViewModel : ViewModelBase
 {
-    private IReadOnlyList<PatternSegment> _parsedSegments = Array.Empty<PatternSegment>();
-    private string _sanitizedShowName = string.Empty;
+    private readonly IMkvRenameWizardService _coreService;
     private bool _suppressRebuild;
 
     public List<RenameEntity> RenameEntities
@@ -50,15 +53,12 @@ public class OutputFileConfigurationViewModel : ViewModelBase
                 return;
             }
             SetProperty(ref field, value);
-            _sanitizedShowName = FilePatternHelper.SanitizeToken(value.AsSpan());
             if (!_suppressRebuild)
             {
                 RebuildPreview();
             }
         }
     } = string.Empty;
-
-    private const string DefaultFileNamePattern = "{S##E##} {Title}";
 
     public string FileNamePattern
     {
@@ -74,7 +74,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
                 }
             }
         }
-    } = DefaultFileNamePattern;
+    } = CoreTokenNames.DefaultPattern;
 
     public bool IsPatternValid
     {
@@ -179,11 +179,14 @@ public class OutputFileConfigurationViewModel : ViewModelBase
 
     private readonly ILogger<OutputFileConfigurationViewModel> _logger;
 
-    public OutputFileConfigurationViewModel(ILogger<OutputFileConfigurationViewModel> logger)
+    public OutputFileConfigurationViewModel(
+        IMkvRenameWizardService coreService,
+        ILogger<OutputFileConfigurationViewModel> logger)
     {
+        _coreService = coreService;
         _logger = logger;
 
-        foreach (var token in FilePatternHelper.ValidTokens)
+        foreach (var token in _coreService.RetrieveAvailableTokens())
         {
             ActiveTokens.Add(new AvailableTokenViewModel(token.Name, token.Description, token.ExampleValue, false));
         }
@@ -221,21 +224,27 @@ public class OutputFileConfigurationViewModel : ViewModelBase
 
     private void RevalidatePattern()
     {
-        var (segments, errors) = FilePatternHelper.ParseAndValidate(FileNamePattern);
-        _parsedSegments = segments;
+        var validation = _coreService.ValidatePattern(FileNamePattern ?? string.Empty);
+        var segments = new PatternSegment[validation.Segments.Count];
+        for (var i = 0; i < validation.Segments.Count; i++)
+        {
+            var seg = validation.Segments[i];
+            segments[i] = new PatternSegment(seg.Text, (PatternSegmentType)(int)seg.SegmentType);
+        }
 
-        if (PatternErrors.Count > 0 || errors.Count > 0)
+        if (PatternErrors.Count > 0 || validation.Errors.Count > 0)
         {
             PatternErrors.Clear();
-            for (var i = 0; i < errors.Count; i++)
+            for (var i = 0; i < validation.Errors.Count; i++)
             {
-                PatternErrors.Add(errors[i]);
+                var err = validation.Errors[i];
+                PatternErrors.Add(new PatternError(err.Column, err.TokenName, err.Suggestion));
             }
         }
 
-        var targetSegmentCount = segments.Count + 1;
+        var targetSegmentCount = segments.Length + 1;
         var existingSegCount = PatternSegments.Count;
-        var segOverlap = Math.Min(existingSegCount, segments.Count);
+        var segOverlap = Math.Min(existingSegCount, segments.Length);
 
         for (var i = 0; i < segOverlap; i++)
         {
@@ -246,16 +255,16 @@ public class OutputFileConfigurationViewModel : ViewModelBase
             }
         }
 
-        for (var i = segOverlap; i < segments.Count; i++)
+        for (var i = segOverlap; i < segments.Length; i++)
         {
             PatternSegments.Add(new PatternSegmentViewModel { Text = segments[i].Text, SegmentType = segments[i].SegmentType });
         }
 
-        if (PatternSegments.Count > segments.Count)
+        if (PatternSegments.Count > segments.Length)
         {
-            if (PatternSegments[segments.Count].Text != ".mkv" || PatternSegments[segments.Count].SegmentType != PatternSegmentType.Literal)
+            if (PatternSegments[segments.Length].Text != ".mkv" || PatternSegments[segments.Length].SegmentType != PatternSegmentType.Literal)
             {
-                PatternSegments[segments.Count] = new PatternSegmentViewModel { Text = ".mkv", SegmentType = PatternSegmentType.Literal };
+                PatternSegments[segments.Length] = new PatternSegmentViewModel { Text = ".mkv", SegmentType = PatternSegmentType.Literal };
             }
             for (var i = PatternSegments.Count - 1; i >= targetSegmentCount; i--)
             {
@@ -267,7 +276,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
             PatternSegments.Add(new PatternSegmentViewModel { Text = ".mkv", SegmentType = PatternSegmentType.Literal });
         }
 
-        IsPatternValid = errors.Count == 0;
+        IsPatternValid = validation.IsValid;
         if (!IsPatternValid)
         {
             IsTokenTableExpanded = true;
@@ -300,124 +309,52 @@ public class OutputFileConfigurationViewModel : ViewModelBase
         var entitiesSpan = CollectionsMarshal.AsSpan(RenameEntities);
         var entityCount = entitiesSpan.Length;
 
-        if (!IsPatternValid)
-        {
-            var existingCount = PreviewItems.Count;
-            var overlap = Math.Min(existingCount, entityCount);
-
-            for (var i = 0; i < overlap; i++)
-            {
-                var sourceFilePath = entitiesSpan[i].MkvFile.FullPath ?? string.Empty;
-                var sourceFileName = Path.GetFileName(sourceFilePath);
-                PreviewItems[i].Update(i + 1, sourceFilePath, sourceFileName, null, RenamePreviewStatus.PatternError);
-            }
-
-            for (var i = overlap; i < entityCount; i++)
-            {
-                var sourceFilePath = entitiesSpan[i].MkvFile.FullPath ?? string.Empty;
-                var sourceFileName = Path.GetFileName(sourceFilePath);
-                PreviewItems.Add(new RenamePreviewRowViewModel(i + 1, sourceFilePath, sourceFileName, null, RenamePreviewStatus.PatternError));
-            }
-
-            for (var i = existingCount - 1; i >= entityCount; i--)
-            {
-                PreviewItems.RemoveAt(i);
-            }
-
-            ReadyCount = 0;
-            ConflictCount = 0;
-            SkippedCount = 0;
-            return;
-        }
-
-        var targets = entityCount > 0 ? new string?[entityCount] : Array.Empty<string?>();
-        var statuses = entityCount > 0 ? new RenamePreviewStatus[entityCount] : Array.Empty<RenamePreviewStatus>();
-        var sourceNames = entityCount > 0 ? new string[entityCount] : Array.Empty<string>();
-        var targetCounts = new Dictionary<string, int>(entityCount, StringComparer.OrdinalIgnoreCase);
-
-        var showNameSpan = _sanitizedShowName.AsSpan();
-        var prefixSpan = Prefix.AsSpan();
-
+        var candidates = new CoreRenameCandidate[entityCount];
         for (var i = 0; i < entityCount; i++)
         {
             ref readonly var entry = ref entitiesSpan[i];
-            var sourceFilePath = entry.MkvFile.FullPath ?? string.Empty;
-            var sourceFileName = Path.GetFileName(sourceFilePath);
-            sourceNames[i] = sourceFileName;
-
-            if (entry.Episode.EpisodeNumber == null)
-            {
-                statuses[i] = RenamePreviewStatus.Skipped;
-                continue;
-            }
-
-            var extSpan = Path.GetExtension(sourceFilePath.AsSpan());
-            var runTimeStr = entry.Episode.RunTime > 0
-                ? LabelFormaterHelper.FormatRunTime(entry.Episode.RunTime)
-                : string.Empty;
-
-            var target = FilePatternHelper.ApplyTokenValues(
-                _parsedSegments,
-                entry.Episode,
-                showNameSpan,
-                prefixSpan,
-                extSpan,
-                runTimeStr.AsSpan(),
-                SelectedCaseStyle,
-                appendExtension: extSpan);
-
-            targets[i] = target;
-
-            if (string.Equals(sourceFileName, target, StringComparison.OrdinalIgnoreCase))
-            {
-                statuses[i] = RenamePreviewStatus.Done;
-            }
-            else
-            {
-                statuses[i] = RenamePreviewStatus.Ready;
-                targetCounts.TryGetValue(target, out var count);
-                targetCounts[target] = count + 1;
-            }
+            candidates[i] = new CoreRenameCandidate(
+                SourcePath: entry.MkvFile.FullPath ?? string.Empty,
+                Season: entry.Episode.Season,
+                EpisodeNumber: entry.Episode.EpisodeNumber,
+                EpisodeName: entry.Episode.Name,
+                RunTime: entry.Episode.RunTime,
+                AirDate: entry.Episode.AirDate);
         }
 
-        var readyCount = 0;
-        var conflictCount = 0;
-        var skippedCount = 0;
+        var plan = _coreService.BuildRenamePlan(new CoreRenamePlanRequest(
+            ShowName: CurrentShowName ?? string.Empty,
+            Pattern: FileNamePattern ?? string.Empty,
+            Prefix: Prefix ?? string.Empty,
+            CaseStyle: (CoreCaseStyle)(int)SelectedCaseStyle,
+            TargetDirectory: null,
+            Candidates: candidates));
+
         var existingPreviewCount = PreviewItems.Count;
-        var previewOverlap = Math.Min(existingPreviewCount, entityCount);
+        var previewOverlap = Math.Min(existingPreviewCount, plan.Items.Count);
 
-        for (var i = 0; i < entityCount; i++)
+        for (var i = 0; i < plan.Items.Count; i++)
         {
-            var finalStatus = statuses[i];
-            var target = targets[i];
-            if (finalStatus == RenamePreviewStatus.Ready && target is not null && targetCounts[target] > 1)
-            {
-                finalStatus = RenamePreviewStatus.Conflict;
-            }
-
-            if (finalStatus == RenamePreviewStatus.Ready) readyCount++;
-            else if (finalStatus == RenamePreviewStatus.Conflict) conflictCount++;
-            else if (finalStatus == RenamePreviewStatus.Skipped) skippedCount++;
-
-            var sourcePath = entitiesSpan[i].MkvFile.FullPath ?? string.Empty;
+            var item = plan.Items[i];
+            var status = (RenamePreviewStatus)(int)item.Status;
             if (i < previewOverlap)
             {
-                PreviewItems[i].Update(i + 1, sourcePath, sourceNames[i], target, finalStatus);
+                PreviewItems[i].Update(item.OperationId, item.SourcePath, item.SourceFileName, item.TargetFileName, status);
             }
             else
             {
-                PreviewItems.Add(new RenamePreviewRowViewModel(i + 1, sourcePath, sourceNames[i], target, finalStatus));
+                PreviewItems.Add(new RenamePreviewRowViewModel(item.OperationId, item.SourcePath, item.SourceFileName, item.TargetFileName, status));
             }
         }
 
-        for (var i = existingPreviewCount - 1; i >= entityCount; i--)
+        for (var i = existingPreviewCount - 1; i >= plan.Items.Count; i--)
         {
             PreviewItems.RemoveAt(i);
         }
 
-        ReadyCount = readyCount;
-        ConflictCount = conflictCount;
-        SkippedCount = skippedCount;
+        ReadyCount = plan.ReadyCount;
+        ConflictCount = plan.ConflictCount;
+        SkippedCount = plan.SkippedCount;
     }
 
     private async Task PickTargetFolder()
@@ -489,7 +426,7 @@ public class OutputFileConfigurationViewModel : ViewModelBase
         {
             RenameEntities = new List<RenameEntity>();
             CurrentShowName = string.Empty;
-            FileNamePattern = DefaultFileNamePattern;
+            FileNamePattern = CoreTokenNames.DefaultPattern;
             Prefix = string.Empty;
             SelectedCaseStyle = CaseStyle.Default;
             TargetFolder = string.Empty;

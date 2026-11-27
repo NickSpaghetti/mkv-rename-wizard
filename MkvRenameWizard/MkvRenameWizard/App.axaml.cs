@@ -8,7 +8,7 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using MkvRenameWizard.DataAccess;
+using MkvRenameWizard.Core.Configurations;
 using MkvRenameWizard.Services;
 using MkvRenameWizard.ViewModels;
 using MkvRenameWizard.Views;
@@ -87,18 +87,7 @@ public partial class App : Application
             configure.AddSerilog(serilogLogger, dispose: true);
         });
 
-        services.AddHttpClient<ITvMazeDataAccess, TvMazeDataAccess>(client =>
-        {
-            client.BaseAddress = new Uri("https://api.tvmaze.com/");
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("User-Agent", "MkvRenameWizard/1.0 (+https://github.com/NickSpaghetti/mkv-rename-wizard)");
-        })
-        .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
-        {
-            AutomaticDecompression = DecompressionMethods.All,
-            PooledConnectionLifetime = TimeSpan.FromMinutes(5)
-        });
-
+        services.AddMkvRenameWizardCore();
         services.AddHttpClient();
 
         services.TryAddTransient<IImageLoadingService, ImageLoadingService>();

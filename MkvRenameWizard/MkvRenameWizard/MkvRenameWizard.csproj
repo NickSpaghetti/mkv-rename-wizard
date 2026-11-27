@@ -21,6 +21,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\MkvRenameWizard.Core\MkvRenameWizard.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.0.3" />
         <PackageReference Include="Avalonia.Desktop" Version="12.0.3" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.3" />

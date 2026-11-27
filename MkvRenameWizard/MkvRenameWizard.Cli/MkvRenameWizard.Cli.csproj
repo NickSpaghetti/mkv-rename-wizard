@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>mkv-rename-cli</AssemblyName>
+    <RootNamespace>MkvRenameWizard.Cli</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsAotCompatible>true</IsAotCompatible>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <Configurations>Debug;Release;Profile</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishAot>true</PublishAot>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <StripSymbols>true</StripSymbols>
+  </PropertyGroup>
+
+  <!-- CoreCLR builds for dotnet-trace and dotnet-gcdump profiling -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Profile'">
+    <Optimize>true</Optimize>
+    <PublishAot>false</PublishAot>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <!-- The SDK bundles ILCompiler 10.0.12, which GHSA-p3jp-9v83-76w9 flags; 10.0.14 is the patched release. -->
+  <Target Name="PinPatchedILCompiler" BeforeTargets="ProcessFrameworkReferences">
+    <ItemGroup>
+      <KnownILCompilerPack Update="Microsoft.DotNet.ILCompiler"
+                           Condition="'%(KnownILCompilerPack.TargetFramework)' == 'net10.0'"
+                           ILCompilerPackVersion="10.0.14" />
+      <KnownRuntimePack Update="Microsoft.NETCore.App"
+                        Condition="'%(KnownRuntimePack.TargetFramework)' == 'net10.0' and '%(KnownRuntimePack.RuntimePackLabels)' == 'NativeAOT'"
+                        LatestRuntimeFrameworkVersion="10.0.14" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../MkvRenameWizard/BannedSymbols.txt" Link="BannedSymbols.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MkvRenameWizard.Core/MkvRenameWizard.Core.csproj" />
+    <ProjectReference Include="../tools/MkvRenameWizard.Standard.Analyzers/MkvRenameWizard.Standard.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MkvRenameWizard.Cli.Tests.Unit" />
+  </ItemGroup>
+
+</Project>

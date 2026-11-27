@@ -407,3 +407,10 @@ out/
 # Integration / E2E test media (generated locally, never commit)
 Tests/Integration/TestMedia/
 *.mkv
+
+# Local session architecture notes (remove once feature/CLI is implemented)
+ARCHITECTURE.local.md
+.profiles/
+*.nettrace
+*.gcdump
+mkv-rename-tui/target/

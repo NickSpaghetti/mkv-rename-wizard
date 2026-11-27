@@ -143,6 +143,7 @@ public class WizardViewModel : ViewModelBase
             ShowRenameResult = false;
         };
         _renameResultViewModel.RetryFailedRequested += async () => await ExecuteRenameAsync(retryFailedOnly: true);
+        _renameResultViewModel.UndoRequested += async () => await UndoRenameAsync();
         _renameResultViewModel.GoBackRequested += () =>
         {
             _outputFileConfigurationViewModel.ApplyRenameResults(_renameResultViewModel.OperationResults);
@@ -306,6 +307,24 @@ public class WizardViewModel : ViewModelBase
 
             ShowRenameResult = true;
         }
+    }
+
+    private async Task UndoRenameAsync()
+    {
+        var previousResults = _renameResultViewModel.OperationResults.ToList();
+        if (previousResults.Count == 0)
+        {
+            return;
+        }
+
+        var undoResults = await Task.Run(() => _fileRenameOperationService.Undo(previousResults));
+        _outputFileConfigurationViewModel.ApplyRenameResults(undoResults);
+
+        _renameResultViewModel.RePopulateViewModel(
+            undoResults,
+            _renameResultViewModel.ShowSeasonLabel ?? string.Empty,
+            _renameResultViewModel.TargetFolder ?? string.Empty,
+            isUndoResult: true);
     }
 
     private async Task UpdateContentSelectViewModel()
